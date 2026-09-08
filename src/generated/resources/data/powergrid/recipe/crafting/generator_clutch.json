@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "create:clutch",
+    "create:andesite_alloy"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:generator_clutch"
+  }
+}

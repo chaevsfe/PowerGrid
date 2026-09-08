@@ -1,0 +1,247 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.circuits.editor;
+
+import com.zurrtum.create.client.foundation.gui.AllIcons;
+import com.zurrtum.create.client.foundation.gui.menu.AbstractSimiContainerScreen;
+import com.zurrtum.create.client.foundation.gui.widget.IconButton;
+import com.zurrtum.create.foundation.gui.menu.MenuType;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.util.Util;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.storage.TagValueInput;
+import org.jetbrains.annotations.NotNull;
+import org.patryk3211.powergrid.PowerGrid;
+import org.patryk3211.powergrid.circuits.gui.CircuitFileBox;
+import org.patryk3211.powergrid.circuits.schematic.CircuitSchematic;
+import org.patryk3211.powergrid.collections.ModIcons;
+import org.patryk3211.powergrid.collections.ModdedPackets;
+import org.patryk3211.powergrid.collections.ModdedSoundEvents;
+import org.patryk3211.powergrid.network.packets.ChangeScreenC2SPacket;
+import org.patryk3211.powergrid.network.packets.SaveSchematicC2SPacket;
+import org.patryk3211.powergrid.utility.Lang;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.*;
+import java.util.List;
+
+@Environment(EnvType.CLIENT)
+public class CircuitDesignTableLoadScreen extends AbstractSimiContainerScreen<CircuitDesignTableLoadMenu> {
+    private static final Identifier BACKGROUND = PowerGrid.texture("gui/circuit_design_table_load");
+    private static final int TEXTURE_SIZE = 256;
+    private static final int WIDTH = 214;
+    private static final int HEIGHT = 85;
+
+    private static final Component NO_NAME = Lang.translateDirect("gui.circuit_designer.no_name");
+    private static final Component CONFIRM_OVERWRITE = Lang.translateDirect("gui.circuit_designer.confirm_overwrite");
+    private static final Component DOESNT_EXIST = Lang.translateDirect("gui.circuit_designer.doesnt_exist");
+    private static final Component INVALID_FILE = Lang.translateDirect("gui.circuit_designer.invalid_file");
+
+    private static final Component FILE_DIALOG = Lang.translateDirect("gui.circuit_designer.file_dialog");
+    private static final Component CANCEL = Lang.translateDirect("gui.circuit_designer.cancel");
+    private static final Component FILE_SAVE = Lang.translateDirect("gui.circuit_designer.file_save");
+    private static final Component FILE_LOAD = Lang.translateDirect("gui.circuit_designer.file_load");
+
+    private IconButton cancelBtn;
+    private IconButton saveBtn;
+    private IconButton loadBtn;
+    private IconButton folderBtn;
+
+    private CircuitFileBox fileNameInput;
+
+    private Component popupText;
+    private int popupTimeout;
+    private boolean confirm;
+
+    public CircuitDesignTableLoadScreen(CircuitDesignTableLoadMenu container, Inventory inv, Component title) {
+        super(container, inv, title, WIDTH, HEIGHT);
+    }
+
+    public static CircuitDesignTableLoadScreen create(
+        Minecraft minecraft, MenuType<CircuitDesignTableBlockEntity> type, int syncId, Inventory inventory, Component title, RegistryFriendlyByteBuf extraData
+    ) {
+        CircuitDesignTableBlockEntity be = getBlockEntity(minecraft, extraData);
+        if(be == null)
+            return null;
+        try(var reporter = new ProblemReporter.ScopedCollector(be.problemPath(), PowerGrid.LOGGER)) {
+            be.readClient(TagValueInput.create(reporter, extraData.registryAccess(), extraData.readNbt()));
+        }
+        return type.create(CircuitDesignTableLoadScreen::new, syncId, inventory, title, be);
+    }
+
+    private static SoundManager soundManager() {
+        return Minecraft.getInstance().getSoundManager();
+    }
+
+    private static void playSound(ModdedSoundEvents.SoundEntry sound) {
+        soundManager().play(SimpleSoundInstance.forUI(sound.getMainEvent(), 1.0f));
+    }
+
+    private void save() {
+        if(fileNameInput.getValue().isEmpty()) {
+            popup(NO_NAME);
+            return;
+        }
+
+        try {
+            var filename = fileNameInput.getValue();
+            if (filename.endsWith(".nbt"))
+                filename = filename.substring(0, filename.length() - 4);
+            var file = Path.of("circuits", filename.replaceAll("\\W+", "_") + ".nbt");
+            Files.createDirectories(file.getParent());
+            if(Files.exists(file) && !confirm) {
+                confirm = true;
+                popup(CONFIRM_OVERWRITE);
+                return;
+            }
+            Files.deleteIfExists(file);
+            try (OutputStream out = Files.newOutputStream(file, StandardOpenOption.CREATE)) {
+                RegistryAccess registries = Minecraft.getInstance().level.registryAccess();
+                NbtIo.writeCompressed(this.menu.contentHolder.schematic.serializeNbt(registries), out);
+            }
+            back();
+        } catch (IOException e) {
+            PowerGrid.LOGGER.error("Failed to save circuit schematic", e);
+        } catch (RuntimeException e) {
+            popup(INVALID_FILE);
+        }
+        confirm = false;
+    }
+
+    private void load() {
+        try {
+            var file = Path.of("circuits", fileNameInput.getValue());
+            if (!file.toString().endsWith(".nbt"))
+                file = Path.of(file + ".nbt");
+            if (!Files.exists(file)) {
+                popup(DOESNT_EXIST);
+                return;
+            }
+            try (InputStream in = Files.newInputStream(file, StandardOpenOption.READ)) {
+                var nbt = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
+                RegistryAccess registries = Minecraft.getInstance().level.registryAccess();
+                var schematic = CircuitSchematic.fromNbt(registries, nbt);
+                var name = fileNameInput.getValue();
+                if(name.endsWith(".nbt")) {
+                    name = name.substring(0, name.length() - 4);
+                }
+                ModdedPackets.sendToServer(new SaveSchematicC2SPacket(this.menu.contentHolder, name, schematic));
+            }
+        } catch (IOException e) {
+            PowerGrid.LOGGER.error("Failed to load circuit schematic", e);
+        } catch (RuntimeException e) {
+            popup(INVALID_FILE);
+        }
+    }
+
+    private void back() {
+        ModdedPackets.sendToServer(new ChangeScreenC2SPacket(menu.contentHolder, 0));
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        fileNameInput = new CircuitFileBox(font, leftPos + 48, topPos + 28, 135, 10, Component.empty());
+
+        cancelBtn = new IconButton(leftPos + 20, topPos + 58, ModIcons.I_CANCEL);
+        cancelBtn.withCallback(this::back);
+        cancelBtn.setToolTip(CANCEL);
+        saveBtn = new IconButton(leftPos + 146, topPos + 58, AllIcons.I_CONFIG_SAVE);
+        saveBtn.withCallback(this::save);
+        saveBtn.setToolTip(FILE_SAVE);
+        loadBtn = new IconButton(leftPos + 168, topPos + 58, ModIcons.I_UPLOAD);
+        loadBtn.withCallback(this::load);
+        loadBtn.setToolTip(FILE_LOAD);
+
+        folderBtn = new IconButton(leftPos + 20, topPos + 23, AllIcons.I_OPEN_FOLDER);
+        folderBtn.withCallback(() -> Util.getPlatform().openFile(Paths.get("circuits/").toFile()));
+
+        addRenderableWidget(cancelBtn);
+        addRenderableWidget(saveBtn);
+        addRenderableWidget(loadBtn);
+        addRenderableWidget(folderBtn);
+        addRenderableWidget(fileNameInput);
+    }
+
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        fileNameInput.tick();
+        if(popupTimeout > 0)
+            --popupTimeout;
+        if(!menu.player.isCreative() && !menu.contentHolder.isPowered())
+            onClose();
+    }
+
+    private void popup(Component text) {
+        playSound(ModdedSoundEvents.UI_FAIL);
+        this.popupText = text;
+        this.popupTimeout = 60;
+    }
+
+    @Override
+    public void extractBackground(GuiGraphicsExtractor ctx, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(ctx, mouseX, mouseY, partialTick);
+        int bgX = getLeftOfCentered(WIDTH);
+
+        ctx.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, bgX, topPos, 0, 0, WIDTH, HEIGHT, TEXTURE_SIZE, TEXTURE_SIZE);
+        ctx.text(font, FILE_DIALOG, leftPos + 5, topPos + 4, 0x404040, false);
+
+        if(popupTimeout > 0) {
+            int color = 0xFF6060;
+            int alpha = Math.min(popupTimeout, 20) * 255 / 20;
+            color |= alpha << 24;
+            ctx.centeredText(font, popupText, width / 2, topPos - 12, color);
+        }
+    }
+
+    @Override
+    protected void renderForeground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        super.renderForeground(graphics, mouseX, mouseY, partialTicks);
+        if(fileNameInput != null && fileNameInput.isMouseOver(mouseX, mouseY)) {
+            List<Component> tooltip = fileNameInput.getToolTip();
+            if (tooltip.isEmpty())
+                return;
+            graphics.setComponentTooltipForNextFrame(font, tooltip, mouseX, mouseY);
+        }
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        var result = super.keyPressed(event);
+        if(getFocused() == fileNameInput)
+            return true;
+        return result;
+    }
+}

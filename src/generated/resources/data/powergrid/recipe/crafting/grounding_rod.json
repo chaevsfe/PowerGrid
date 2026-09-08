@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": "#c:ingots/copper",
+    "P": "#c:plates/copper"
+  },
+  "pattern": [
+    "P",
+    "I",
+    "I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:grounding_rod"
+  }
+}

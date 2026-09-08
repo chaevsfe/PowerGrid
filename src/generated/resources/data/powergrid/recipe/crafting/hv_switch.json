@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "create:andesite_casing",
+    "G": "create:cogwheel",
+    "I": "#c:plates/iron"
+  },
+  "pattern": [
+    "I  ",
+    "I  ",
+    "AGI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:hv_switch"
+  }
+}

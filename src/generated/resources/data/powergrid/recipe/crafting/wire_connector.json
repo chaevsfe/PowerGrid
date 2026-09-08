@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "create:andesite_alloy",
+    "C": "#c:nuggets/copper"
+  },
+  "pattern": [
+    " C ",
+    "CAC"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:wire_connector"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "powergrid:item/portable_saw"
+  }
+}

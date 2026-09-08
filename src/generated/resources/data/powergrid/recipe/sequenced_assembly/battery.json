@@ -1,0 +1,54 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": "powergrid:conductive_casing",
+  "loops": 3,
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "#c:plates/copper",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "#c:plates/zinc",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:filling",
+      "ingredient": "$ingredient",
+      "fluid_ingredient": {
+        "type": "fluid_stack",
+        "fluid": "powergrid:acid",
+        "amount": 20250
+      },
+      "result": "$result"
+    }
+  ],
+  "transitional_item": {
+    "id": "powergrid:incomplete_battery"
+  },
+  "result": {
+    "chance": 0.917431,
+    "id": "powergrid:battery"
+  },
+  "junks": [
+    {
+      "chance": 5.0,
+      "id": "powergrid:conductive_casing"
+    },
+    {
+      "chance": 2.0,
+      "id": "create:copper_sheet"
+    },
+    {
+      "chance": 2.0,
+      "id": "powergrid:zinc_sheet"
+    }
+  ]
+}

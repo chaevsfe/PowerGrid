@@ -1,0 +1,10 @@
+{
+  "type": "powergrid:boost_recipe",
+  "results": [
+    {
+      "id": "powergrid:electrobaton"
+    }
+  ],
+  "target": "powergrid:electrobaton",
+  "ingredient": "powergrid:integrated_circuit"
+}

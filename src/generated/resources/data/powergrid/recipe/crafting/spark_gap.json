@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "create:andesite_casing",
+    "I": "#c:plates/iron",
+    "P": "powergrid:pins"
+  },
+  "pattern": [
+    " P ",
+    "I I",
+    " A "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:spark_gap"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "values": [
+    "powergrid:potentiometer",
+    "powergrid:current_gauge",
+    "powergrid:barretter_tube",
+    "powergrid:copper_coil",
+    "powergrid:display_module",
+    "create:electron_tube",
+    "powergrid:bjt_npn",
+    "powergrid:bjt_pnp",
+    "minecraft:copper_nugget",
+    "powergrid:lv_switch",
+    "powergrid:lv_button",
+    "powergrid:voltage_gauge",
+    "powergrid:relay_dpdt",
+    "powergrid:lv_light_bulb",
+    "powergrid:resistor",
+    "powergrid:neon_bulb",
+    "powergrid:relay",
+    "powergrid:vfet",
+    "minecraft:paper",
+    "powergrid:varistor",
+    "powergrid:capacitor",
+    "powergrid:fuse_holder",
+    "powergrid:wire_connector",
+    "powergrid:redstone_relay",
+    "powergrid:regulator_tube",
+    "powergrid:diode"
+  ]
+}

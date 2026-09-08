@@ -1,0 +1,10 @@
+{
+  "type": "powergrid:boost_recipe",
+  "results": [
+    {
+      "id": "powergrid:portable_saw"
+    }
+  ],
+  "target": "powergrid:portable_saw",
+  "ingredient": "powergrid:integrated_circuit"
+}

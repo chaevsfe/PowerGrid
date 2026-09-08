@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "#c:plates/copper",
+    "E": "powergrid:conductive_casing",
+    "I": "#c:plates/iron"
+  },
+  "pattern": [
+    "IC",
+    "EI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:generator_housing"
+  }
+}

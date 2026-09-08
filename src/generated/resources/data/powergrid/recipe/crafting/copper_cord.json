@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "powergrid:insulated_copper_wire",
+    "powergrid:insulated_copper_wire",
+    "minecraft:dried_kelp"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:copper_cord"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#c:plates/copper",
+    "powergrid:conductive_casing",
+    "#c:plates/brass"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:socket"
+  }
+}

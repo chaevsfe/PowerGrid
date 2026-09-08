@@ -1,0 +1,198 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.electricity.grounding;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import org.patryk3211.powergrid.collections.ModdedConfigs;
+import org.patryk3211.powergrid.collections.ModdedDamageTypes;
+import org.patryk3211.powergrid.collections.ModdedTags;
+import org.patryk3211.powergrid.electricity.base.ElectricBlockEntity;
+import org.patryk3211.powergrid.electricity.sim.SwitchedWire;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
+import com.mojang.serialization.Codec;
+
+public class GroundingRodBlockEntity extends ElectricBlockEntity {
+    private static final float DANGER_POTENTIAL = 48;
+    private SwitchedWire wire;
+    private int groundCount;
+    private int conductiveCount;
+    private int damageTickCounter;
+
+    public GroundingRodBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+        setLazyTickRate(20);
+    }
+
+    private static int minBlocks() {
+        return ModdedConfigs.server().electricity.groundingMinimumBlocks.get();
+    }
+
+    private void scan(BlockPos pos) {
+        assert level != null;
+        var scanned = new HashSet<BlockPos>();
+        var queue = new ArrayList<BlockPos>();
+        queue.add(pos);
+        while(!queue.isEmpty()) {
+            var checkPos = queue.remove(0);
+            if(!scanned.add(checkPos))
+                continue;
+            var state = level.getBlockState(checkPos);
+            if(state.is(ModdedTags.Block.CONDUCTIVE_GROUND.tag)) {
+                ++conductiveCount;
+            } else if(groundCount >= minBlocks()) {
+                // Avoid running the test below
+                continue;
+            } else if(state.isRedstoneConductor(level, checkPos)) {
+                // Stop scanning normal blocks if the threshold has been reached
+                if(++groundCount >= minBlocks())
+                    continue;
+            }
+            for(var dir : Direction.values()) {
+                var nextPos = checkPos.relative(dir);
+                if(scanned.contains(nextPos))
+                    continue;
+                // Limit search to 10 blocks away from starting position,
+                // this should result in about 1000 blocks checked.
+                if(nextPos.distManhattan(pos) < 10 && !level.isEmptyBlock(nextPos))
+                    queue.add(nextPos);
+            }
+            if(conductiveCount >= ModdedConfigs.server().electricity.groundingMaximumBlocks.get() &&
+                groundCount >= minBlocks())
+                break;
+        }
+    }
+
+    @Override
+    public void lazyTick() {
+        assert level != null;
+        super.lazyTick();
+        if(!level.isClientSide()) {
+            var prevConductiveCount = conductiveCount;
+            groundCount = 0;
+            conductiveCount = 0;
+            scan(getBlockPos().below());
+            var prevState = wire.getState();
+            if(groundCount < minBlocks()) {
+                wire.setState(false);
+            } else {
+                var highR = ModdedConfigs.server().electricity.groundingHighestResistance.getF();
+                var lowR = ModdedConfigs.server().electricity.groundingLowestResistance.getF();
+                int maxBlocks = Math.max(1, ModdedConfigs.server().electricity.groundingMaximumBlocks.get());
+                var delta = (highR - lowR) / maxBlocks;
+                var resistance = highR - delta * Math.min(conductiveCount, maxBlocks);
+                wire.setResistance(resistance);
+                wire.setState(true);
+            }
+            if(prevState != wire.getState() || prevConductiveCount != conductiveCount)
+                notifyUpdate();
+        }
+    }
+
+    @Override
+    public void tick() {
+        assert level != null;
+        super.tick();
+        if(!level.isClientSide() && damageTickCounter++ >= 10) {
+            damageTickCounter = 0;
+            // Limit radius to 10 block to avoid having to scan the whole world
+            var sourceDamage = Math.abs(wire.getResistance() * wire.current() / DANGER_POTENTIAL);
+            if(sourceDamage < 1)
+                return;
+            var dangerRadius = Math.min(Math.abs(wire.getResistance() * wire.current() / (2 * Math.PI * DANGER_POTENTIAL)), 10);
+            var blockRadius = (int) Math.round(dangerRadius);
+            var bb = new AABB(Vec3.atCenterOf(worldPosition.offset(-blockRadius, -blockRadius, -blockRadius)), Vec3.atCenterOf(worldPosition.offset(blockRadius, blockRadius, blockRadius)));
+            var sqrDist = dangerRadius * dangerRadius;
+            var center = Vec3.atCenterOf(worldPosition);
+            var entities = level.getEntitiesOfClass(LivingEntity.class, bb, e -> e.position().distanceToSqr(center) <= sqrDist && e.onGround());
+
+            var source = new GroundingRodDamageSource(ModdedDamageTypes.ZAP.holder(level), this.getBlockState().getBlock());
+            for(var entity : entities) {
+                double entityDistSqr = entity.distanceToSqr(center);
+                double entityDmg = sourceDamage / Math.max(entityDistSqr, 1);
+                if(entityDmg >= 1)
+                    entity.hurt(source, (float) (sourceDamage / entityDmg));
+            }
+        }
+    }
+
+    public static class GroundingRodDamageSource extends DamageSource {
+        private final Block rod;
+
+        public GroundingRodDamageSource(Holder<DamageType> type, Block rod) {
+            super(type);
+            this.rod = rod;
+        }
+
+        @Override
+        public Component getLocalizedDeathMessage(LivingEntity killed) {
+            var translationId = "death.attack." + this.type().msgId();
+            var primeAdversary = killed.getKillCredit();
+            var machineName = Component.translatable(rod.getDescriptionId());
+            if(primeAdversary != null) {
+                return Component.translatable(translationId + ".player", killed.getDisplayName(), machineName, primeAdversary.getDisplayName());
+            } else {
+                return Component.translatable(translationId, killed.getDisplayName(), machineName);
+            }
+        }
+    }
+
+    @Override
+    public void buildCircuit(CircuitBuilder builder) {
+        builder.setTerminalCount(1);
+        wire = builder.connectSwitch(1, builder.terminalNode(0), null, false);
+    }
+
+    @Override
+    protected void read(ValueInput tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        var storedResistance = tag.read("Resistance", Codec.FLOAT);
+        if(storedResistance.isPresent()) {
+            var R = storedResistance.get();
+            wire.setState(false);
+            wire.setResistance(R);
+            wire.setState(R > 0);
+        } else {
+            wire.setState(false);
+        }
+    }
+
+    @Override
+    protected void write(ValueOutput tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        if(wire.getState())
+            tag.putFloat("Resistance", (float) wire.getResistance());
+    }
+}

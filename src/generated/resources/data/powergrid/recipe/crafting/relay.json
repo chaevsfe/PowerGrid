@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#c:copper_coils",
+    "#c:plates/iron",
+    "create:andesite_alloy"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:relay"
+  }
+}

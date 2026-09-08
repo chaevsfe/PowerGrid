@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "powergrid:resistive_coil",
+    "#minecraft:coals"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:resistor"
+  }
+}

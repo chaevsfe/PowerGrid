@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "powergrid:item/string_light_cord"
+  }
+}

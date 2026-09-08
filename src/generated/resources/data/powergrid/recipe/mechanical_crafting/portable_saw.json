@@ -1,0 +1,22 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "A": "create:andesite_alloy",
+    "G": "powergrid:electrical_gizmo",
+    "I": "#c:plates/iron",
+    "P": "create:precision_mechanism",
+    "Z": "#c:plates/zinc",
+    "z": "#c:ingots/zinc"
+  },
+  "pattern": [
+    " I  ZA",
+    "IAIPGz",
+    " I    "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:portable_saw"
+  }
+}

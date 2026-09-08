@@ -1,0 +1,22 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "A": "create:andesite_alloy",
+    "D": "minecraft:diamond",
+    "G": "powergrid:electrical_gizmo",
+    "P": "create:precision_mechanism",
+    "Z": "#c:plates/zinc",
+    "z": "#c:ingots/zinc"
+  },
+  "pattern": [
+    " A ZA",
+    "ADPGz",
+    " A   "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:portable_drill"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "powergrid:relay",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:redstone_relay"
+  }
+}

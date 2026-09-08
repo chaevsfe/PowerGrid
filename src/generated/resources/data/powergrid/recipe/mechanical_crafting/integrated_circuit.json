@@ -1,0 +1,20 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "G": "minecraft:gold_nugget",
+    "L": "minecraft:lapis_lazuli",
+    "Q": "create:polished_rose_quartz",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "  L  ",
+    "RRQRR",
+    " GGG "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:integrated_circuit"
+  }
+}

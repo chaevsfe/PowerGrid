@@ -1,0 +1,390 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.equipment.multimeter;
+
+import com.zurrtum.create.catnip.math.VecHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import org.patryk3211.powergrid.circuits.circuitboard.CircuitBoardBlock;
+import org.patryk3211.powergrid.electricity.wire.CircuitBoardEndpoint;
+import org.patryk3211.powergrid.circuits.schematic.CircuitSchematic;
+import org.patryk3211.powergrid.collections.ModdedBlockEntities;
+import org.patryk3211.powergrid.collections.ModdedConfigs;
+import org.patryk3211.powergrid.collections.ModdedPackets;
+import org.patryk3211.powergrid.electricity.GlobalElectricNetworks;
+import org.patryk3211.powergrid.electricity.base.IElectric;
+import org.patryk3211.powergrid.electricity.info.Current;
+import org.patryk3211.powergrid.electricity.info.IHaveElectricProperties;
+import org.patryk3211.powergrid.electricity.info.Voltage;
+import org.patryk3211.powergrid.electricity.wire.*;
+import org.patryk3211.powergrid.network.packets.MultimeterDataC2SPacket;
+import org.patryk3211.powergrid.utility.Lang;
+import org.patryk3211.powergrid.utility.Unit;
+
+import java.util.List;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.world.entity.EquipmentSlot;
+
+public class MultimeterItem extends Item implements IHaveElectricProperties {
+    public MultimeterItem(Properties properties) {
+        super(properties.stacksTo(1));
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        if(context.getPlayer() != null && context.getPlayer().isShiftKeyDown())
+            return super.useOn(context);
+        if(context.getHand() != InteractionHand.MAIN_HAND)
+            return super.useOn(context);
+
+        var electric = IElectric.getAt(context.getLevel(), context.getClickedPos());
+        var blockState = context.getLevel().getBlockState(context.getClickedPos());
+        if(electric != null) {
+            var pos = context.getClickedPos();
+            var terminal = electric.terminalIndexAt(blockState, context.getClickLocation().subtract(pos.getX(), pos.getY(), pos.getZ()));
+            if(terminal >= 0) {
+                var endpoint = new BlockWireEndpoint(pos, terminal);
+                GlobalElectricNetworks.getWorldNetworks(context.getLevel())
+                        .putInNetwork(endpoint);
+                return onTerminal(context.getLevel(), endpoint, context.getItemInHand());
+            }
+        }
+        return context.getLevel().getBlockEntity(context.getClickedPos(), ModdedBlockEntities.CIRCUIT_BOARD.get())
+                .map(be -> {
+                    var pos = context.getClickedPos();
+                    var state = context.getLevel().getBlockState(context.getClickedPos());
+                    var hitLocalPos = context.getClickLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
+                    hitLocalPos = VecHelper.rotateCentered(hitLocalPos, -CircuitBoardBlock.getAngleY(state), Direction.Axis.Y);
+                    hitLocalPos = VecHelper.rotateCentered(hitLocalPos, -CircuitBoardBlock.getAngleX(state), Direction.Axis.X);
+                    if(hitLocalPos.y >= 2 / 16f && hitLocalPos.y <= 3 / 16f) {
+                        int x = (int) (hitLocalPos.x * 16);
+                        int y = (int) (hitLocalPos.z * 16);
+                        if(!be.getSchematic().hasTrace(CircuitSchematic.Layer.FRONT, x, y))
+                            return InteractionResult.FAIL;
+                        return onTerminal(context.getLevel(), new CircuitBoardEndpoint(pos, x, y), context.getItemInHand());
+                    }
+                    return InteractionResult.PASS;
+                }).orElse(InteractionResult.PASS);
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static Vec3 getAttachmentPoint() {
+        var hit = Minecraft.getInstance().hitResult;
+        if(hit == null || hit.getType() != HitResult.Type.ENTITY)
+            return null;
+        var entityHit = (EntityHitResult) hit;
+        return entityHit.getLocation();
+    }
+
+    public InteractionResult useOnWire(Player player, ItemStack stack, InteractionHand hand, BaseWireEntity wireEntity) {
+        if(hand != InteractionHand.MAIN_HAND)
+            return InteractionResult.PASS;
+        if(getMode(stack) != 1) {
+            // Enable current mode.
+            setMode(stack, 1);
+        }
+        if(player.level().isClientSide()) {
+            var point = getAttachmentPoint();
+            var data = getModeData(stack);
+            data.putDouble("X", point.x);
+            data.putDouble("Y", point.y);
+            data.putDouble("Z", point.z);
+            ModdedPackets.sendToServer(new MultimeterDataC2SPacket(point, wireEntity));
+        }
+        return InteractionResult.CONSUME;
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, EquipmentSlot slot) {
+        super.inventoryTick(stack, level, entity, slot);
+        var data = getModeData(stack);
+        float maxDistance = ModdedConfigs.server().equipment.multimeterDistance.getF();
+        switch(getMode(stack)) {
+            case 0 -> {
+                var pos = WireEndpointType.deserialize(data.getCompoundOrEmpty("Pos"));
+                var neg = WireEndpointType.deserialize(data.getCompoundOrEmpty("Neg"));
+                if(pos != null) {
+                    var posPos = pos.getExactPosition(level);
+                    if(entity.distanceToSqr(posPos) > maxDistance * maxDistance || !pos.isValid(level)) {
+                        if(entity instanceof Player player)
+                            player.sendOverlayMessage(Lang.translate("message.multimeter_disconnected")
+                                    .style(ChatFormatting.GRAY)
+                                    .component());
+                        data.remove("Pos");
+                        saveModeData(stack, data);
+                    }
+                }
+                if(neg != null) {
+                    var negPos = neg.getExactPosition(level);
+                    if(entity.distanceToSqr(negPos) > maxDistance * maxDistance || !neg.isValid(level)) {
+                        if(entity instanceof Player player)
+                            player.sendOverlayMessage(Lang.translate("message.multimeter_disconnected")
+                                    .style(ChatFormatting.GRAY)
+                                    .component());
+                        data.remove("Neg");
+                        saveModeData(stack, data);
+                    }
+                }
+            }
+            case 1 -> {
+                if(!level.isClientSide()) {
+                    var storedUuid = data.read("UUID", UUIDUtil.CODEC);
+                    if(storedUuid.isPresent()) {
+                        var genericEntity = ((ServerLevel) level).getEntity(storedUuid.get());
+                        if(genericEntity != null) {
+                            data.putInt("EID", genericEntity.getId());
+                            saveModeData(stack, data);
+                        } else {
+                            if(entity instanceof Player player)
+                                player.sendOverlayMessage(Lang.translate("message.multimeter_disconnected")
+                                        .style(ChatFormatting.GRAY)
+                                        .component());
+                            // Wipe all data
+                            deleteModeData(stack);
+                        }
+                    }
+                }
+                if(data.contains("X")) {
+                    var point = new Vec3(data.getDoubleOr("X", 0.0), data.getDoubleOr("Y", 0.0), data.getDoubleOr("Z", 0.0));
+                    if(entity.distanceToSqr(point) > maxDistance * maxDistance) {
+                        if(entity instanceof Player player)
+                            player.sendOverlayMessage(Lang.translate("message.multimeter_disconnected")
+                                    .style(ChatFormatting.GRAY)
+                                    .component());
+                        // Wipe all data
+                        deleteModeData(stack);
+                    }
+                }
+            }
+        }
+    }
+
+    // 0 = Voltage, 1 = Current
+    public int getMode(ItemStack stack) {
+        CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
+        if (customData == null)
+            return -1;
+
+        CompoundTag tag = customData.copyTag();
+        return tag.getIntOr("Mode", -1);
+    }
+
+
+    public void setMode(ItemStack stack, int mode) {
+        CompoundTag tag = stack
+                .getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                .copyTag();
+
+        tag.putInt("Mode", mode);
+        tag.remove("ModeData");
+
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+    }
+
+
+    public static CompoundTag getModeData(ItemStack stack) {
+        // Get existing custom data or empty
+        CompoundTag root = stack
+                .getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                .copyTag();
+
+        CompoundTag modeData;
+        if (root.getCompound("ModeData").isPresent()) {
+            modeData = root.getCompoundOrEmpty("ModeData");
+        } else {
+            modeData = new CompoundTag();
+            root.put("ModeData", modeData);
+
+            // IMPORTANT: write back because we created data
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(root));
+        }
+
+        return modeData;
+    }
+
+    public static void deleteModeData(ItemStack stack) {
+        CompoundTag root = stack
+                .getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                .copyTag();
+        root.remove("ModeData");
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(root));
+    }
+
+    public static void saveModeData(ItemStack stack, CompoundTag modeData) {
+        CompoundTag root = stack
+                .getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+                .copyTag();
+        root.put("ModeData", modeData);
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(root));
+    }
+
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand usedHand) {
+        if(player.isShiftKeyDown() && usedHand == InteractionHand.MAIN_HAND) {
+            player.getItemInHand(usedHand).remove(DataComponents.CUSTOM_DATA);
+            player.sendOverlayMessage(Lang.translate("message.multimeter_disconnected")
+                    .style(ChatFormatting.GRAY)
+                    .component());
+            return InteractionResult.SUCCESS;
+        }
+        return super.use(level, player, usedHand);
+    }
+
+    private InteractionResult onTerminal(Level level, IWireEndpoint endpoint, ItemStack stack) {
+        if(getMode(stack) != 0) {
+            setMode(stack, 0);
+        }
+        var data = getModeData(stack);
+        if(data.contains("Pos")) {
+            var current = WireEndpointType.deserialize(data.getCompoundOrEmpty("Pos"));
+            if(endpoint.equals(current)) {
+                data.remove("Pos");
+                saveModeData(stack, data);
+                return InteractionResult.SUCCESS;
+            }
+        }
+        if(data.contains("Neg")) {
+            var current = WireEndpointType.deserialize(data.getCompoundOrEmpty("Neg"));
+            if(endpoint.equals(current)) {
+                data.remove("Neg");
+                saveModeData(stack, data);
+                return InteractionResult.SUCCESS;
+            }
+        }
+        if(data.contains("Pos") && data.contains("Neg"))
+            return InteractionResult.PASS;
+        if(data.contains("Pos")) {
+            data.put("Neg", endpoint.serialize());
+        } else {
+            data.put("Pos", endpoint.serialize());
+        }
+        saveModeData(stack, data);
+        return InteractionResult.CONSUME;
+    }
+
+    public float getMeasurement(Level level, ItemStack stack) {
+        var data = getModeData(stack);
+        return switch(getMode(stack)) {
+            case 0 -> {
+                var pos = WireEndpointType.deserialize(data.getCompoundOrEmpty("Pos"));
+                var neg = WireEndpointType.deserialize(data.getCompoundOrEmpty("Neg"));
+                if(pos == null || neg == null)
+                    yield 0;
+                if(!pos.isValid(level) || !neg.isValid(level))
+                    yield 0;
+                double posV = 0, negV = 0;
+                if(data.contains("PosV")) {
+                    posV = data.getFloatOr("PosV", 0.0f);
+                } else {
+                    var posNode = pos instanceof CircuitBoardEndpoint e ? e.getGenericNode(level) : pos.getNode(level);
+                    if(posNode == null)
+                        yield 0;
+                    posV = posNode.getVoltage();
+                }
+                if(data.contains("NegV")) {
+                    negV = data.getFloatOr("NegV", 0.0f);
+                } else {
+                    var negNode = neg instanceof CircuitBoardEndpoint e ? e.getGenericNode(level) : neg.getNode(level);
+                    if(negNode == null)
+                        yield 0;
+                    negV = negNode.getVoltage();
+                }
+                yield (float) (posV - negV);
+            }
+            case 1 -> {
+                var lineId = data.getIntOr("EID", -1);
+                var entity = level.getEntity(lineId);
+                if(entity instanceof BaseWireEntity wire) {
+                    yield wire.measuredCurrent();
+                }
+                yield 0;
+            }
+            default -> 0;
+        };
+    }
+
+    public Component getText(Level level, Player user, ItemStack stack) {
+        var measurement = getMeasurement(level, stack);
+        return switch(getMode(stack)) {
+            case 0 -> {
+                var voltage = Unit.VOLTAGE.formatWithPrefixes(measurement);
+                float maxVolt = ModdedConfigs.server().equipment.multimeterVoltage.getF();
+                if(measurement > maxVolt) {
+                    voltage = Lang.text(">" + maxVolt + " ").add(Unit.VOLTAGE.get());
+                } else if(measurement < -maxVolt) {
+                    voltage = Lang.text("<-" + maxVolt + " ").add(Unit.VOLTAGE.get());
+                }
+                yield Lang.translate("tooltip.multimeter.voltage")
+                        .add(voltage.style(ChatFormatting.BLUE))
+                        .style(ChatFormatting.GRAY)
+                        .component();
+            }
+            case 1 -> {
+                var current = Unit.CURRENT.formatWithPrefixes(measurement);
+                float maxAmp = ModdedConfigs.server().equipment.multimeterCurrent.getF();
+                if(measurement > maxAmp) {
+                    current = Lang.text(">" + maxAmp + " ").add(Unit.CURRENT.get());
+                } else if(measurement < -maxAmp) {
+                    current = Lang.text("<-" + maxAmp + " ").add(Unit.CURRENT.get());
+                }
+                yield Lang.translate("tooltip.multimeter.current")
+                        .add(current.style(ChatFormatting.YELLOW))
+                        .style(ChatFormatting.GRAY)
+                        .component();
+            }
+            default -> null;
+        };
+    }
+
+    public float getDial(Level level, ItemStack stack) {
+        float measurement = getMeasurement(level, stack);
+        float value = Math.abs(switch(getMode(stack)) {
+            case 0 -> measurement / ModdedConfigs.server().equipment.multimeterVoltage.getF();
+            case 1 -> measurement / ModdedConfigs.server().equipment.multimeterCurrent.getF();
+            default -> 0;
+        });
+        if(value > 1)
+            return 1 + level.getRandom().nextFloat() * 0.125f;
+        return value;
+    }
+
+    @Override
+    public void appendProperties(ItemStack stack, Player player, List<Component> tooltip) {
+        Voltage.max(ModdedConfigs.server().equipment.multimeterVoltage.getF(), player, tooltip);
+        Current.max(ModdedConfigs.server().equipment.multimeterCurrent.getF(), player, tooltip);
+    }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "C": "#c:copper_coils",
+    "E": "powergrid:conductive_casing",
+    "I": "#c:plates/iron",
+    "M": "powergrid:magnet",
+    "S": "create:shaft"
+  },
+  "pattern": [
+    " ICI ",
+    "CMSMC",
+    " ICI ",
+    "  E  "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:electric_motor"
+  }
+}

@@ -1,0 +1,201 @@
+/*
+ * Copyright 2026 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.electricity.info.customdisplay;
+
+import com.zurrtum.create.foundation.gui.menu.MenuBase;
+import com.zurrtum.create.foundation.gui.menu.MenuProvider;
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.foundation.blockEntity.behaviour.BehaviourType;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.client.catnip.lang.LangBuilder;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.patryk3211.powergrid.utility.Lang;
+import org.patryk3211.powergrid.utility.Unit;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import com.mojang.serialization.Codec;
+import net.minecraft.util.Mth;
+
+public class CustomDisplayBehaviour extends BlockEntityBehaviour implements MenuProvider {
+    public static final BehaviourType<CustomDisplayBehaviour> TYPE = new BehaviourType<>("custom_display");
+
+    protected String equationStr;
+    protected Expression expr;
+    protected Unit unit;
+    public String unitStr;
+    protected boolean prefixes;
+
+    @Nullable
+    private final Supplier<Float> maxValue;
+    private final Function<Float, ChatFormatting> color;
+
+    public CustomDisplayBehaviour(SmartBlockEntity be, Unit unit,
+                                  boolean prefixes, @Nullable Supplier<Float> maxValue, Function<Float, ChatFormatting> color,
+                                  String defaultEquation) {
+        super(be);
+        this.unit = unit;
+        this.prefixes = prefixes;
+        this.maxValue = maxValue;
+        this.color = color;
+        this.equationStr = defaultEquation;
+        this.expr = Expression.parse(equationStr);
+    }
+
+    public static boolean use(Level level, BlockPos pos, Player player, InteractionHand hand) {
+        if(!player.getItemInHand(hand).is(Items.NAME_TAG))
+            return false;
+        var behaviour = BlockEntityBehaviour.get(level, pos, TYPE);
+        if(behaviour == null)
+            return false;
+        if(!level.isClientSide() && player instanceof ServerPlayer serverPlayer)
+            MenuProvider.openHandledScreen(serverPlayer, behaviour);
+        return true;
+    }
+
+    @NotNull
+    @Override
+    public Component getDisplayName() {
+        return blockEntity.getBlockState().getBlock().getName();
+    }
+
+    @Override
+    public MenuBase<?> createMenu(int syncId, Inventory inventory, Player player, RegistryFriendlyByteBuf extraData) {
+        blockEntity.sendToMenu(extraData);
+        return new CustomDisplayMenu(syncId, inventory, blockEntity);
+    }
+
+
+    public LangBuilder format(float baseValue, @Nullable IVarSet variables) {
+        if(expr == null) {
+            return Lang.translate("gui.invalid_equation")
+                    .style(ChatFormatting.RED);
+        }
+        String line = "";
+        if(maxValue != null) {
+            if (Math.abs(baseValue) > maxValue.get()) {
+                line += baseValue >= 0 ? "> " : "< ";
+                if (baseValue < 0)
+                    baseValue = -maxValue.get();
+                else
+                    baseValue = maxValue.get();
+            }
+        }
+        var evaluatedValue = variables != null ? expr.eval(variables) : expr.eval(baseValue);
+        if(evaluatedValue >= 0)
+            line += " ";
+        String prefix;
+        if(prefixes) {
+            var abs = Math.abs(evaluatedValue);
+            if (abs < 1) {
+                // Milli
+                evaluatedValue *= 1000;
+                prefix = "m";
+            } else if (abs < 1000) {
+                prefix = "";
+            } else if (abs < 1000000) {
+                // Kilo
+                evaluatedValue /= 1000;
+                prefix = "k";
+            } else {
+                // Mega
+                evaluatedValue /= 1000000;
+                prefix = "M";
+            }
+        } else {
+            prefix = "";
+        }
+        line += String.format("%.2f %s", evaluatedValue, prefix);
+        var component = Lang.text(line)
+                .style(color.apply(Math.abs(baseValue)));
+        if(unit != null) {
+            component.add(unit.get());
+        } else if(unitStr != null) {
+            component.add(Component.literal(unitStr));
+        }
+        return component;
+    }
+
+    @Override
+    public void read(ValueInput nbt, boolean clientPacket) {
+        super.read(nbt, clientPacket);
+        var storedFmt = nbt.child("Fmt");
+        if(storedFmt.isPresent()) {
+            var tag = storedFmt.get();
+            equationStr = tag.getStringOr("Eq", "");
+            if(equationStr.isEmpty())
+                equationStr = "x";
+            expr = Expression.tryParse(equationStr).orElse(null);
+            var storedUnit = tag.read("Unit", Codec.BYTE);
+            var storedUnitStr = tag.getString("UnitS");
+            if(storedUnit.isPresent()) {
+                unit = Unit.values()[Mth.clamp(storedUnit.get(), 0, Unit.values().length - 1)];
+            } else if(storedUnitStr.isPresent()) {
+                unit = null;
+                unitStr = storedUnitStr.get();
+            }
+            prefixes = tag.getBooleanOr("Prefix", false);
+        }
+    }
+
+    @Override
+    public void write(ValueOutput nbt, boolean clientPacket) {
+        super.write(nbt, clientPacket);
+        var tag = nbt.child("Fmt");
+        if(unit == null && unitStr != null) {
+            tag.putString("UnitS", unitStr);
+        } else if(unit != null) {
+            tag.putByte("Unit", (byte) unit.ordinal());
+        }
+        tag.putString("Eq", equationStr);
+        tag.putBoolean("Prefix", prefixes);
+    }
+
+    @Override
+    public boolean isSafeNBT() {
+        return true;
+    }
+
+    @Override
+    public BehaviourType<?> getType() {
+        return TYPE;
+    }
+
+    public void set(String equation, Unit unit, String unitStr, boolean usePrefixes) {
+        this.equationStr = equation;
+        this.expr = Expression.tryParse(equationStr).orElse(null);
+        this.unit = unit;
+        this.unitStr = unitStr;
+        this.prefixes = usePrefixes;
+        blockEntity.notifyUpdate();
+    }
+}

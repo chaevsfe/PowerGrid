@@ -1,0 +1,74 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": "minecraft:glass_pane",
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "minecraft:slime_ball",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "create:polished_rose_quartz",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:cutting",
+      "ingredient": "$ingredient",
+      "results": [
+        "$result"
+      ],
+      "processing_time": 50
+    },
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "#c:ingots/copper",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredient": "$ingredient",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "#c:plates/copper",
+      "results": [
+        "$result"
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "powergrid:incomplete_solar_panel"
+  },
+  "result": {
+    "chance": 0.917431,
+    "id": "powergrid:solar_panel"
+  },
+  "junks": [
+    {
+      "chance": 3.0,
+      "id": "create:polished_rose_quartz"
+    },
+    {
+      "chance": 3.0,
+      "id": "powergrid:zinc_sheet"
+    },
+    {
+      "chance": 3.0,
+      "id": "minecraft:slime_ball"
+    }
+  ]
+}

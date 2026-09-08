@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "#c:nuggets/copper",
+    "#c:nuggets/copper"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:pins"
+  }
+}

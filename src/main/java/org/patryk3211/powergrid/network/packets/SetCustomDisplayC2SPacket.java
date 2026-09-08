@@ -1,0 +1,91 @@
+/*
+ * Copyright 2026 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.network.packets;
+
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
+import org.patryk3211.powergrid.electricity.info.customdisplay.CustomDisplayBehaviour;
+import org.patryk3211.powergrid.electricity.info.customdisplay.Expression;
+import org.patryk3211.powergrid.network.C2SPacket;
+import org.patryk3211.powergrid.utility.Unit;
+
+public class SetCustomDisplayC2SPacket implements C2SPacket {
+    public static final int MAX_UNIT_STR_LENGTH = 16;
+
+    @Nullable
+    private final BlockPos pos;
+    private final String equation;
+    private final boolean usePrefixes;
+    private final Unit unit;
+    private final String unitStr;
+
+    public SetCustomDisplayC2SPacket(SmartBlockEntity be, String equation, boolean usePrefixes, Unit unit, String unitStr) {
+        this.pos = be.getBlockPos();
+        this.equation = equation;
+        this.usePrefixes = usePrefixes;
+        this.unit = unit;
+        this.unitStr = unitStr;
+    }
+
+    public SetCustomDisplayC2SPacket(FriendlyByteBuf buf) {
+        pos = buf.readBlockPos();
+        equation = buf.readUtf(Expression.MAX_EQUATION_LENGTH);
+        usePrefixes = buf.readBoolean();
+        if(buf.readBoolean()) {
+            unit = buf.readEnum(Unit.class);
+            unitStr = null;
+        } else {
+            unit = null;
+            unitStr = buf.readUtf(MAX_UNIT_STR_LENGTH);
+        }
+    }
+
+    @Override
+    public void write(FriendlyByteBuf buf) {
+        buf.writeBlockPos(pos);
+        var equation = this.equation;
+        if(equation.length() > Expression.MAX_EQUATION_LENGTH)
+            equation = equation.substring(0, Expression.MAX_EQUATION_LENGTH);
+        buf.writeUtf(equation, Expression.MAX_EQUATION_LENGTH);
+        buf.writeBoolean(usePrefixes);
+        if(unit != null) {
+            buf.writeBoolean(true);
+            buf.writeEnum(unit);
+        } else {
+            buf.writeBoolean(false);
+            var unitStr = this.unitStr;
+            if(unitStr.length() > MAX_UNIT_STR_LENGTH)
+                unitStr = unitStr.substring(0, MAX_UNIT_STR_LENGTH);
+            buf.writeUtf(unitStr, MAX_UNIT_STR_LENGTH);
+        }
+    }
+
+    @Override
+    public void handle(ServerPlayer player) {
+        if(!C2SPacket.canInteract(player, pos))
+            return;
+        var level = player.level();
+        var behaviour = BlockEntityBehaviour.get(level, pos, CustomDisplayBehaviour.TYPE);
+        if(behaviour == null)
+            return;
+        behaviour.set(equation, unit, unitStr, usePrefixes);
+    }
+}

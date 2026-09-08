@@ -1,0 +1,171 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.equipment.zapper;
+
+import com.zurrtum.create.content.equipment.zapper.ShootableGadgetItemMethods;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+import org.patryk3211.powergrid.PowerGridClient;
+import org.patryk3211.powergrid.collections.ModdedConfigs;
+import org.patryk3211.powergrid.collections.ModdedPackets;
+import org.patryk3211.powergrid.equipment.BoostingChipItem;
+import org.patryk3211.powergrid.equipment.ItemBoostUtils;
+import org.patryk3211.powergrid.equipment.portablebattery.BatteryUtils;
+import org.patryk3211.powergrid.utility.Lang;
+
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import net.minecraft.world.item.component.TooltipDisplay;
+import java.util.function.Consumer;
+import net.minecraft.world.InteractionResult;
+
+public class ElectroZapperItem extends ProjectileWeaponItem {
+    public static final int MAX_DAMAGE = 50;
+
+    public ElectroZapperItem(Properties settings) {
+        super(settings.durability(MAX_DAMAGE));
+    }
+
+    @Override
+    public Predicate<ItemStack> getAllSupportedProjectiles() {
+        return $ -> false;
+    }
+
+    public boolean isZapper(ItemStack stack) {
+        return stack.getItem() instanceof ElectroZapperItem;
+    }
+
+    @Override
+    public int getDefaultProjectileRange() {
+        return 15;
+    }
+
+    @Override
+    protected void shootProjectile(LivingEntity shooter, Projectile projectile, int index, float velocity, float inaccuracy, float angle, @Nullable LivingEntity target) {
+
+    }
+
+    @Override
+    public boolean canDestroyBlock(ItemStack stack, BlockState state, Level world, BlockPos pos, LivingEntity miner) {
+        return false;
+    }
+
+    @Override
+    public boolean isBarVisible(ItemStack stack) {
+        return BatteryUtils.isBarVisible(stack, energyPerUse());
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        return BatteryUtils.getBarWidth(stack, energyPerUse());
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        return BatteryUtils.getBarColor(stack, energyPerUse());
+    }
+
+    public static int energyPerUse() {
+        return ModdedConfigs.server().equipment.electroZapperEnergyPerShot.get();
+    }
+
+    private static void clientUse(InteractionHand hand) {
+        PowerGridClient.ELECTRO_ZAPPER_RENDER_HANDLER.dontAnimateItem(hand);
+    }
+
+    @Override
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
+        var stack = user.getItemInHand(hand);
+        boolean boosted = ItemBoostUtils.useBoost(stack, user);
+        if(!boosted) {
+            var otherStack = user.getItemInHand(hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND);
+            if(otherStack.getItem() instanceof BoostingChipItem)
+                return InteractionResult.PASS;
+        }
+        if(world.isClientSide()) {
+            clientUse(hand);
+            return InteractionResult.SUCCESS;
+        }
+
+        float power = BatteryUtils.drawEnergy(user, energyPerUse());
+        var barrelPos = ShootableGadgetItemMethods.getGunBarrelVec(user, hand == InteractionHand.MAIN_HAND,
+                new Vec3(.25f, -0.15f, 1.0f));
+        var correction = ShootableGadgetItemMethods.getGunBarrelVec(user, hand == InteractionHand.MAIN_HAND,
+                new Vec3(0, 0, 0)).subtract(user.position().add(0, user.getEyeHeight(), 0));
+
+        var lookVec = user.getLookAngle();
+        var motion = lookVec.add(correction)
+                .normalize()
+                .scale(4);
+
+        var projectile = ZapProjectileEntity.create(world, barrelPos, motion, Math.max(power, 0.5f) * (boosted ? 2 : 1));
+        projectile.setOwner(user);
+        world.addFreshEntity(projectile);
+
+        ShootableGadgetItemMethods.applyCooldown(user, stack, hand, this::isZapper, 10);
+        Function<Boolean, ElectroZapperS2CPacket> factory = b -> new ElectroZapperS2CPacket(barrelPos, hand, b);
+        ModdedPackets.sendToClientsTracking(factory.apply(false), user);
+        ModdedPackets.sendToClient(factory.apply(true), (ServerPlayer) user);
+        if(power == 0)
+            stack.hurtAndBreak(1, user, EquipmentSlot.MAINHAND);
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.empty());
+        tooltip.accept(Component.translatable("powergrid.electrozapper.bolt").append(Component.literal(":"))
+                .withStyle(ChatFormatting.GRAY));
+        var spacing = Component.literal(" ");
+
+        float damageF = 8;//type.getDamage() * additionalDamageMult;
+        var damage = Component.literal(damageF == Mth.floor(damageF) ? "" + Mth.floor(damageF) : "" + damageF);
+        var reloadTicks = Component.literal("10");
+
+//        damage = damage.formatted(Formatting.DARK_GREEN);
+
+        tooltip.accept(spacing.plainCopy().append(Lang.translateDirect("electrozapper.bolt.damage", damage).withStyle(ChatFormatting.DARK_GREEN)));
+        tooltip.accept(spacing.plainCopy().append(Lang.translateDirect("electrozapper.bolt.reload", reloadTicks).withStyle(ChatFormatting.DARK_GREEN)));
+        super.appendHoverText(stack, context, display, tooltip, flag);
+    }
+
+    public boolean onEntitySwing(ItemStack itemStack, LivingEntity livingEntity) {
+        return true;
+    }
+
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+        return slotChanged || newStack.getItem() != oldStack.getItem();
+    }
+}

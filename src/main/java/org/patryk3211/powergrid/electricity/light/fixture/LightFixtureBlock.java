@@ -1,0 +1,219 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.electricity.light.fixture;
+
+import com.zurrtum.create.foundation.block.IBE;
+import org.patryk3211.powergrid.registrate.builders.BlockBuilder;
+import org.patryk3211.powergrid.registrate.fn.NonNullUnaryOperator;
+import org.patryk3211.powergrid.utility.Env;
+import com.zurrtum.create.catnip.math.VoxelShaper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
+import org.patryk3211.powergrid.base.CustomProperties;
+import org.patryk3211.powergrid.collections.ModdedBlockEntities;
+import org.patryk3211.powergrid.electricity.base.DirectionalElectricBlock;
+import org.patryk3211.powergrid.electricity.base.IDecoratedTerminal;
+import org.patryk3211.powergrid.electricity.base.TerminalBoundingBox;
+import org.patryk3211.powergrid.electricity.base.terminals.BlockStateTerminalCollection;
+import org.patryk3211.powergrid.electricity.light.bulb.ILightBulb;
+import org.patryk3211.powergrid.electricity.wire.powercord.AutoCordEndpoint;
+import org.patryk3211.powergrid.electricity.wire.powercord.IAcceptCord;
+
+import java.util.ArrayList;
+import java.util.List;
+import net.minecraft.core.component.DataComponents;
+
+public class LightFixtureBlock extends DirectionalElectricBlock implements IBE<LightFixtureBlockEntity>, IAcceptCord {
+    public static final IntegerProperty POWER = IntegerProperty.create("power", 0, 2);
+    public static final BooleanProperty ALONG_FIRST_AXIS = CustomProperties.ALONG_FIRST_AXIS;
+
+    private static final TerminalBoundingBox[] UP_TERMINALS = new TerminalBoundingBox[] {
+            new TerminalBoundingBox(IDecoratedTerminal.CONNECTOR, 2.5, 1.5, 6.5, 4.5, 3.5, 9.5),
+            new TerminalBoundingBox(IDecoratedTerminal.CONNECTOR, 11.5, 1.5, 6.5, 13.5, 3.5, 9.5)
+    };
+
+    private static final VoxelShape SHAPE_UP = box(3.5, 0, 3.5, 12.5, 3, 12.5);
+
+    Vec3 modelOffset;
+
+    public LightFixtureBlock(Properties settings) {
+        super(settings.lightLevel(state -> switch(state.getValue(POWER)) {
+            case 1 -> ILightBulb.LIGHT_LEVEL_LOW_POWER;
+            case 2 -> ILightBulb.LIGHT_LEVEL_FULL_POWER;
+            default -> 0;
+        }));
+        modelOffset = Vec3.ZERO;
+        registerDefaultState(defaultBlockState().setValue(POWER, 0));
+
+        var shaper = VoxelShaper.forDirectional(SHAPE_UP, Direction.UP);
+        setTerminalCollection(BlockStateTerminalCollection.builder(this)
+                .forAllStatesExcept(state -> BlockStateTerminalCollection.each(UP_TERMINALS, terminal -> {
+                    var facing = state.getValue(FACING);
+                    terminal = switch(facing) {
+                        case UP -> terminal;
+                        case DOWN -> terminal.rotateAroundX(180);
+                        case NORTH -> terminal.rotateAroundX(90);
+                        case SOUTH -> terminal.rotateAroundX(90).rotateAroundY(180);
+                        case EAST -> terminal.rotateAroundX(90).rotateAroundY(90);
+                        case WEST -> terminal.rotateAroundX(90).rotateAroundY(-90);
+                    };
+                    if(!state.getValue(ALONG_FIRST_AXIS)) {
+                        terminal = terminal.rotate(facing.getAxis(), 90);
+                    }
+                    return terminal;
+                }), POWER)
+                .withShapeMapper(state -> shaper.get(state.getValue(FACING)))
+                .build());
+    }
+
+    public static <B extends LightFixtureBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> setBulbModelOffset(Vec3 modelOffset) {
+        return b -> {
+            Env.CLIENT.runIfCurrent(() -> () -> b.onRegister(block -> block.modelOffset = modelOffset));
+            return b;
+        };
+    }
+
+    public static <B extends LightFixtureBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> setBulbModelOffset(float x, float y, float z) {
+        return b -> {
+            Env.CLIENT.runIfCurrent(() -> () -> b.onRegister(block -> block.modelOffset = new Vec3(x, y, z)));
+            return b;
+        };
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(POWER, ALONG_FIRST_AXIS);
+    }
+
+    @Override
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        var facing = ctx.getClickedFace();
+        boolean along = true;
+        if(facing.getAxis() == Direction.Axis.Y) {
+            var player = ctx.getHorizontalDirection();
+            if(player.getAxis() == Direction.Axis.X)
+                along = false;
+        }
+
+        return defaultBlockState()
+                .setValue(FACING, facing)
+                .setValue(ALONG_FIRST_AXIS, along);
+    }
+
+    @Override
+    public int terminalCount() {
+        return 2;
+    }
+
+    @Override
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return InteractionResult.PASS;
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if(!player.getMainHandItem().isEmpty())
+            return InteractionResult.PASS;
+        return onBlockEntityUse(level, pos, be ->
+                be.replaceBulb(player, InteractionHand.MAIN_HAND, ItemStack.EMPTY)
+                        ? InteractionResult.SUCCESS
+                        : InteractionResult.FAIL);
+    }
+
+    @Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if(hand != InteractionHand.MAIN_HAND)
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
+        if(stack.getItem() instanceof ILightBulb) {
+            return onBlockEntityUseItemOn(level, pos, be ->
+                    be.replaceBulb(player, hand, stack)
+                            ? InteractionResult.SUCCESS
+                            : InteractionResult.FAIL);
+        } else if(stack.getItem() instanceof DyeItem dye) {
+            return onBlockEntityUseItemOn(level, pos, be -> be.setColor(stack.get(DataComponents.DYE)));
+        } else {
+            // Holding something else.
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
+        }
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        var be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if(be instanceof LightFixtureBlockEntity fixture) {
+            var bulb = fixture.getBulbState();
+            if(bulb != null && !bulb.isBurned()) {
+                var drops = new ArrayList<>(super.getDrops(state, params));
+                drops.add(new ItemStack(fixture.getBulbState().getItem(), 1));
+                return drops;
+            }
+        }
+        return super.getDrops(state, params);
+    }
+
+    @Override
+    public void destroy(LevelAccessor world, BlockPos pos, BlockState state) {
+        super.destroy(world, pos, state);
+    }
+
+    @Override
+    public Class<LightFixtureBlockEntity> getBlockEntityClass() {
+        return LightFixtureBlockEntity.class;
+    }
+
+    @Override
+    public BlockEntityType<? extends LightFixtureBlockEntity> getBlockEntityType() {
+        return ModdedBlockEntities.LIGHT_FIXTURE.get();
+    }
+
+    @Override
+    public @Nullable AutoCordEndpoint getEndpoint(UseOnContext context) {
+        var level = context.getLevel();
+        var pos = context.getClickedPos();
+        var state = level.getBlockState(pos);
+        var facing = state.getValue(FACING);
+
+        var center = Vec3.atCenterOf(pos);
+        var normal = facing.getUnitVec3i();
+        var point = center.add(normal.getX() * -0.40625, normal.getY() * -0.40625, normal.getZ() * -0.40625);
+
+        return new AutoCordEndpoint(context.getClickedPos(), 0, 1, point,
+                renderPlug() ? context.getClickedFace() : null);
+    }
+}

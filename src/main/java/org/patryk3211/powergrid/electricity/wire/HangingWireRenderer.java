@@ -1,0 +1,352 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.electricity.wire;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.zurrtum.create.catnip.theme.Color;
+import org.patryk3211.powergrid.compat.sable.SableCompanion;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.GraphicsPreset;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.Vec3;
+import org.patryk3211.powergrid.collections.ModdedConfigs;
+import org.patryk3211.powergrid.electricity.GlobalElectricNetworks;
+
+@Environment(EnvType.CLIENT)
+public class HangingWireRenderer extends EntityRenderer<HangingWireEntity, WireRenderState> {
+    public static final boolean RAINBOW_WIRES = false;
+
+    public HangingWireRenderer(EntityRendererProvider.Context ctx) {
+        super(ctx);
+    }
+
+    @Override
+    public WireRenderState createRenderState() {
+        return new WireRenderState();
+    }
+
+    public static boolean useFancyGraphics() {
+        return Minecraft.getInstance().options.graphicsPreset().get() != GraphicsPreset.FAST;
+    }
+
+    public static RenderType wireRenderType(WireRenderState state) {
+        return state.simpleModel ? RenderTypes.entityCutout(state.texture) : RenderTypes.entityCutoutCull(state.texture);
+    }
+
+    public static int lodLevel(Vec3 playerPos, Vec3 offset, Vec3... wirePositions) {
+        if(!ModdedConfigs.client().wireLOD.get())
+            return 0;
+        double minDist = Double.POSITIVE_INFINITY;
+        for(var pos : wirePositions) {
+            double dx = playerPos.x - (pos.x - offset.x);
+            double dy = playerPos.y - (pos.y - offset.y);
+            double dz = playerPos.z - (pos.z - offset.z);
+            double dist = dx * dx + dy * dy * dz * dz;
+            if(dist < minDist)
+                minDist = dist;
+        }
+        if(minDist > 64 * 64)
+            return 2;
+        if(minDist > 32 * 32)
+            return 1;
+        return 0;
+    }
+
+    @Override
+    public void extractRenderState(HangingWireEntity entity, WireRenderState state, float tickDelta) {
+        super.extractRenderState(entity, state, tickDelta);
+        state.clearSegments();
+        state.skip = true;
+
+        if(entity.curveParams == null)
+            return;
+
+        if(entity.isOverheated())
+            // Don't render since it's dead and only there to spawn particles.
+            return;
+        CurveParameters rp = entity.curveParams;
+
+        state.texture = entity.getWireEntry().texture();
+
+        // To introduce some subtle variety into the wires.
+        var thicknessOffset = entity.getId() / 16f;
+
+        int color = Color.mixColors(
+                entity.getColor() | 0xFF000000,
+                0xFFFF0000,
+                (float) Math.max(0, (rp.L - entity.placedLength) * entity.overlayTicks / 20f));
+        if(RAINBOW_WIRES) {
+            var line = GlobalElectricNetworks.getLine(entity);
+            if(line != null) {
+                color = line.hashCode() | 0xFF000000;
+            }
+        }
+        final int wireColor = color;
+
+        var rawPos = entity.position();
+        var pos = SableCompanion.INSTANCE.projectOutOfSubLevel(entity.level(), rawPos);
+        final var playerPos = ModdedConfigs.client().wireLOD.get() ? Minecraft.getInstance().player.position() : null;
+        float segmentSize = 0.5f;
+        final boolean simpleModel;
+        switch(lodLevel(playerPos, rawPos.subtract(pos), rawPos, entity.terminalPos1, entity.terminalPos2)) {
+            case 1 -> {
+                segmentSize = 1.5f;
+                simpleModel = !useFancyGraphics();
+            }
+            case 2 -> {
+                segmentSize = 3.0f;
+                simpleModel = true;
+            }
+            default -> simpleModel = !useFancyGraphics();
+        }
+        state.simpleModel = simpleModel;
+
+        var world = entity.level();
+        if(entity.baseTerminalPos1 != null && entity.baseTerminalPos2 != null) {
+            // Change curve based on sublevels
+            boolean moved = false;
+            Vec3 pos1 = entity.terminalPos1, pos2 = entity.terminalPos2;
+            var s1 = SableCompanion.INSTANCE.getContainingClient(entity.baseTerminalPos1);
+            var s2 = SableCompanion.INSTANCE.getContainingClient(entity.baseTerminalPos2);
+            if (s1 != null) {
+                pos1 = s1.renderPose(tickDelta).transformPosition(entity.baseTerminalPos1);
+                moved = true;
+            }
+            if (s2 != null) {
+                pos2 = s2.renderPose(tickDelta).transformPosition(entity.baseTerminalPos2);
+                moved = true;
+            }
+            if (moved) {
+                double L = entity.placedLength;
+                double d = pos1.distanceTo(pos2);
+                if(d > L && d < L + 1) {
+                    L = d + .01;
+                }
+                rp.nudge(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z, L);
+            }
+        }
+        rp.runForSegments((x1, y1, z1, x2, y2, z2, offset, length) -> {
+            var blockPos = BlockPos.containing((x1 + x2) * 0.5 + pos.x, (y1 + y2) * 0.5 + pos.y, (z1 + z2) * 0.5 + pos.z);
+            var sky = world.getBrightness(LightLayer.SKY, blockPos);
+            var block = world.getBrightness(LightLayer.BLOCK, blockPos);
+            state.addSegment(
+                    x1, y1, z1,
+                    x2, y2, z2,
+                    rp.cross1, rp.cross2, LightCoordsUtil.pack(block, sky), wireColor,
+                    rp.thickness, thicknessOffset, (float) length, (float) offset);
+        }, segmentSize);
+        state.skip = false;
+    }
+
+    @Override
+    public void submit(WireRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        super.submit(state, matrices, queue, cameraState);
+        if(state.skip || state.segmentCount == 0)
+            return;
+        queue.submitCustomGeometry(matrices, wireRenderType(state), state::renderSegments);
+    }
+
+    public static void renderFromPositions(PoseStack.Pose matrices, VertexConsumer buffer, Vec3 t1, Vec3 t2, double horizontalCoefficient, double verticalCoefficient, double thickness, int light, int color) {
+        double x = (t1.x + t2.x) * 0.5;
+        double y = t1.y;
+        double z = (t1.z + t2.z) * 0.5;
+        var dX = t2.x - t1.x;
+        var dY = t2.y - t1.y;
+        var dZ = t2.z - t1.z;
+        var hL = dX * dX + dZ * dZ;
+        var curve = new CurveParameters(t1, t2, Math.sqrt(horizontalCoefficient * hL + verticalCoefficient * dY * dY), thickness);
+        curve.runForSegments((x1, y1, z1, x2, y2, z2, offset, length) ->
+                renderSegment(matrices, buffer,
+                        x1 + x, y1 + y, z1 + z,
+                        x2 + x, y2 + y, z2 + z,
+                        curve.cross1, curve.cross2, light, color,
+                        curve.thickness, 0, (float) length, (float) offset, !useFancyGraphics()), 0.5f);
+    }
+
+    public static void renderFromPositions(PoseStack.Pose matrices, VertexConsumer buffer, Vec3 t1, Vec3 t2, double horizontalCoefficient, double verticalCoefficient, double thickness, BlockAndTintGetter lightProvider, int color) {
+        double x = (t1.x + t2.x) * 0.5;
+        double y = t1.y;
+        double z = (t1.z + t2.z) * 0.5;
+        var dX = t2.x - t1.x;
+        var dY = t2.y - t1.y;
+        var dZ = t2.z - t1.z;
+        var hL = dX * dX + dZ * dZ;
+        var curve = new CurveParameters(t1, t2, Math.sqrt(horizontalCoefficient * hL + verticalCoefficient * dY * dY), thickness);
+        curve.runForSegments((x1, y1, z1, x2, y2, z2, offset, length) -> {
+                var blockPos = BlockPos.containing((x1 + x2) * 0.5 + x, (y1 + y2) * 0.5 + y, (z1 + z2) * 0.5 + z);
+                var sky = lightProvider.getBrightness(LightLayer.SKY, blockPos);
+                var block = lightProvider.getBrightness(LightLayer.BLOCK, blockPos);
+                renderSegment(matrices, buffer,
+                        x1 + x, y1 + y, z1 + z,
+                        x2 + x, y2 + y, z2 + z,
+                        curve.cross1, curve.cross2, LightCoordsUtil.pack(block, sky), color,
+                        curve.thickness, 0, (float) length, (float) offset, !useFancyGraphics());
+        }, 0.5f);
+    }
+
+    public static void renderSegment(PoseStack.Pose ms, VertexConsumer buffer,
+                                     double x1, double y1, double z1, double x2, double y2, double z2,
+                                     Vec3 cross1, Vec3 cross2, int light, int color,
+                                     float thickness, float thicknessOffset, float uvLength, float lengthOffset, boolean simpleModel) {
+        if(simpleModel) {
+            quad(ms, buffer, light, color,
+                    x1 + cross1.x, y1 + cross1.y, z1 + cross1.z,
+                    x1 - cross1.x, y1 - cross1.y, z1 - cross1.z,
+                    x2 + cross1.x, y2 + cross1.y, z2 + cross1.z,
+                    x2 - cross1.x, y2 - cross1.y, z2 - cross1.z,
+                    thickness, thicknessOffset, uvLength, lengthOffset);
+            quad(ms, buffer, light, color,
+                    x1 + cross2.x, y1 + cross2.y, z1 + cross2.z,
+                    x1 - cross2.x, y1 - cross2.y, z1 - cross2.z,
+                    x2 + cross2.x, y2 + cross2.y, z2 + cross2.z,
+                    x2 - cross2.x, y2 - cross2.y, z2 - cross2.z,
+                    thickness, thicknessOffset, uvLength, lengthOffset);
+        } else {
+            quad(ms, buffer, light, color,
+                    x1 + cross1.x, y1 + cross1.y, z1 + cross1.z,
+                    x1 - cross2.x, y1 - cross2.y, z1 - cross2.z,
+                    x2 + cross1.x, y2 + cross1.y, z2 + cross1.z,
+                    x2 - cross2.x, y2 - cross2.y, z2 - cross2.z,
+                    cross1.x - cross2.x, cross1.y - cross2.y, cross1.z - cross2.z,
+                    thickness, thicknessOffset, uvLength, lengthOffset);
+            quad(ms, buffer, light, color,
+                    x1 - cross1.x, y1 - cross1.y, z1 - cross1.z,
+                    x1 + cross2.x, y1 + cross2.y, z1 + cross2.z,
+                    x2 - cross1.x, y2 - cross1.y, z2 - cross1.z,
+                    x2 + cross2.x, y2 + cross2.y, z2 + cross2.z,
+                    cross2.x - cross1.x, cross2.y - cross1.y, cross2.z - cross1.z,
+                    thickness, thicknessOffset, uvLength, lengthOffset);
+            quad(ms, buffer, light, color,
+                    x1 + cross2.x, y1 + cross2.y, z1 + cross2.z,
+                    x1 + cross1.x, y1 + cross1.y, z1 + cross1.z,
+                    x2 + cross2.x, y2 + cross2.y, z2 + cross2.z,
+                    x2 + cross1.x, y2 + cross1.y, z2 + cross1.z,
+                    cross1.x + cross2.x, cross1.y + cross2.y, cross1.z + cross2.z,
+                    thickness, thicknessOffset, uvLength, lengthOffset);
+            quad(ms, buffer, light, color,
+                    x1 - cross2.x, y1 - cross2.y, z1 - cross2.z,
+                    x1 - cross1.x, y1 - cross1.y, z1 - cross1.z,
+                    x2 - cross2.x, y2 - cross2.y, z2 - cross2.z,
+                    x2 - cross1.x, y2 - cross1.y, z2 - cross1.z,
+                    -cross1.x - cross2.x, -cross1.y - cross2.y, -cross1.z - cross2.z,
+                    thickness, thicknessOffset, uvLength, lengthOffset);
+            quad(ms, buffer, light, color,
+                    x1 + cross1.x, y1 + cross1.y, z1 + cross1.z,
+                    x1 + cross2.x, y1 + cross2.y, z1 + cross2.z,
+                    x1 - cross2.x, y1 - cross2.y, z1 - cross2.z,
+                    x1 - cross1.x, y1 - cross1.y, z1 - cross1.z,
+                    x1 - x2, y1 - y2, z1 - z2,
+                    thickness, thicknessOffset, thickness, thicknessOffset);
+            quad(ms, buffer, light, color,
+                    x2 + cross1.x, y2 + cross1.y, z2 + cross1.z,
+                    x2 - cross2.x, y2 - cross2.y, z2 - cross2.z,
+                    x2 + cross2.x, y2 + cross2.y, z2 + cross2.z,
+                    x2 - cross1.x, y2 - cross1.y, z2 - cross1.z,
+                    x2 - x1, y2 - y1, z2 - z1,
+                    thickness, thicknessOffset, thickness, thicknessOffset);
+        }
+    }
+
+    public static void quad(PoseStack.Pose matrix, VertexConsumer buffer, int light, int color,
+                            double x1, double y1, double z1, double x2, double y2, double z2,
+                            double x3, double y3, double z3, double x4, double y4, double z4,
+                            float vLen, float v0, float uLen, float u0) {
+        buffer.addVertex(matrix.pose(), (float) x1, (float) y1, (float) z1)
+                .setColor(color)
+                .setUv(u0, v0)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setUv2(light & 65535, light >> 16 & 65535)
+                .setNormal(matrix, 0, 1, 0);
+        buffer.addVertex(matrix.pose(), (float) x2, (float) y2, (float) z2)
+                .setColor(color)
+                .setUv(u0, v0 + vLen)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setUv2(light & 65535, light >> 16 & 65535)
+                .setNormal(matrix, 0, 1, 0);
+        buffer.addVertex(matrix.pose(), (float) x4, (float) y4, (float) z4)
+                .setColor(color)
+                .setUv(u0 + uLen, v0 + vLen)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setUv2(light & 65535, light >> 16 & 65535)
+                .setNormal(matrix, 0, 1, 0);
+        buffer.addVertex(matrix.pose(), (float) x3, (float) y3, (float) z3)
+                .setColor(color)
+                .setUv(u0 + uLen, v0)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setUv2(light & 65535, light >> 16 & 65535)
+                .setNormal(matrix, 0, 1, 0);
+    }
+
+    public static void quad(PoseStack.Pose matrix, VertexConsumer buffer, int light, int color,
+                            double x1, double y1, double z1, double x2, double y2, double z2,
+                            double x3, double y3, double z3, double x4, double y4, double z4,
+                            double nX, double nY, double nZ,
+                            float vLen, float v0, float uLen, float u0) {
+        var nLen = Math.sqrt(nX * nX + nY * nY + nZ * nZ);
+        nX /= nLen; nY /= nLen; nZ /= nLen;
+        buffer.addVertex(matrix.pose(), (float) x1, (float) y1, (float) z1)
+                .setColor(color)
+                .setUv(u0, v0)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setUv2(light & 65535, light >> 16 & 65535)
+                .setNormal(matrix, (float) nX, (float) nY, (float) nZ);
+        buffer.addVertex(matrix.pose(), (float) x2, (float) y2, (float) z2)
+                .setColor(color)
+                .setUv(u0, v0 + vLen)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setUv2(light & 65535, light >> 16 & 65535)
+                .setNormal(matrix, (float) nX, (float) nY, (float) nZ);
+        buffer.addVertex(matrix.pose(), (float) x4, (float) y4, (float) z4)
+                .setColor(color)
+                .setUv(u0 + uLen, v0 + vLen)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setUv2(light & 65535, light >> 16 & 65535)
+                .setNormal(matrix, (float) nX, (float) nY, (float) nZ);
+        buffer.addVertex(matrix.pose(), (float) x3, (float) y3, (float) z3)
+                .setColor(color)
+                .setUv(u0 + uLen, v0)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setUv2(light & 65535, light >> 16 & 65535)
+                .setNormal(matrix, (float) nX, (float) nY, (float) nZ);
+    }
+
+    public static void quad(PoseStack.Pose matrix, VertexConsumer buffer, int color,
+                            double x1, double y1, double z1, double x2, double y2, double z2,
+                            double x3, double y3, double z3, double x4, double y4, double z4) {
+        buffer.addVertex(matrix.pose(), (float) x1, (float) y1, (float) z1)
+                .setColor(color);
+        buffer.addVertex(matrix.pose(), (float) x2, (float) y2, (float) z2)
+                .setColor(color);
+        buffer.addVertex(matrix.pose(), (float) x4, (float) y4, (float) z4)
+                .setColor(color);
+        buffer.addVertex(matrix.pose(), (float) x3, (float) y3, (float) z3)
+                .setColor(color);
+    }
+}

@@ -1,0 +1,53 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"render_type": "cutout",
+	"textures": {
+		"0": "powergrid:block/thermometer",
+		"particle": "powergrid:block/thermometer"
+	},
+	"elements": [
+		{
+			"name": "needle",
+			"from": [2.5, 5.5, 1.25],
+			"to": [9.5, 6.5, 1.25],
+			"rotation": {"angle": -22.5, "axis": "z", "origin": [8, 6, 7]},
+			"faces": {
+				"south": {"uv": [15.5, 4, 16, 7.5], "rotation": 270, "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, 2, 4],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, 2, 4],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"firstperson_righthand": {
+			"rotation": [-15, -15, 0],
+			"translation": [1, 2, 1],
+			"scale": [0.75, 0.75, 0.75]
+		},
+		"firstperson_lefthand": {
+			"rotation": [-15, -15, 0],
+			"translation": [1, 2, 1],
+			"scale": [0.75, 0.75, 0.75]
+		},
+		"ground": {
+			"translation": [0, 2, 5],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [30, 45, 0],
+			"translation": [4, -2, 0],
+			"scale": [0.75, 0.75, 0.75]
+		},
+		"fixed": {
+			"rotation": [0, -180, 0],
+			"translation": [0, 0, -7]
+		}
+	}
+}

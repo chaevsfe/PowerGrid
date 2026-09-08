@@ -1,0 +1,19 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "C": "#c:plates/copper",
+    "E": "powergrid:conductive_casing",
+    "R": "powergrid:resistive_coil"
+  },
+  "pattern": [
+    "RRRRR",
+    " C C ",
+    " CEC "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:basin_heater"
+  }
+}

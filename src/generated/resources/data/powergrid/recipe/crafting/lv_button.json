@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:stone_button",
+    "powergrid:pins",
+    "powergrid:conductive_casing"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:lv_button"
+  }
+}

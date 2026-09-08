@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": "minecraft:glass_pane",
+    "I": "#c:plates/iron",
+    "W": "#c:wires/iron"
+  },
+  "pattern": [
+    " G ",
+    "GWG",
+    " I "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:light_bulb"
+  }
+}

@@ -1,0 +1,83 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.ponder.base;
+
+import com.zurrtum.create.client.ponder.foundation.PonderScene;
+import com.zurrtum.create.client.ponder.foundation.element.PonderElementBase;
+import org.patryk3211.powergrid.electricity.GlobalElectricNetworks;
+import org.patryk3211.powergrid.electricity.sim.node.VoltageSourceCoupling;
+import org.patryk3211.powergrid.electricity.wire.IWireEndpoint;
+
+import java.util.function.Function;
+
+public class VoltageSource extends PonderElementBase {
+    private final IWireEndpoint target;
+    private final float voltage;
+
+    private VoltageSourceCoupling source;
+
+    private Function<Integer, Float> func;
+    private int time;
+
+    public VoltageSource(IWireEndpoint target, float voltage) {
+        this.target = target;
+        this.voltage = voltage;
+    }
+
+    @Override
+    public void tick(PonderScene scene) {
+        super.tick(scene);
+        if(source == null) {
+            var node = target.getNode(scene.getLevel());
+            if(node.getNetwork() == null) {
+                var global = GlobalElectricNetworks.getWorldNetworks(scene.getLevel());
+                global.prepareUnpaused(node);
+                if(node.getNetwork() == null) {
+                    // Still no network.
+                    target.joinNetwork(scene.getLevel(), global.newNetwork());
+                }
+            }
+            var network = node.getNetwork();
+            source = new VoltageSourceCoupling(node, null, 0, voltage);
+            network.addNode(source);
+        }
+        if(func != null) {
+            source.setVoltage(func.apply(time++));
+        }
+    }
+
+    @Override
+    public void reset(PonderScene scene) {
+        if(source != null) {
+            source.getNetwork().removeNode(source);
+            source = null;
+        }
+        func = null;
+    }
+
+    public void setValue(float value) {
+        if(source != null) {
+            source.setVoltage(value);
+        }
+        func = null;
+    }
+
+    public void setFunction(Function<Integer, Float> func) {
+        this.func = func;
+        this.time = 0;
+    }
+}

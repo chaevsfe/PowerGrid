@@ -1,0 +1,9 @@
+{
+  "type": "powergrid:magnetization",
+  "results": [
+    {
+      "id": "powergrid:magnet"
+    }
+  ],
+  "ingredient": "create:andesite_alloy"
+}

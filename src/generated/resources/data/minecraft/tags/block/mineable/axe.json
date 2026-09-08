@@ -1,0 +1,25 @@
+{
+  "values": [
+    "powergrid:plotter",
+    "powergrid:generator_clutch",
+    "powergrid:lv_switch",
+    "powergrid:lv_button",
+    "powergrid:mv_switch",
+    "powergrid:hv_switch",
+    "powergrid:spark_gap",
+    "powergrid:ceiling_tile",
+    "powergrid:ceiling_tile_lamp",
+    "powergrid:ceiling_tile_connector",
+    "powergrid:ceiling_tile_junction",
+    "powergrid:electric_fan",
+    {
+      "id": "powergrid:circuit_design_table",
+      "required": false
+    },
+    "powergrid:fe_inverter",
+    "powergrid:fuse_holder",
+    "powergrid:andesite_encased_crt",
+    "powergrid:brass_encased_crt",
+    "powergrid:ceiling_tile_solar"
+  ]
+}

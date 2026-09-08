@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "powergrid",
+  "version": "${version}",
+  "name": "Create Fly: Power Grid (Unofficial Port)",
+  "description": "Create: Power Grid port for Create Fly 26.2. Physics-based electricity simulation for Create.",
+  "authors": [
+    "patryk3211",
+    "Da-Negy",
+    "rvndm",
+    "casvara",
+    "chaevsfe"
+  ],
+  "contributors": [
+    "chaevsfe"
+  ],
+  "contact": {
+    "homepage": "https://github.com/chaevsfe/PowerGrid",
+    "sources": "https://github.com/chaevsfe/PowerGrid",
+    "issues": "https://github.com/chaevsfe/PowerGrid/issues",
+    "upstream": "https://modrinth.com/mod/power-grid"
+  },
+  "license": [
+    "Apache-2.0"
+  ],
+  "icon": "assets/powergrid/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "org.patryk3211.powergrid.fabric.PowerGridFabric"
+    ],
+    "client": [
+      "org.patryk3211.powergrid.fabric.PowerGridClientFabric"
+    ],
+    "create_plugin": [
+      "org.patryk3211.powergrid.fabric.PowerGridCreatePlugin"
+    ]
+  },
+  "accessWidener": "powergrid.accesswidener",
+  "mixins": [
+    "powergrid.mixins.json",
+    {
+      "config": "powergrid.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "minecraft": "${minecraft_dependency_version}",
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "create": "${create_fabric_version_range}",
+    "java": ">=25"
+  },
+  "suggests": {
+    "createaddition": "*"
+  },
+  "breaks": {
+    "sable": "*",
+    "sable-companion": "*"
+  }
+}

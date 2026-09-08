@@ -1,0 +1,19 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    "powergrid:unetched_circuit"
+  ],
+  "fluid_ingredients": [
+    {
+      "type": "fluid_stack",
+      "fluid": "powergrid:acid",
+      "amount": 20250
+    }
+  ],
+  "results": [
+    {
+      "id": "powergrid:incomplete_circuit"
+    }
+  ]
+}

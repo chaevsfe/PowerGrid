@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "powergrid:conductive_casing",
+    "#c:nuggets/iron",
+    "#c:plates/iron"
+  ],
+  "result": {
+    "count": 3,
+    "id": "powergrid:cord_junction"
+  }
+}

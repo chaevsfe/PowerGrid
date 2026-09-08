@@ -1,0 +1,21 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    "minecraft:redstone",
+    "minecraft:blaze_powder"
+  ],
+  "fluid_ingredients": [
+    {
+      "type": "fluid_stack",
+      "fluid": "minecraft:water",
+      "amount": 20250
+    }
+  ],
+  "fluid_results": [
+    {
+      "id": "powergrid:acid",
+      "amount": 20250
+    }
+  ]
+}

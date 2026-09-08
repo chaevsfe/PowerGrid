@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "powergrid:battery",
+    "C": "powergrid:device_connector",
+    "D": "powergrid:electrical_gizmo",
+    "Z": "#c:plates/zinc"
+  },
+  "pattern": [
+    " C ",
+    "ZDZ",
+    "ZBZ"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:portable_battery"
+  }
+}

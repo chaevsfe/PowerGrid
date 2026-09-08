@@ -1,0 +1,50 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": "#c:plates/iron",
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "create:polished_rose_quartz",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "#c:wires/gold",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredient": "$ingredient",
+      "results": [
+        "$result"
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "powergrid:incomplete_bjt_npn"
+  },
+  "result": {
+    "chance": 0.862069,
+    "id": "powergrid:bjt_npn"
+  },
+  "junks": [
+    {
+      "chance": 10.0,
+      "id": "powergrid:bjt_pnp"
+    },
+    {
+      "chance": 3.0,
+      "id": "create:iron_sheet"
+    },
+    {
+      "chance": 3.0,
+      "id": "create:electron_tube"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": "#c:plates/zinc",
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "#c:copper_coils",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "create:electron_tube",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "powergrid:integrated_circuit",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "minecraft:gold_nugget",
+      "results": [
+        "$result"
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "powergrid:incomplete_electrical_gizmo"
+  },
+  "result": {
+    "chance": 0.833333,
+    "id": "powergrid:electrical_gizmo"
+  },
+  "junks": [
+    {
+      "chance": 7.0,
+      "id": "powergrid:zinc_sheet"
+    },
+    {
+      "chance": 5.0,
+      "id": "create:polished_rose_quartz"
+    },
+    {
+      "chance": 3.0,
+      "id": "minecraft:gold_nugget"
+    },
+    {
+      "chance": 2.0,
+      "id": "minecraft:copper_nugget"
+    },
+    {
+      "chance": 3.0,
+      "id": "minecraft:repeater"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "type": "create:item_application",
+  "results": [
+    {
+      "id": "powergrid:conductive_casing"
+    }
+  ],
+  "target": "create:andesite_casing",
+  "ingredient": "#c:ingots/zinc"
+}

@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "base=false,facing=east": {
+      "model": "powergrid:block/rheostat/block_baseless",
+      "y": 90
+    },
+    "base=false,facing=north": {
+      "model": "powergrid:block/rheostat/block_baseless"
+    },
+    "base=false,facing=south": {
+      "model": "powergrid:block/rheostat/block_baseless",
+      "y": 180
+    },
+    "base=false,facing=west": {
+      "model": "powergrid:block/rheostat/block_baseless",
+      "y": 270
+    },
+    "base=true,facing=east": {
+      "model": "powergrid:block/rheostat/block",
+      "y": 90
+    },
+    "base=true,facing=north": {
+      "model": "powergrid:block/rheostat/block"
+    },
+    "base=true,facing=south": {
+      "model": "powergrid:block/rheostat/block",
+      "y": 180
+    },
+    "base=true,facing=west": {
+      "model": "powergrid:block/rheostat/block",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "minecraft:glass",
+    "G": "minecraft:glowstone_dust",
+    "I": "#c:plates/iron"
+  },
+  "pattern": [
+    "B",
+    "G",
+    "I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:neon_bulb"
+  }
+}

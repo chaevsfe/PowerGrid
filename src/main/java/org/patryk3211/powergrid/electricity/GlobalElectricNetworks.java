@@ -1,0 +1,232 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.electricity;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.saveddata.SavedData;
+import org.jetbrains.annotations.Nullable;
+import org.patryk3211.powergrid.PowerGrid;
+import org.patryk3211.powergrid.collections.ModdedConfigs;
+import org.patryk3211.powergrid.config.CSolver;
+import org.patryk3211.powergrid.electricity.base.ElectricBehaviour;
+import org.patryk3211.powergrid.electricity.sim.ElectricWire;
+import org.patryk3211.powergrid.electricity.sim.node.IElectricNode;
+import org.patryk3211.powergrid.electricity.sim.node.OwnedFloatingNode;
+import org.patryk3211.powergrid.electricity.sim.special.TransmissionLine;
+import org.patryk3211.powergrid.electricity.wire.BaseWireEntity;
+import org.patryk3211.powergrid.electricity.wire.IWireEndpoint;
+import org.patryk3211.powergrid.electricity.wire.JunctionWireEndpoint;
+import org.patryk3211.powergrid.electricity.wire.WireEntity;
+import org.patryk3211.powergrid.utility.NumberFormats;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.patryk3211.powergrid.utility.LevelKind;
+
+public class GlobalElectricNetworks {
+    protected static final Map<Level, WorldNetworks> worldNetworks = new ConcurrentHashMap<>();
+
+    public static void preTick(Level world) {
+        var networks = worldNetworks.get(world);
+        if(networks == null)
+            return;
+        networks.preTick();
+    }
+
+    public static void postTick(Level world) {
+        var networks = worldNetworks.get(world);
+        if(networks == null)
+            return;
+        networks.postTick();
+    }
+
+    public static void unloadWorld(ServerLevel world) {
+        worldNetworks.remove(world);
+        JunctionWireEndpoint.unloadWorld(world);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static WorldNetworks makeClientWorldNetworks(Level world) {
+        return new ClientWorldNetworks(world);
+    }
+
+    public static WorldNetworks getWorldNetworks(Level world) {
+        var global = worldNetworks.computeIfAbsent(world, key -> {
+            if(LevelKind.isPonder(key))
+                return new WorldNetworks(key);
+            if(key.isClientSide()) return makeClientWorldNetworks(key);
+            if(world instanceof ServerLevel server) {
+                var networks = server.getDataStorage().computeIfAbsent(WorldNetworks.TYPE);
+                networks.bind(server);
+                return networks;
+            } else {
+                return new WorldNetworks(world);
+            }
+        });
+        global.completeLoad();
+        return global;
+    }
+
+    @Nullable
+    public static WorldNetworks getWorldNetworks(LevelAccessor world) {
+        return worldNetworks.get(world);
+    }
+
+    public static TransmissionLine getLine(WireEntity entity) {
+        var wire = entity.getWire();
+        if(wire == null)
+            return null;
+        var worldNetworks = getWorldNetworks(entity.level());
+        if(wire.getNode1() instanceof OwnedFloatingNode owned) {
+            var line = worldNetworks.findLineMiddle(owned);
+            if (line != null && line.isPart(wire)) {
+                return line;
+            }
+        }
+        if(wire.getNode2() instanceof OwnedFloatingNode owned) {
+            var line = worldNetworks.findLineMiddle(owned);
+            if (line != null && line.isPart(wire)) {
+                return line;
+            }
+        }
+        // If that fails, the only other option is that the line has one segment (or doesn't exist).
+        var lineWire = worldNetworks.globalGraph.getFirstWire(wire.getNode1(), wire.getNode2());
+        if(lineWire instanceof TransmissionLine line1) {
+            return line1;
+        }
+        return null;
+    }
+
+    public static ElectricWire makeConnection(Level world, IWireEndpoint endpoint1, IWireEndpoint endpoint2, BaseWireEntity forEntity, WorldNetworks.PartId id) {
+        return getWorldNetworks(world).makeTransmissionLine(endpoint1, endpoint2, forEntity, id);
+    }
+
+    public static ElectricWire makeSimpleConnection(Level world, IWireEndpoint endpoint1, IWireEndpoint endpoint2, float resistance) {
+        return getWorldNetworks(world).makeSimpleWire(endpoint1, endpoint2, resistance);
+    }
+
+    private static Component display(IElectricNode node) {
+        MutableComponent line;
+        if(node instanceof OwnedFloatingNode ofn) {
+            line = Component.literal("OFN[" + ofn.endpoint + "]");
+        } else {
+            line = Component.literal(node.toString());
+        }
+        line.append(Component.literal("@" + NumberFormats.formatPrecise(node.getVoltage()) + "V").withStyle(ChatFormatting.DARK_GRAY));
+        if(node.getNetwork() != null) {
+            if(node.getNetwork().isLeaf(node)) {
+                line.append(Component.literal(" -").withStyle(ChatFormatting.GREEN));
+            }
+        }
+        return line;
+    }
+
+    public static void inspect(ElectricBehaviour behaviour, Player user) {
+        var worldNetworks = getWorldNetworks(user.level());
+        int index = 0;
+        for(var node : behaviour.getExternalNodes()) {
+            user.sendSystemMessage(Component.literal((index++) + " = ").append(display(node))
+                    .withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD));
+            for (var connected : worldNetworks.globalGraph.getConnectedNodes(node)) {
+                user.sendSystemMessage(Component.literal(" - ").append(display(connected))
+                        .withStyle(ChatFormatting.BLUE));
+                for (var wire : worldNetworks.globalGraph.getWires(node, connected)) {
+                    user.sendSystemMessage(Component.literal("    via " + wire)
+                            .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+                }
+            }
+        }
+    }
+
+    // This function should handle unloading unneeded transmission lines and removal of electric nodes.
+    public static void nodeHolderUnloaded(ElectricBehaviour behaviour) {
+        var worldNetworks = getWorldNetworks(behaviour.blockEntity.getLevel());
+        for(IElectricNode node : behaviour.getExternalNodes()) {
+            if(node instanceof OwnedFloatingNode ownedNode)
+                worldNetworks.nodeHolderUnloaded(ownedNode);
+        }
+    }
+
+    public static void nodeHolderRemoved(ElectricBehaviour behaviour) {
+        var worldNetworks = getWorldNetworks(behaviour.blockEntity.getLevel());
+        for(IElectricNode node : behaviour.getExternalNodes()) {
+            if(node instanceof OwnedFloatingNode ownedNode)
+                worldNetworks.nodeHolderRemoved(ownedNode);
+        }
+    }
+
+    public static void nodeHolderAdded(ElectricBehaviour behaviour) {
+        var worldNetworks = getWorldNetworks(behaviour.blockEntity.getLevel());
+        for(OwnedFloatingNode node : behaviour.getExternalNodes()) {
+            worldNetworks.nodeHolderAdded(node, behaviour.hasInternals());
+        }
+    }
+
+    public static void prepareUnpaused(ElectricBehaviour behaviour) {
+        var worldNetworks = getWorldNetworks(behaviour.blockEntity.getLevel());
+        for(OwnedFloatingNode node : behaviour.getExternalNodes()) {
+            worldNetworks.prepareUnpaused(node);
+        }
+    }
+
+    public static void configsReloaded() {
+        var cSolver = ModdedConfigs.server().electricity.solver;
+        var backend = cSolver.solverBackend.get();
+        var rA = cSolver.solverAbsolutePrecision.get();
+        var rR = cSolver.solverRelativePrecision.get();
+        var rM = cSolver.solverAbsoluteMinimumPrecision.get();
+        var sA = cSolver.solverMaxSearchAlpha.get();
+        if(!backend.isSupported()) {
+            PowerGrid.LOGGER.error("Selected backend '{}' is not supported! Using Java backend instead", backend);
+            backend = CSolver.SolverBackend.JAVA;
+            cSolver.solverBackend.set(CSolver.SolverBackend.JAVA);
+        }
+        final var selectedBackend = backend;
+        for(var networks : worldNetworks.values()) {
+            networks.subnetworks.forEach(network -> {
+                network.switchBackend(selectedBackend);
+                network.setPrecision(rA, rR, rM, sA);
+                network.bjtSmoothAlpha = cSolver.bjtLimAlpha.getF();
+                network.diodeSmoothAlpha = cSolver.diodeLimAlpha.getF();
+                network.triodeLimCathode = cSolver.triodeLimCathode.getF();
+                network.triodeLimAnode = cSolver.triodeLimAnode.getF();
+                network.triodeLimGrid = cSolver.triodeLimGrid.getF();
+            });
+        }
+    }
+
+    public static void dropTrackers(ServerPlayer player, ResourceKey<Level> dimension) {
+        for(var entry : worldNetworks.entrySet()) {
+            var level = entry.getKey();
+            if(level.isClientSide())
+                continue;
+            if(level.dimension() == dimension)
+                entry.getValue().dropTrackers(player);
+        }
+    }
+}

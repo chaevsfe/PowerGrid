@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": "create:cardboard",
+    "S": "minecraft:stick",
+    "W": "#c:wires/copper"
+  },
+  "pattern": [
+    " WC",
+    "WSW",
+    "CW "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:copper_coil"
+  }
+}

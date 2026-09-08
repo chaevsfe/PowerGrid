@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": "minecraft:glass_pane",
+    "I": "#c:plates/iron",
+    "Q": "minecraft:quartz",
+    "W": "#c:wires/iron"
+  },
+  "pattern": [
+    "GQG",
+    "GWG",
+    " I "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:growth_lamp"
+  }
+}

@@ -1,0 +1,48 @@
+Copyright 2025-2026 patryk3211
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this project except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+This distribution is a modification by chaevsfe of Create: Power Grid, ported to Fabric / Create Fly for Minecraft 26.2; upstream: https://github.com/patryk3211/PowerGrid
+
+Portions of org.patryk3211.powergrid.electricity.battery.CustomConnectivityHandler,
+org.patryk3211.powergrid.utility.sound.SoundScapes and
+org.patryk3211.powergrid.electricity.electromagnet.MagnetizingBehaviour are derived from
+Create (https://github.com/Creators-of-Create/Create) and Create Fly
+(https://github.com/ZurrTum/Create-Fly), used under the MIT licence; Copyright (c) The Create
+Team / The Creators of Create. The full licence text is included as licenses/Create-LICENSE.
+
+This distribution bundles the following third-party libraries as nested jars:
+
+  Efficient Java Matrix Library (EJML) 0.44.0 - Copyright Peter Abeles and contributors,
+    licensed under the Apache License, Version 2.0 (http://ejml.org/,
+    https://github.com/lessthanoptimal/ejml). The Apache licence text accompanies this file
+    as LICENSE. EJML is bundled by upstream as well.
+  Team Reborn Energy 5.0.0 - Copyright (c) 2022 Team Reborn, MIT licence; the licence text
+    accompanies the library at META-INF/jars/energy-5.0.0.jar.
+
+The classes under org.patryk3211.powergrid.compat.sable, and the data/sable datapack files
+inherited from upstream, are inert stubs and tags written for this port. They reproduce only the
+method signatures Power Grid calls and contain no code from Sable Companion; the real mod is
+declared incompatible in fabric.mod.json.
+
+The registration layer under org.patryk3211.powergrid.registrate and the Create helpers under
+org.patryk3211.powergrid.foundation were written for this port. They are not Registrate code and
+not Create Fly code: they were derived from Power Grid's own call sites and from Create Fly's
+public registration entrypoints, so that upstream's registration code compiles unchanged against
+Create Fly. SharedProperties and CreateTags reproduce the block property values and tag ids that Create itself
+uses (MIT, see licenses/Create-LICENSE) so that Power Grid's blocks keep upstream's hardness and
+behaviour. Class and method names follow Registrate's API only where a call site requires it;
+Registrate itself is Copyright (c) tterrag1098 and licensed under the MIT licence.
+
+Nothing outside org/patryk3211/powergrid/ ships in either jar apart from resources and the
+nested libraries listed above; a build-time check enforces that.

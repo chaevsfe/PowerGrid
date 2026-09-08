@@ -1,0 +1,39 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": "create:cardboard",
+  "loops": 2,
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "minecraft:paper",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredient": "$ingredient",
+      "results": [
+        "$result"
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "powergrid:incomplete_punch_card"
+  },
+  "result": {
+    "chance": 0.909091,
+    "id": "powergrid:punch_card"
+  },
+  "junks": [
+    {
+      "chance": 5.0,
+      "id": "minecraft:paper"
+    },
+    {
+      "chance": 5.0,
+      "id": "create:cardboard"
+    }
+  ]
+}

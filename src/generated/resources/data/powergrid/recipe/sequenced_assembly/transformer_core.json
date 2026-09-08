@@ -1,0 +1,45 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": "#c:plates/iron",
+  "loops": 3,
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "target": "$ingredient",
+      "ingredient": "#c:plates/iron",
+      "results": [
+        "$result"
+      ]
+    },
+    {
+      "type": "create:pressing",
+      "ingredient": "$ingredient",
+      "results": [
+        "$result"
+      ]
+    }
+  ],
+  "transitional_item": {
+    "id": "powergrid:incomplete_transformer_core"
+  },
+  "result": {
+    "chance": 0.909091,
+    "id": "powergrid:transformer_core"
+  },
+  "junks": [
+    {
+      "chance": 5.0,
+      "id": "minecraft:iron_door"
+    },
+    {
+      "chance": 3.0,
+      "id": "minecraft:cauldron"
+    },
+    {
+      "id": "create:iron_sheet"
+    },
+    {
+      "id": "minecraft:iron_ingot"
+    }
+  ]
+}

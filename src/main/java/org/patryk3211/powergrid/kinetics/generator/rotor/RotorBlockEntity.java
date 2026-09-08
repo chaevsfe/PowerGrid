@@ -1,0 +1,49 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.kinetics.generator.rotor;
+
+import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import org.patryk3211.powergrid.kinetics.generator.IRotorAssemblyPart;
+
+import java.util.List;
+
+public abstract class RotorBlockEntity extends SmartBlockEntity {
+    protected RotorBehaviour rotorBehaviour;
+
+    public RotorBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
+        super(typeIn, pos, state);
+    }
+
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
+        assert getBlockState().getBlock() instanceof IRotorAssemblyPart;
+        rotorBehaviour = new RotorBehaviour(this, ((IRotorAssemblyPart) getBlockState().getBlock()).getInertia(), damageRadius());
+        behaviours.add(rotorBehaviour);
+    }
+
+    protected abstract float damageRadius();
+
+    @Override
+    public void remove() {
+        super.remove();
+        rotorBehaviour.remove();
+    }
+}

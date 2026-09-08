@@ -1,0 +1,189 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.network.packets;
+
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import io.netty.buffer.AbstractByteBufAllocator;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
+import io.netty.buffer.UnpooledByteBufAllocator;
+import io.netty.handler.codec.DecoderException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
+import org.patryk3211.powergrid.PowerGrid;
+import org.patryk3211.powergrid.collections.ModdedConfigs;
+import org.patryk3211.powergrid.electricity.base.ElectricBehaviour;
+import org.patryk3211.powergrid.electricity.base.ISynchronizedElement;
+import org.patryk3211.powergrid.electricity.wire.JunctionWireEndpoint;
+import org.patryk3211.powergrid.network.S2CPacket;
+import org.patryk3211.powergrid.utility.ClientSideAccess;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class StateS2CPacket implements S2CPacket {
+    private static final PooledByteBufAllocator POOL = new PooledByteBufAllocator(true, 0, 4, PooledByteBufAllocator.defaultPageSize(), 7);
+    private final List<Key> keys = new ArrayList<>();
+    private final boolean useDoubles;
+    private final ByteBuf data;
+    private FriendlyByteBuf wrapper;
+    private int lengthPosition;
+
+    private static AbstractByteBufAllocator allocator() {
+        return ModdedConfigs.common().allocateUnpooledBuffers.get() ? UnpooledByteBufAllocator.DEFAULT : POOL;
+    }
+
+    // Typically the server side constructor
+    public StateS2CPacket(boolean useDoubles) {
+        this.useDoubles = useDoubles;
+        this.data = allocator().directBuffer();
+    }
+
+    public FriendlyByteBuf wrapper() {
+        if(wrapper == null)
+            wrapper = new FriendlyByteBuf(data);
+        return wrapper;
+    }
+
+    // Typically the client side constructor
+    public StateS2CPacket(FriendlyByteBuf buf) {
+        useDoubles = buf.readBoolean();
+        int count = buf.readInt();
+        if(count < 0 || count > buf.readableBytes())
+            throw new DecoderException("Invalid state packet key count");
+        for(int i = 0; i < count; ++i) {
+            keys.add(Key.read(buf));
+        }
+        int size = buf.readInt();
+        if(size < 0 || size > buf.readableBytes())
+            throw new DecoderException("Invalid state packet data length");
+        // Unpooled so that a packet whose handler never runs cannot leak a pooled buffer.
+        data = Unpooled.buffer(size, size);
+        buf.readBytes(data, size);
+    }
+
+    public void begin(ISynchronizedElement pos) {
+        keys.add(pos.getKey());
+        lengthPosition = wrapper().writerIndex();
+        wrapper().writeInt(0);
+    }
+
+    public void end() {
+        var entryLength = wrapper().writerIndex() - lengthPosition - 4;
+        wrapper.setInt(lengthPosition, entryLength);
+    }
+
+    @Override
+    public void write(FriendlyByteBuf buf) {
+        buf.writeBoolean(useDoubles);
+        buf.writeInt(keys.size());
+        for(var key : keys) {
+            key.serialize(buf);
+        }
+        buf.writeInt(data.writerIndex());
+        buf.writeBytes(data, data.writerIndex());
+        // Data is not needed after it has been encoded so it's released.
+        wrapper = null;
+        data.release();
+    }
+
+    @Override
+    public void handle(Minecraft mc) {
+        var level = ClientSideAccess.world();
+        if(level == null) {
+            wrapper = null;
+            data.release();
+            return;
+        }
+        try {
+            for(var key : keys) {
+                var entryLength = wrapper().readInt();
+                var element = key.resolve(level);
+                if(element == null) {
+                    // Skip entry
+                    wrapper().skipBytes(entryLength);
+                } else {
+                    try {var start = wrapper().readerIndex();
+                    element.readFromSync(wrapper(), useDoubles);
+                    var end = wrapper().readerIndex();
+                    if(end - start > entryLength) {
+                        if(ModdedConfigs.logsEnabled())PowerGrid.LOGGER.warn("Buffer read overrun (Entry of {} bytes, read {} bytes) for {}", entryLength, end - start, element);
+                        wrapper().readerIndex(start + entryLength);
+                    } else if(end - start < entryLength) {
+                        if(ModdedConfigs.logsEnabled())PowerGrid.LOGGER.warn("Buffer read underrun (Entry of {} bytes, read {} bytes) for {}", entryLength, end - start, element);
+                        wrapper().readerIndex(start + entryLength);}
+                    } catch(IndexOutOfBoundsException e) {
+                        if(ModdedConfigs.logsEnabled())
+                            PowerGrid.LOGGER.warn("Buffer read overrun (Out of bounds exception thrown)");
+                    }
+                }
+            }
+        } finally {
+            // Data is not needed after it has been handled so it's released.
+            wrapper = null;
+            data.release();
+        }
+    }
+
+    public interface Key {
+        void serialize(FriendlyByteBuf buf);
+        @Nullable
+        ISynchronizedElement resolve(Level level);
+
+        static Key read(FriendlyByteBuf buf) {
+            var i = buf.readByte();
+            return switch(i) {
+                case 0 -> new PosKey(buf.readBlockPos());
+                case 1 -> new UUIDKey(buf.readUUID());
+                default -> throw new IllegalStateException("Unknown key type");
+            };
+        }
+    }
+
+    public record PosKey(BlockPos pos) implements Key {
+        @Override
+        public void serialize(FriendlyByteBuf buf) {
+            buf.writeByte(0);
+            buf.writeBlockPos(pos);
+        }
+
+        @Override
+        @Nullable
+        public ISynchronizedElement resolve(Level level) {
+            return BlockEntityBehaviour.get(level, pos, ElectricBehaviour.TYPE);
+        }
+    }
+
+    public record UUIDKey(UUID id) implements Key {
+        @Override
+        public void serialize(FriendlyByteBuf buf) {
+            buf.writeByte(1);
+            buf.writeUUID(id);
+        }
+
+        @Override
+        @Nullable
+        public ISynchronizedElement resolve(Level level) {
+            return JunctionWireEndpoint.getSyncObject(level, id);
+        }
+    }
+}

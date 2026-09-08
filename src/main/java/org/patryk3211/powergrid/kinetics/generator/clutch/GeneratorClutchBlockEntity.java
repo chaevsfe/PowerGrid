@@ -1,0 +1,261 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.kinetics.generator.clutch;
+
+import com.zurrtum.create.api.stress.BlockStressValues;
+import com.zurrtum.create.content.kinetics.base.GeneratingKineticBlockEntity;
+import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
+import com.zurrtum.create.foundation.blockEntity.behaviour.scrollValue.ServerScrollOptionBehaviour;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import org.apache.commons.lang3.mutable.MutableFloat;
+import org.patryk3211.powergrid.collections.ModdedConfigs;
+import org.patryk3211.powergrid.kinetics.generator.IRotorAssemblyPart;
+import org.patryk3211.powergrid.kinetics.generator.rotor.RotorBehaviour;
+import org.patryk3211.powergrid.utility.Lang;
+
+import java.util.List;
+
+import static org.patryk3211.powergrid.PowerGrid.maxRPM;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+
+public class GeneratorClutchBlockEntity extends GeneratingKineticBlockEntity implements RotorBehaviour.IForceSource {
+    protected RotorBehaviour rotorBehaviour;
+
+    private ServerScrollOptionBehaviour<ClutchMode> mode;
+
+    private int currentRedstonePower;
+
+    public float load;
+    private float motorLoad;
+    private boolean recalculateStress = false;
+    private int generatedSpeed;
+    private int prevRedstoneOut;
+
+    public GeneratorClutchBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
+        super(typeIn, pos, state);
+        currentRedstonePower = 0;
+        setLazyTickRate(10);
+    }
+
+    public void changeMode() {
+        if(hasNetwork()) {
+            var network = getOrCreateNetwork();
+            network.remove(this);
+            if(mode.get() == ClutchMode.GENERATOR)
+                generatedSpeed = 0;
+            network.add(this);
+            updateGeneratedRotation();
+        }
+    }
+
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour<?>> behaviours) {
+        super.addBehaviours(behaviours);
+        rotorBehaviour = new RotorBehaviour(this, ((IRotorAssemblyPart) getBlockState().getBlock()).getInertia(), 0);
+        rotorBehaviour.forceSource(this);
+        rotorBehaviour.setChangeCallback(this::assemblyChanged);
+        behaviours.add(rotorBehaviour);
+
+        mode = new ServerScrollOptionBehaviour<>(ClutchMode.class, this);
+        mode.setValue(0);
+        mode.withCallback(i -> changeMode());
+        behaviours.add(mode);
+    }
+
+    private void assemblyChanged() {
+        recalculateStress = true;
+    }
+
+    public float torqueForStress() {
+        return ModdedConfigs.server().kinetics.torqueForStress.getF();
+    }
+
+    @Override
+    public float sourceForce(float velocity) {
+        if(mode.get() == ClutchMode.MOTOR)
+            return 0;
+        if(getTheoreticalSpeed() == 0 || isOverStressed())
+            return 0;
+        return (float) (torqueForStress() * lastStressApplied / 30 * Math.PI);
+    }
+
+    @Override
+    public float forceSpeed() {
+        return getTheoreticalSpeed();
+    }
+
+    @Override
+    public void receiveUsedForce(float percent) {
+        load = percent;
+    }
+
+    public void updateStrength(int receivedRedstonePower) {
+        if(currentRedstonePower != receivedRedstonePower) {
+            currentRedstonePower = receivedRedstonePower;
+            recalculateStress = true;
+        }
+    }
+
+    @Override
+    public float getGeneratedSpeed() {
+        return generatedSpeed;
+    }
+
+    @Override
+    public void lazyTick() {
+        super.lazyTick();
+        if(mode.get() == ClutchMode.MOTOR && !level.isClientSide()) {
+            var newSpeed = (int) rotorBehaviour.getAngularVelocity();
+            // Max speed constraints.
+            if(newSpeed > maxRPM())
+                newSpeed = maxRPM();
+            if(newSpeed < -maxRPM())
+                newSpeed = -maxRPM();
+
+            // Update speed from average power.
+            if(newSpeed != generatedSpeed) {
+                generatedSpeed = newSpeed;
+                updateGeneratedRotation();
+            }
+        }
+    }
+
+    @Override
+    public void updateFromNetwork(float maxStress, float currentStress, int networkSize) {
+        super.updateFromNetwork(maxStress, currentStress, networkSize);
+        motorLoad = maxStress == 0 ? 0 : currentStress / maxStress;
+    }
+
+    @Override
+    public void onSpeedChanged(float previousSpeed) {
+        super.onSpeedChanged(previousSpeed);
+        if(hasNetwork())
+            updateFromNetwork(capacity, stress, getOrCreateNetwork().getSize());
+    }
+
+    public int getRedstoneOutput() {
+        float load = getLoad();
+        return Mth.floor(load * 14.0f) + (load > 0.001 ? 1 : 0);
+    }
+
+    public float getLoad() {
+        float load;
+        if(mode.get() == ClutchMode.MOTOR) {
+            load = this.motorLoad;
+        } else {
+            load = this.load;
+        }
+        return load;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if(recalculateStress) {
+            if(hasNetwork() && !level.isClientSide()) {
+                var network = getOrCreateNetwork();
+                network.updateStressFor(this, calculateStressApplied());
+                network.updateCapacityFor(this, calculateAddedStressCapacity());
+                notifyUpdate();
+            }
+            recalculateStress = false;
+        }
+        if(mode.get() == ClutchMode.MOTOR) {
+            var force = (float) (torqueForStress() * Mth.clamp(motorLoad, 0, 1) * lastCapacityProvided / 30 * Math.PI);
+            var maxForce = rotorBehaviour.getAngularVelocity() * rotorBehaviour.getInertia() * 20f;
+            if(force > Math.abs(maxForce)) {
+                force = Math.abs(maxForce);
+            }
+            rotorBehaviour.applyTickForce(-force * Math.signum(rotorBehaviour.getAngularVelocity()));
+        }
+        if(getRedstoneOutput() != prevRedstoneOut) {
+            level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
+            prevRedstoneOut = getRedstoneOutput();
+        }
+    }
+
+    @Override
+    protected void write(ValueOutput compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
+        compound.putByte("Power", (byte) currentRedstonePower);
+        if(generatedSpeed != 0)
+            compound.putInt("GeneratedSpeed", generatedSpeed);
+        if(clientPacket && mode.get() == ClutchMode.MOTOR) {
+            compound.putFloat("MotorLoad", motorLoad);
+        }
+    }
+
+    @Override
+    protected void read(ValueInput compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
+        currentRedstonePower = compound.getByteOr("Power", (byte) 0);
+        if(compound.contains("GeneratedSpeed")) {
+            generatedSpeed = compound.getIntOr("GeneratedSpeed", 0);
+        } else {
+            generatedSpeed = 0;
+        }
+        if(clientPacket && mode.get() == ClutchMode.MOTOR) {
+            motorLoad = compound.getFloatOr("MotorLoad", 0.0f);
+        }
+    }
+
+    public float stressSum() {
+        var totalImpact = new MutableFloat(0.0f);
+        rotorBehaviour.forEachSegment(segment ->
+                totalImpact.add(BlockStressValues.getImpact(segment.blockEntity.getBlockState().getBlock()))
+        );
+        return totalImpact.getValue();
+    }
+
+    @Override
+    public float calculateStressApplied() {
+        if(mode.get() == ClutchMode.GENERATOR) {
+            float couplingStrength = (15 - currentRedstonePower) / 15f;
+            this.lastStressApplied = stressSum() * couplingStrength;
+            return lastStressApplied;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public float calculateAddedStressCapacity() {
+        if(mode.get() == ClutchMode.MOTOR) {
+            float couplingStrength = (15 - currentRedstonePower) / 15f;
+            this.lastCapacityProvided = stressSum() * couplingStrength;
+            return lastCapacityProvided;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public void remove() {
+        super.remove();
+        rotorBehaviour.remove();
+    }
+
+    public enum ClutchMode {
+        GENERATOR, MOTOR
+    }
+}

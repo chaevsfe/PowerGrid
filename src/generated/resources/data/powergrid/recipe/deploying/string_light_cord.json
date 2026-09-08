@@ -1,0 +1,10 @@
+{
+  "type": "create:deploying",
+  "results": [
+    {
+      "id": "powergrid:string_light_cord"
+    }
+  ],
+  "target": "powergrid:copper_cord",
+  "ingredient": "powergrid:light_bulb"
+}

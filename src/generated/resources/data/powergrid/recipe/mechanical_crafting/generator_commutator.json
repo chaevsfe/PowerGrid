@@ -1,0 +1,23 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": true,
+  "category": "misc",
+  "key": {
+    "A": "create:andesite_alloy",
+    "C": "create:andesite_casing",
+    "G": "#minecraft:coals",
+    "M": "#c:plates/copper",
+    "P": "powergrid:pins",
+    "S": "create:shaft"
+  },
+  "pattern": [
+    " P ",
+    "GMG",
+    "ASA",
+    " C "
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:generator_commutator"
+  }
+}

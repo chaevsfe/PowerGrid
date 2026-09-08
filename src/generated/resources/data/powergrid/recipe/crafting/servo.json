@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "powergrid:electric_motor",
+    "powergrid:electrical_gizmo",
+    "create:precision_mechanism"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:servo"
+  }
+}

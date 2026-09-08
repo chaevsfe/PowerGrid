@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "G": "minecraft:glowstone_dust",
+    "I": "#c:plates/iron"
+  },
+  "pattern": [
+    "A",
+    "G",
+    "I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:regulator_tube"
+  }
+}

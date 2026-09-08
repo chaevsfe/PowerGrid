@@ -1,0 +1,9 @@
+{
+  "type": "create:pressing",
+  "results": [
+    {
+      "id": "powergrid:zinc_sheet"
+    }
+  ],
+  "ingredient": "#c:ingots/zinc"
+}

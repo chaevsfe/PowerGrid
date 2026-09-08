@@ -1,0 +1,150 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.electricity.electricswitch;
+
+import com.zurrtum.create.AllItems;
+import com.zurrtum.create.foundation.block.IBE;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.Nullable;
+import org.patryk3211.powergrid.collections.ModdedBlockEntities;
+import org.patryk3211.powergrid.electricity.base.ElectricBlock;
+import org.patryk3211.powergrid.electricity.info.Current;
+import org.patryk3211.powergrid.electricity.info.IHaveElectricProperties;
+import org.patryk3211.powergrid.electricity.info.Resistance;
+import org.patryk3211.powergrid.electricity.info.Voltage;
+import org.patryk3211.powergrid.utility.Lang;
+
+import java.util.List;
+
+public abstract class SwitchBlock extends ElectricBlock implements IBE<SwitchBlockEntity>, IHaveElectricProperties {
+    public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
+
+    protected float maxVoltage = 200f;
+    protected boolean isButton = false;
+
+    public SwitchBlock(Properties settings) {
+        super(settings);
+        registerDefaultState(defaultBlockState().setValue(OPEN, true));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(OPEN);
+    }
+
+    public boolean isButton() {
+        return isButton;
+    }
+
+    @Override
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        var terminal = terminalAt(state, hit.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ()));
+        if(terminal != null)
+            return InteractionResult.PASS;
+        if(!player.isShiftKeyDown()) {
+            if(!player.getItemInHand(hand).is(AllItems.WRENCH)) {
+                var isOpen = !state.getValue(OPEN);
+                if(!isButton) {
+                    world.setBlockAndUpdate(pos, state.setValue(OPEN, isOpen));
+                    if(!world.isClientSide())
+                        withBlockEntityDo(world, pos, be -> be.setState(!isOpen));
+                    useSound(world, pos, isOpen);
+                } else {
+                    if(!isOpen) {
+                        world.setBlockAndUpdate(pos, state.setValue(OPEN, false));
+                        useSound(world, pos, false);
+                    }
+                    if(!world.isClientSide())
+                        withBlockEntityDo(world, pos, be -> be.setState(true));
+                }
+                return InteractionResult.SUCCESS;
+            } else if (isButton) {
+                if(!world.isClientSide())
+                    withBlockEntityDo(world, pos, be -> {
+                        be.setNormallyClosed(!be.isNormallyClosed());
+                        be.setState(false);
+                    });
+                return InteractionResult.SUCCESS;
+            }
+        }
+        return InteractionResult.PASS;
+    }
+
+    public void useSound(Level world, BlockPos pos, boolean open) {
+
+    }
+
+    @Override
+    public Class<SwitchBlockEntity> getBlockEntityClass() {
+        return SwitchBlockEntity.class;
+    }
+
+    @Override
+    public BlockEntityType<? extends SwitchBlockEntity> getBlockEntityType() {
+        return ModdedBlockEntities.SWITCH.get();
+    }
+
+    public float getMaxVoltage() {
+        return maxVoltage;
+    }
+
+    @Override
+    public void appendProperties(ItemStack stack, Player player, List<Component> tooltip) {
+        Resistance.series(resistance(), player, tooltip);
+        Current.max(stack, player, tooltip);
+        Voltage.max(maxVoltage, player, tooltip);
+    }
+
+    @Nullable
+    @Environment(EnvType.CLIENT)
+    public static Component overlayText(Player player) {
+        if(!player.getItemInHand(InteractionHand.MAIN_HAND).is(AllItems.WRENCH))
+            return null;
+        HitResult hit = Minecraft.getInstance().hitResult;
+        if(!(hit instanceof BlockHitResult blockHit) || blockHit.getType() == HitResult.Type.MISS)
+            return null;
+        var state = Minecraft.getInstance().level.getBlockState(blockHit.getBlockPos());
+        if(!(state.getBlock() instanceof SwitchBlock switchBlock) || !switchBlock.isButton())
+            return null;
+        boolean nc = switchBlock.getBlockEntityOptional(Minecraft.getInstance().level, blockHit.getBlockPos())
+                .map(SwitchBlockEntity::isNormallyClosed).orElse(false);
+        return Lang.translate("gui.button_overlay.mode")
+                .add(Lang.translate("gui.button_overlay." + (nc ? "nc" : "no"))
+                        .style(ChatFormatting.BLUE))
+                .style(ChatFormatting.GRAY)
+                .component();
+    }
+}

@@ -1,0 +1,346 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.electricity.wire.powercord;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.zurrtum.create.catnip.theme.Color;
+import com.zurrtum.create.client.catnip.render.CachedBuffers;
+import com.zurrtum.create.client.catnip.render.SuperByteBufferRenderState;
+import org.patryk3211.powergrid.compat.sable.SableCompanion;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import org.patryk3211.powergrid.collections.ModdedConfigs;
+import org.patryk3211.powergrid.collections.ModdedPartialModels;
+import org.patryk3211.powergrid.electricity.wire.CurveParameters;
+import org.patryk3211.powergrid.electricity.wire.HangingWireRenderer;
+import org.patryk3211.powergrid.electricity.wire.registry.WireItemEntry;
+
+import java.util.List;
+
+import static org.patryk3211.powergrid.electricity.wire.HangingWireRenderer.lodLevel;
+import static org.patryk3211.powergrid.electricity.wire.HangingWireRenderer.useFancyGraphics;
+
+@Environment(EnvType.CLIENT)
+public class CordRenderer<T extends CordEntity, S extends CordRenderState> extends EntityRenderer<T, S> {
+    public CordRenderer(EntityRendererProvider.Context ctx) {
+        super(ctx);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public S createRenderState() {
+        return (S) new CordRenderState();
+    }
+
+    private static void extractPlug(List<SuperByteBufferRenderState> plugs, BlockState referenceState, Direction facing, double x, double y, double z, int light) {
+        switch (facing) {
+            case NORTH -> z -= 3 / 16f;
+            case SOUTH -> z += 3 / 16f;
+            case WEST -> x -= 3 / 16f;
+            case EAST -> x += 3 / 16f;
+            case DOWN -> y -= 3 / 16f;
+            case UP -> y += 3 / 16f;
+        }
+        plugs.add(CachedBuffers.partialFacing(ModdedPartialModels.PLUG, referenceState, facing)
+                .light(light)
+                .translate((float) x, (float) y, (float) z)
+                .extractRenderState());
+    }
+
+    protected void beginExtract(T entity, S state, float tickDelta) { }
+
+    protected void extractSegmentHook(T entity, S state,
+                                      double x1, double y1, double z1, double x2, double y2, double z2,
+                                      double offset, double length, boolean first, boolean last, int light) { }
+
+    @Override
+    public void extractRenderState(T entity, S state, float tickDelta) {
+        super.extractRenderState(entity, state, tickDelta);
+        state.clearSegments();
+        state.plugs.clear();
+        state.skip = true;
+
+        if(entity.curveParams == null)
+            return;
+
+        if(entity.isOverheated())
+            // Don't render since it's dead and only there to spawn particles.
+            return;
+
+        CurveParameters rp = entity.curveParams;
+
+        state.texture = entity.getWireEntry().texture();
+
+        // To introduce some subtle variety into the wires.
+        var thicknessOffset = entity.getId() / 16f;
+
+        int color = Color.mixColors(
+                entity.getColor() | 0xFF000000,
+                0xFFFF0000,
+                (float) Math.max(0, (rp.L - entity.placedLength) * entity.overlayTicks / 20f));
+
+        var world = entity.level();
+        var rawPos = entity.position();
+        var pos = SableCompanion.INSTANCE.projectOutOfSubLevel(world, rawPos);
+        final var playerPos = ModdedConfigs.client().wireLOD.get() ? Minecraft.getInstance().player.position() : null;
+        float segmentSize = 0.5f;
+        final boolean simpleModel;
+        switch(lodLevel(playerPos, rawPos.subtract(pos), rawPos, entity.terminalPos1, entity.terminalPos2)) {
+            case 1 -> {
+                segmentSize = 1.5f;
+                simpleModel = !useFancyGraphics();
+            }
+            case 2 -> {
+                segmentSize = 3.0f;
+                simpleModel = true;
+            }
+            default -> simpleModel = !useFancyGraphics();
+        }
+        state.simpleModel = simpleModel;
+        if(entity.baseTerminalPos1 != null && entity.baseTerminalPos2 != null) {
+            // Change curve based on sublevels
+            boolean moved = false;
+            Vec3 pos1 = entity.terminalPos1, pos2 = entity.terminalPos2;
+            var s1 = SableCompanion.INSTANCE.getContainingClient(entity.baseTerminalPos1);
+            var s2 = SableCompanion.INSTANCE.getContainingClient(entity.baseTerminalPos2);
+            if (s1 != null) {
+                pos1 = s1.renderPose(tickDelta).transformPosition(entity.baseTerminalPos1);
+                moved = true;
+            }
+            if (s2 != null) {
+                pos2 = s2.renderPose(tickDelta).transformPosition(entity.baseTerminalPos2);
+                moved = true;
+            }
+            if (moved) {
+                double L = entity.placedLength;
+                double d = pos1.distanceTo(pos2);
+                if(d > L && d < L + 1) {
+                    L = d + .01;
+                }
+                rp.nudge(pos1.x, pos1.y, pos1.z, pos2.x, pos2.y, pos2.z, L);
+            }
+        }
+
+        beginExtract(entity, state, tickDelta);
+
+        rp.runForSegments((x1, y1, z1, x2, y2, z2, offset, length, first, last) -> {
+            var blockPos = BlockPos.containing((x1 + x2) * 0.5 + pos.x, (y1 + y2) * 0.5 + pos.y, (z1 + z2) * 0.5 + pos.z);
+            var sky = world.getBrightness(LightLayer.SKY, blockPos);
+            var block = world.getBrightness(LightLayer.BLOCK, blockPos);
+            var currentLight = LightCoordsUtil.pack(block, sky);
+            if(first) {
+                var endpoint = entity.getEndpoint1();
+                if(endpoint instanceof SplitCordEndpoint split) {
+                    var p1 = SableCompanion.INSTANCE.projectOutOfSubLevel(world, split.getEndpoint1().getExactPosition(world));
+                    var p2 = SableCompanion.INSTANCE.projectOutOfSubLevel(world, split.getEndpoint2().getExactPosition(world));
+                    var normal = rp.getNormal();
+
+                    var direction = new Vec3(x2 - p1.x + pos.x, y2 - p1.y + pos.y, z2 - p1.z + pos.z);
+                    var v1 = new Vec3(1 - direction.x, 1 - direction.y, 1 - direction.z);
+                    var smallCross1 = v1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    var smallCross2 = smallCross1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    state.addSegment(
+                            p1.x - pos.x, p1.y - pos.y, p1.z - pos.z,
+                            x2 - (smallCross1.x + smallCross2.x) * 0.5 + normal.x / 32,
+                            y2 - (smallCross1.y + smallCross2.y) * 0.5 + normal.y / 32,
+                            z2 - (smallCross1.z + smallCross2.z) * 0.5 + normal.z / 32,
+                            smallCross1, smallCross2, currentLight, 0xFFB02E26,
+                            rp.thickness * 0.5f, thicknessOffset, (float) (length * 2), (float) offset);
+
+                    direction = new Vec3(x2 - p2.x + pos.x, y2 - p2.y + pos.y, z2 - p2.z + pos.z);
+                    v1 = new Vec3(1 - direction.x, 1 - direction.y, 1 - direction.z);
+                    smallCross1 = v1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    smallCross2 = smallCross1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    state.addSegment(
+                            p2.x - pos.x, p2.y - pos.y, p2.z - pos.z,
+                            x2 + (smallCross1.x + smallCross2.x) * 0.5 + normal.x / 32,
+                            y2 + (smallCross1.y + smallCross2.y) * 0.5 + normal.y / 32,
+                            z2 + (smallCross1.z + smallCross2.z) * 0.5 + normal.z / 32,
+                            smallCross1, smallCross2, currentLight, 0xFF3C44AA,
+                            rp.thickness * 0.5f, thicknessOffset, (float) (length * 2), (float) offset);
+                    return;
+                } else if(endpoint instanceof SocketEndpoint socket) {
+                    extractPlug(state.plugs,
+                            world.getBlockState(socket.getPosition()),
+                            socket.getFacing(world), x1, y1, z1, currentLight);
+                } else if(endpoint instanceof AutoCordEndpoint auto) {
+                    var facing = auto.getPlugFacing();
+                    if(facing != null) {
+                        extractPlug(state.plugs,
+                                world.getBlockState(auto.getPosition()),
+                                facing.getOpposite(), x1, y1, z1, currentLight);
+                    }
+                }
+            } else if(last) {
+                var endpoint = entity.getEndpoint2();
+                if(endpoint instanceof SplitCordEndpoint split) {
+                    var p1 = SableCompanion.INSTANCE.projectOutOfSubLevel(world, split.getEndpoint1().getExactPosition(world));
+                    var p2 = SableCompanion.INSTANCE.projectOutOfSubLevel(world, split.getEndpoint2().getExactPosition(world));
+                    var normal = rp.getNormal();
+
+                    var direction = new Vec3(x1 - p1.x + pos.x, y1 - p1.y + pos.y, z1 - p1.z + pos.z);
+                    var v1 = new Vec3(1 - direction.x, 1 - direction.y, 1 - direction.z);
+                    var smallCross1 = v1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    var smallCross2 = smallCross1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    state.addSegment(
+                            x1 - (smallCross1.x + smallCross2.x) * 0.5f - normal.x / 32f,
+                            y1 - (smallCross1.y + smallCross2.y) * 0.5f - normal.y / 32f,
+                            z1 - (smallCross1.z + smallCross2.z) * 0.5f - normal.z / 32f,
+                            p1.x - pos.x, p1.y - pos.y, p1.z - pos.z,
+                            smallCross1, smallCross2, currentLight, 0xFFB02E26,
+                            rp.thickness * 0.5f, thicknessOffset, (float) (length * 2), (float) offset);
+
+                    direction = new Vec3(x1 - p2.x + pos.x, y1 - p2.y + pos.y, z1 - p2.z + pos.z);
+                    v1 = new Vec3(1 - direction.x, 1 - direction.y, 1 - direction.z);
+                    smallCross1 = v1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    smallCross2 = smallCross1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    state.addSegment(
+                            x1 + (smallCross1.x + smallCross2.x) * 0.5f - normal.x / 32f,
+                            y1 + (smallCross1.y + smallCross2.y) * 0.5f - normal.y / 32f,
+                            z1 + (smallCross1.z + smallCross2.z) * 0.5f - normal.z / 32f,
+                            p2.x - pos.x, p2.y - pos.y, p2.z - pos.z,
+                            smallCross1, smallCross2, currentLight, 0xFF3C44AA,
+                            rp.thickness * 0.5f, thicknessOffset, (float) (length * 2), (float) offset);
+                    return;
+                } else if(endpoint instanceof SocketEndpoint socket) {
+                    extractPlug(state.plugs,
+                            world.getBlockState(socket.getPosition()),
+                            socket.getFacing(world), x2, y2, z2, currentLight);
+                } else if(endpoint instanceof AutoCordEndpoint auto) {
+                    var facing = auto.getPlugFacing();
+                    if(facing != null) {
+                        extractPlug(state.plugs,
+                                world.getBlockState(auto.getPosition()),
+                                facing.getOpposite(), x2, y2, z2, currentLight);
+                    }
+                }
+            }
+            extractSegmentHook(entity, state, x1, y1, z1, x2, y2, z2, offset, length, first, last, currentLight);
+            state.addSegment(
+                    x1, y1, z1,
+                    x2, y2, z2,
+                    rp.cross1, rp.cross2, currentLight, color,
+                    rp.thickness, thicknessOffset, (float) length, (float) offset);
+        }, segmentSize);
+        state.skip = false;
+    }
+
+    @Override
+    public void submit(S state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        super.submit(state, matrices, queue, cameraState);
+        if(state.skip)
+            return;
+        if(state.segmentCount > 0)
+            queue.submitCustomGeometry(matrices, RenderTypes.entityCutout(state.texture), state::renderSegments);
+        for(var plug : state.plugs)
+            plug.submit(RenderTypes.solidMovingBlock(), matrices, queue);
+    }
+
+    public static void renderPreview(ICordEndpoint start, Vec3 end, PoseStack matrices, SubmitNodeCollector queue, Level level, WireItemEntry item, int color, Vec3 cameraPos) {
+        var state = new CordRenderState();
+        state.texture = item.texture();
+        state.simpleModel = !useFancyGraphics();
+
+        var startPos = SableCompanion.INSTANCE.projectOutOfSubLevel(level, start.getExactPosition(level));
+        var dX = end.x - startPos.x;
+        var dY = end.y - startPos.y;
+        var dZ = end.z - startPos.z;
+        var hL = dX * dX + dZ * dZ;
+        CurveParameters rp = new CurveParameters(startPos, end, Math.sqrt(hL * item.horizontalCoefficient() + dY * dY * item.verticalCoefficient()), item.wireThickness());
+
+        // To introduce some subtle variety into the wires.
+        var thicknessOffset = 0;
+        matrices.translate(startPos.x - cameraPos.x, startPos.y - cameraPos.y, startPos.z - cameraPos.z);
+
+        end = end.subtract(startPos);
+        var pos = new Vec3(
+                end.x * 0.5f,
+                0.0f,
+                end.z * 0.5f
+        );
+        matrices.translate(pos.x, pos.y, pos.z);
+        rp.runForSegments((x1, y1, z1, x2, y2, z2, offset, length, first, last) -> {
+            var currentLight = LightCoordsUtil.FULL_BRIGHT;
+            if(first) {
+                if(start instanceof SplitCordEndpoint split) {
+                    var p1 = SableCompanion.INSTANCE.projectOutOfSubLevel(level, split.getEndpoint1().getExactPosition(level)).subtract(startPos);
+                    var p2 = SableCompanion.INSTANCE.projectOutOfSubLevel(level, split.getEndpoint2().getExactPosition(level)).subtract(startPos);
+                    var normal = rp.getNormal();
+
+                    var direction = new Vec3(x2 - p1.x + pos.x, y2 - p1.y + pos.y, z2 - p1.z + pos.z);
+                    var v1 = new Vec3(1 - direction.x, 1 - direction.y, 1 - direction.z);
+                    var smallCross1 = v1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    var smallCross2 = smallCross1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    state.addSegment(
+                            p1.x - pos.x, p1.y - pos.y, p1.z - pos.z,
+                            x2 - (smallCross1.x + smallCross2.x) * 0.5f + normal.x / 32f,
+                            y2 - (smallCross1.y + smallCross2.y) * 0.5f + normal.y / 32f,
+                            z2 - (smallCross1.z + smallCross2.z) * 0.5f + normal.z / 32f,
+                            smallCross1, smallCross2, currentLight, 0xFFB02E26,
+                            rp.thickness * 0.5f, thicknessOffset, (float) (length * 2), (float) offset);
+
+                    direction = new Vec3(x2 - p2.x + pos.x, y2 - p2.y + pos.y, z2 - p2.z + pos.z);
+                    v1 = new Vec3(1 - direction.x, 1 - direction.y, 1 - direction.z);
+                    smallCross1 = v1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    smallCross2 = smallCross1.cross(direction).normalize().scale(rp.thickness * 0.25);
+                    state.addSegment(
+                            p2.x - pos.x, p2.y - pos.y, p2.z - pos.z,
+                            x2 + (smallCross1.x + smallCross2.x) * 0.5f + normal.x / 32f,
+                            y2 + (smallCross1.y + smallCross2.y) * 0.5f + normal.y / 32f,
+                            z2 + (smallCross1.z + smallCross2.z) * 0.5f + normal.z / 32f,
+                            smallCross1, smallCross2, currentLight, 0xFF3C44AA,
+                            rp.thickness * 0.5f, thicknessOffset, (float) (length * 2), (float) offset);
+                    return;
+                } else if(start instanceof SocketEndpoint socket) {
+                    extractPlug(state.plugs,
+                            level.getBlockState(socket.getPosition()),
+                            socket.getFacing(level), x1, y1, z1, currentLight);
+                } else if(start instanceof AutoCordEndpoint auto) {
+                    var facing = auto.getPlugFacing();
+                    if(facing != null) {
+                        extractPlug(state.plugs,
+                                level.getBlockState(auto.getPosition()),
+                                facing.getOpposite(), x1, y1, z1, currentLight);
+                    }
+                }
+            }
+            state.addSegment(
+                    x1, y1, z1,
+                    x2, y2, z2,
+                    rp.cross1, rp.cross2, currentLight, color,
+                    rp.thickness, thicknessOffset, (float) length, (float) offset);
+        }, 0.5f);
+
+        if(state.segmentCount > 0)
+            queue.submitCustomGeometry(matrices, RenderTypes.entityCutout(state.texture), state::renderSegments);
+        for(var plug : state.plugs)
+            plug.submit(RenderTypes.solidMovingBlock(), matrices, queue);
+    }
+}

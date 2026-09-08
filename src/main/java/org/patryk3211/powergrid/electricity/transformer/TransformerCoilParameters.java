@@ -1,0 +1,92 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.electricity.transformer;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Item;
+
+public class TransformerCoilParameters {
+    private int turns;
+    private int terminal1;
+    private int terminal2;
+    private Item item;
+
+    public void writeNbt(ValueOutput tag) {
+        tag.putInt("Turns", turns);
+        tag.putInt("Terminal1", terminal1);
+        tag.putInt("Terminal2", terminal2);
+
+        var identifier = BuiltInRegistries.ITEM.getKey(item);
+        tag.putString("Item", identifier.toString());
+    }
+
+    public boolean readNbt(ValueInput tag) {
+        var oldTurns = turns;
+        var oldT1 = terminal1;
+        var oldT2 = terminal2;
+
+        turns = tag.getIntOr("Turns", 0);
+        terminal1 = tag.getIntOr("Terminal1", 0);
+        terminal2 = tag.getIntOr("Terminal2", 0);
+
+        var identifier = Identifier.parse(tag.getStringOr("Item", ""));
+        item = BuiltInRegistries.ITEM.getValue(identifier);
+
+        return turns != oldTurns || terminal1 != oldT1 || terminal2 != oldT2;
+    }
+
+    public boolean clear() {
+        if (item != null) {
+            turns = 0;
+            terminal1 = -1;
+            terminal2 = -1;
+            item = null;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isDefined() {
+        return item != null;
+    }
+
+    public int getTurns() {
+        return turns;
+    }
+
+    public int getTerminal1() {
+        return terminal1;
+    }
+
+    public int getTerminal2() {
+        return terminal2;
+    }
+
+    public void set(int terminal1, int terminal2, int turns, Item item) {
+        this.terminal1 = terminal1;
+        this.terminal2 = terminal2;
+        this.turns = turns;
+        this.item = item;
+    }
+
+    public Item getItem() {
+        return item;
+    }
+}

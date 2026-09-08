@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "powergrid:resistive_coil",
+    "#minecraft:coals",
+    "minecraft:redstone"
+  ],
+  "result": {
+    "count": 1,
+    "id": "powergrid:varistor"
+  }
+}

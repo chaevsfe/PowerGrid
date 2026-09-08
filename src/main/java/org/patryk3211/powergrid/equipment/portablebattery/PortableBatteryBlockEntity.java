@@ -1,0 +1,156 @@
+/*
+ * Copyright 2025 patryk3211
+ * Modified 2026 by chaevsfe for the unofficial Fabric / Create Fly 26.2 port.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.patryk3211.powergrid.equipment.portablebattery;
+
+import com.zurrtum.create.AllSoundEvents;
+import com.zurrtum.create.catnip.codecs.CatnipCodecUtils;
+import com.zurrtum.create.catnip.math.VecHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Nameable;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+import org.patryk3211.powergrid.collections.ModdedConfigs;
+import org.patryk3211.powergrid.electricity.base.ElectricBlockEntity;
+import org.patryk3211.powergrid.electricity.base.ThermalBehaviour;
+import org.patryk3211.powergrid.electricity.particles.SparkParticleData;
+import org.patryk3211.powergrid.electricity.sim.SwitchedWire;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.network.chat.ComponentSerialization;
+
+public class PortableBatteryBlockEntity extends ElectricBlockEntity implements Nameable {
+    private int charge;
+    private int maxCharge;
+    private int capacityLevel;
+    private SwitchedWire wire;
+    private Component name;
+
+    private DataComponentPatch componentPatch;
+
+    public PortableBatteryBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+        maxCharge = ((PortableBatteryBlock) state.getBlock()).capacity();
+        componentPatch = DataComponentPatch.EMPTY;
+    }
+
+    @Override
+    public @Nullable ThermalBehaviour specifyThermalBehaviour() {
+        return ThermalBehaviour.fromConfig(this);
+    }
+
+    @Override
+    public void electricalTick() {
+        applyPower(wire);
+        if(wire.getState()) {
+            if(!level.isClientSide()) {
+                int prevComparatorLevel = getComparatorOutput();
+                var fePerTick = Math.abs(wire.potentialDifference()) * ModdedConfigs.server().electricity.forgeEnergyPerVolt.getF();
+                charge = (int) Math.min(charge + fePerTick, maxCharge);
+                setChanged();
+                if(getComparatorOutput() != prevComparatorLevel) {
+                    level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
+                    sendData();
+                }
+            }
+        }
+        wire.setState(charge < maxCharge);
+    }
+
+    @Override
+    public void buildCircuit(CircuitBuilder builder) {
+        builder.setTerminalCount(2);
+        wire = builder.connectSwitch(resistance(), builder.terminalNode(0), builder.terminalNode(1), charge < maxCharge);
+    }
+
+    private void playFilledEffect() {
+        AllSoundEvents.CONFIRM.playAt(level, worldPosition, 0.4f, 1, true);
+        var baseMotion = new Vec3(.25, 0.1, 0);
+        var baseVec = Vec3.atCenterOf(worldPosition);
+        for(int i = 0; i < 360; i += 10) {
+            var m = VecHelper.rotate(baseMotion, i, Direction.Axis.Y);
+            m = m.offsetRandom(level.getRandom(), 0.2f);
+            var v = baseVec.add(m.normalize().scale(.25f));
+            level.addParticle(SparkParticleData.INSTANCE, v.x, v.y, v.z, m.x, m.y, m.z);
+        }
+    }
+
+    @Override
+    protected void read(ValueInput tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
+        int prev = charge;
+        charge = tag.getIntOr("Charge", 0);
+        capacityLevel = tag.getIntOr("CapacityLevel", 0);
+        maxCharge = BatteryUtils.getMaxCharge(capacityLevel);
+
+        name = tag.read("CustomName", ComponentSerialization.CODEC).orElse(null);
+        componentPatch = tag.read("Components", DataComponentPatch.CODEC).orElse(DataComponentPatch.EMPTY);
+        if(prev != 0 && prev != charge && charge == maxCharge && clientPacket)
+            playFilledEffect();
+    }
+
+    @Override
+    protected void write(ValueOutput tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        tag.putInt("Charge", charge);
+        tag.putInt("CapacityLevel", capacityLevel);
+        tag.storeNullable("CustomName", ComponentSerialization.CODEC, name);
+        tag.store("Components", DataComponentPatch.CODEC, componentPatch);
+    }
+
+    public void setCapacityEnchantLevel(int level) {
+        capacityLevel = level;
+        maxCharge = BatteryUtils.getMaxCharge(level);
+    }
+
+    public void setCharge(int charge) {
+        this.charge = charge;
+        if(!level.isClientSide())
+            sendData();
+    }
+
+    @Override
+    public Component getName() {
+        return name;
+    }
+
+    public void setName(Component name) {
+        this.name = name;
+    }
+
+    public void setDataPatch(DataComponentPatch patch) {
+        this.componentPatch = patch;
+    }
+
+    public DataComponentPatch getDataPatch() {
+        return componentPatch;
+    }
+
+    public int getCharge() {
+        return charge;
+    }
+
+    public int getComparatorOutput() {
+        return (int) ((float) charge / maxCharge * 15);
+    }
+}

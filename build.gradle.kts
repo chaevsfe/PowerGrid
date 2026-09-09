@@ -21,6 +21,12 @@ repositories {
     maven("https://maven.modmuss50.me/") {
         content { includeGroup("teamreborn") }
     }
+    maven("https://maven.shedaniel.me/") {
+        content {
+            includeGroup("me.shedaniel.cloth")
+            includeGroup("me.shedaniel.cloth.api")
+        }
+    }
 }
 
 loom {
@@ -51,6 +57,13 @@ dependencies {
     include(implementation("org.ejml:ejml-ddense:$ejml")!!)
     include(implementation("org.ejml:ejml-dsparse:$ejml")!!)
 
+    compileOnly("maven.modrinth:rei:${property("rei_version")}")
+    compileOnly("maven.modrinth:architectury-api:${property("architectury_version")}")
+    compileOnly("me.shedaniel.cloth:basic-math:${property("basic_math_version")}")
+    compileOnly(files(fileTree("../../create-rei/CreateReiViewer-Fly/build/libs") {
+        include("CreateReiViewer-*.jar")
+        exclude("*-sources.jar")
+    }.files.maxByOrNull { it.lastModified() } ?: error("No Create Fly Recipe Viewer jar in ../../create-rei/CreateReiViewer-Fly/build/libs")))
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${property("junit_version")}")

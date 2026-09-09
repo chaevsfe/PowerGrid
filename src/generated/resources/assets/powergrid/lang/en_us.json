@@ -887,6 +887,7 @@
   "powergrid.ponder.wire_voltage_drop.text_3": "Lost power is turned into heat",
   "powergrid.ponder.wire_voltage_drop.text_4": "If too much power is drawn, the wires can overheat and break",
   "powergrid.recipe.assembly.magnetizing": "Magnetizing",
+  "powergrid.recipe.boosting": "Item Boosting",
   "powergrid.recipe.category.circuit_assembly": "Circuit Assembly",
   "powergrid.recipe.category.circuit_design": "Circuit Designing",
   "powergrid.recipe.magnetizing": "Magnetizing",

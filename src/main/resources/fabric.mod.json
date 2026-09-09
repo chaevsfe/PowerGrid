@@ -34,6 +34,12 @@
     ],
     "create_plugin": [
       "org.patryk3211.powergrid.fabric.PowerGridCreatePlugin"
+    ],
+    "rei_common": [
+      "org.patryk3211.powergrid.compat.rei.PowerGridReiCommonPlugin"
+    ],
+    "rei_client": [
+      "org.patryk3211.powergrid.compat.rei.PowerGridReiClientPlugin"
     ]
   },
   "accessWidener": "powergrid.accesswidener",
@@ -52,7 +58,9 @@
     "java": ">=25"
   },
   "suggests": {
-    "createaddition": "*"
+    "createaddition": "*",
+    "createreiviewer": "*",
+    "roughlyenoughitems": "*"
   },
   "breaks": {
     "sable": "*",

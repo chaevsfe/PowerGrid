@@ -29,6 +29,15 @@ repositories {
     }
 }
 
+// The recipe viewer is nested into this jar and compiled against: CI downloads its release
+// jar into libs/, a local checkout uses the sibling repo's build output.
+repositories {
+    flatDir {
+        dirs("libs", "../../create-rei/CreateReiViewer-Fly/build/libs")
+    }
+}
+val recipeViewer = ":CreateReiViewer:${property("createreiviewer_version")}+fabric-mc${property("minecraft_version")}"
+
 loom {
     accessWidenerPath = file("src/main/resources/powergrid.accesswidener")
     mods {
@@ -60,10 +69,8 @@ dependencies {
     compileOnly("maven.modrinth:rei:${property("rei_version")}")
     compileOnly("maven.modrinth:architectury-api:${property("architectury_version")}")
     compileOnly("me.shedaniel.cloth:basic-math:${property("basic_math_version")}")
-    compileOnly(files(fileTree("../../create-rei/CreateReiViewer-Fly/build/libs") {
-        include("CreateReiViewer-*.jar")
-        exclude("*-sources.jar")
-    }.files.maxByOrNull { it.lastModified() } ?: error("No Create Fly Recipe Viewer jar in ../../create-rei/CreateReiViewer-Fly/build/libs")))
+    compileOnly(recipeViewer)
+    include(recipeViewer)
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 
     testImplementation("org.junit.jupiter:junit-jupiter:${property("junit_version")}")

@@ -1,6 +1,7 @@
 {
   "parent": "powergrid:block/gauge/current_head",
   "textures": {
+    "particle": "powergrid:block/conductive_gauge",
     "2": "powergrid:block/conductive_gauge"
   }
 }

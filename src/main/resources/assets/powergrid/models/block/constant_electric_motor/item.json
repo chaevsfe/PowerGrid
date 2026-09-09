@@ -4,6 +4,7 @@
 	"parent": "block/block",
 	"texture_size": [64, 64],
 	"textures": {
+		"particle": "powergrid:block/constant_electric_motor",
 		"1": "powergrid:block/constant_electric_motor"
 	},
 	"elements": [

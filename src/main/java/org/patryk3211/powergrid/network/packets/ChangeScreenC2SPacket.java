@@ -45,7 +45,7 @@ public class ChangeScreenC2SPacket implements C2SPacket {
 
     @Override
     public void handle(ServerPlayer player) {
-        if(!C2SPacket.canEdit(player, blockPos))
+        if(player.isSpectator() || !C2SPacket.canInteract(player, blockPos))
             return;
         var genericBe = player.level().getBlockEntity(blockPos);
         if(!(genericBe instanceof SmartBlockEntity) || !(genericBe instanceof IMultiScreenHandlerFactory))

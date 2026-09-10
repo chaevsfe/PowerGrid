@@ -15,12 +15,18 @@
  */
 package org.patryk3211.powergrid.compat.rei;
 
+import dev.chaevsfe.createreiviewer.api.CreateReiApi;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REICommonPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.display.ServerDisplayRegistry;
 
 public class PowerGridReiCommonPlugin implements REICommonPlugin {
+    @Override
+    public double getPriority() {
+        return CreateReiApi.PLUGIN_PRIORITY;
+    }
+
     @Override
     public void registerDisplays(ServerDisplayRegistry registry) {
         if (!PowerGridReiSupport.available()) {

@@ -18,6 +18,7 @@ package org.patryk3211.electricity;
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.patryk3211.powergrid.electricity.sim.calculation.Precalculated;
 import org.patryk3211.powergrid.electricity.sim.node.CurrentSourceWire;
 import org.patryk3211.powergrid.electricity.sim.node.FloatingNode;
 import org.patryk3211.powergrid.electricity.sim.node.VoltageSourceCoupling;
@@ -27,6 +28,24 @@ import org.patryk3211.powergrid.electricity.sim.special.GeneratorCoupling;
 import org.patryk3211.powergrid.electricity.sim.special.IRotor;
 
 public class SolverTests extends TestHelper {
+    private static Precalculated<Float> constantField(float value) {
+        return new Precalculated<>(value) {
+            @Override
+            public Float get() {
+                return defaultValue;
+            }
+
+            @Override
+            public int getStamp() {
+                return 0;
+            }
+
+            @Override
+            public void invalidate() {
+            }
+        };
+    }
+
     @Test
     void testResistorDivider() {
         var Net = new Network();
@@ -165,6 +184,8 @@ public class SolverTests extends TestHelper {
         var N4 = Net.N();
         var V1 = new GeneratorCoupling(N1, N2, 1, rotor1);
         var V2 = new GeneratorCoupling(N3, N4, 1, rotor2);
+        V1.setFieldStrengthProvider(constantField(100));
+        V2.setFieldStrengthProvider(constantField(100));
         V1.setField(100);
         V2.setField(100);
         Net.network.addNodes(V1, V2);

@@ -52,14 +52,9 @@ public class TransmissionLineTest {
         Net2.network.addNode(T2);
         Net2.W(R2, N2, null);
 
-        for(int i = 0; i < 20; ++i) {
-            double Iprev = V1.getCurrent(), Vprev = N2.getVoltage();
+        for(int i = 0; i < 300; ++i) {
             Net1.calculate();
             Net2.calculate();
-
-            System.out.printf("Source current = %g, target = %g\n", V1.getCurrent(), RefV1.getCurrent());
-            System.out.printf("Node voltage = %g, target = %g\n", N2.getVoltage(), RefN1.getVoltage());
-            System.out.printf("dI = %g, dV = %g\n", V1.getCurrent() - Iprev, N2.getVoltage() - Vprev);
         }
 
         Assertions.assertEquals(RefN1.getVoltage(), N2.getVoltage(), 1e-6, "Resistor divider node has incorrect voltage");

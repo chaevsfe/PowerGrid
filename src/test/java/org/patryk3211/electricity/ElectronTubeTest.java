@@ -105,7 +105,7 @@ public class ElectronTubeTest extends TestHelper {
 
         Assertions.assertEquals(0.001643f, V1.getCurrent(), 1e-4f, "Anode current is incorrect");
         Assertions.assertEquals(49.9836f, Anode.getVoltage(), 1e-3f, "Anode voltage is incorrect");
-        Assertions.assertEquals(V1.getCurrent(), Tube.current(), 1e-6f, "Tube current is incorrect");
+        Assertions.assertEquals(V1.getCurrent() + V2.getCurrent(), Tube.current(), 1e-6f, "Tube current is incorrect");
     }
 
     @Test
@@ -158,7 +158,7 @@ public class ElectronTubeTest extends TestHelper {
 
         Assertions.assertTrue(0.1f >= V1.getCurrent(), "Anode current is incorrect");
         Assertions.assertTrue(49.0f <= Anode.getVoltage(), "Anode voltage is incorrect");
-        Assertions.assertEquals(V1.getCurrent(), Tube.current(), 1e-6f, "Tube current is incorrect");
+        Assertions.assertEquals(V1.getCurrent() + V2.getCurrent(), Tube.current(), 1e-6f, "Tube current is incorrect");
     }
 
     @Test

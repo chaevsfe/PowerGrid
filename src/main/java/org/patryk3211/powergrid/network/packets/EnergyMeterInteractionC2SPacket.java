@@ -36,7 +36,7 @@ public class EnergyMeterInteractionC2SPacket implements C2SPacket {
     public void handle(ServerPlayer player) {
         var level = player.level();
 
-        if(!C2SPacket.canInteract(player, pos))
+        if(!C2SPacket.canEdit(player, pos))
             return;
         if(!(level.getBlockEntity(pos) instanceof EnergyMeterBlockEntity meter))
             return;

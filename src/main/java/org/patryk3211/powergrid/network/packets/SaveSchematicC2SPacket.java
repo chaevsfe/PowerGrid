@@ -75,7 +75,7 @@ public class SaveSchematicC2SPacket implements C2SPacket {
 
     @Override
     public void handle(ServerPlayer player) {
-        if(!C2SPacket.canInteract(player, pos))
+        if(!C2SPacket.canEdit(player, pos))
             return;
         var be = player.level().getBlockEntity(pos);
         if(be instanceof CircuitDesignTableBlockEntity table) {

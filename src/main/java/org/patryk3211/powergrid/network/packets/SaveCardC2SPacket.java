@@ -53,6 +53,8 @@ public class SaveCardC2SPacket implements C2SPacket {
 
     @Override
     public void handle(ServerPlayer player) {
+        if (!C2SPacket.mayEditHeldItem(player))
+            return;
         var stack = player.getMainHandItem();
         if (!(stack.getItem() instanceof PunchCardItem))
             return;

@@ -60,6 +60,10 @@ public class BlockWireAttachC2SPacket implements C2SPacket {
             PowerGrid.LOGGER.debug("Received wire attach packet for an entity out of reach from {}", player.getName().getString());
             return;
         }
+        if(!C2SPacket.mayEdit(player, wire.blockPosition())) {
+            PowerGrid.LOGGER.debug("Received wire attach packet from a player who may not edit there {}", player.getName().getString());
+            return;
+        }
         var stack = player.getItemInHand(InteractionHand.MAIN_HAND);
         if(!IWire.isWire(player.level(), stack.getItem())) {
             PowerGrid.LOGGER.debug("Received wire attach packet for player whose not holding a wire from {}", player.getName().getString());

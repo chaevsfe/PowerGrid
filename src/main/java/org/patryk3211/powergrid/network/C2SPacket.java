@@ -19,4 +19,20 @@ public interface C2SPacket {
             return false;
         return player.mayInteract(level, pos);
     }
+
+    static boolean canEdit(ServerPlayer player, BlockPos pos) {
+        if(!canInteract(player, pos))
+            return false;
+        return mayEdit(player, pos);
+    }
+
+    static boolean mayEdit(ServerPlayer player, BlockPos pos) {
+        if(player.isSpectator() || !player.mayBuild())
+            return false;
+        return player.level().mayInteract(player, pos);
+    }
+
+    static boolean mayEditHeldItem(ServerPlayer player) {
+        return !player.isSpectator();
+    }
 }

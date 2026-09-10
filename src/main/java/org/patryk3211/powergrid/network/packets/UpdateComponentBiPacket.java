@@ -96,7 +96,7 @@ public class UpdateComponentBiPacket implements S2CPacket, C2SPacket {
     @Override
     public void handle(ServerPlayer player) {
         var world = player.level();
-        if(!C2SPacket.canInteract(player, pos))
+        if(!C2SPacket.canEdit(player, pos))
             return;
         handle(world);
     }

@@ -80,7 +80,7 @@ public class SetCustomDisplayC2SPacket implements C2SPacket {
 
     @Override
     public void handle(ServerPlayer player) {
-        if(!C2SPacket.canInteract(player, pos))
+        if(!C2SPacket.canEdit(player, pos))
             return;
         var level = player.level();
         var behaviour = BlockEntityBehaviour.get(level, pos, CustomDisplayBehaviour.TYPE);

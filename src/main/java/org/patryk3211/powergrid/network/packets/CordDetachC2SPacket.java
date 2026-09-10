@@ -33,7 +33,7 @@ public class CordDetachC2SPacket implements C2SPacket {
             return;
         if(entity.getBoundingBox().distanceToSqr(player.position()) > C2SPacket.MAX_INTERACTION_DISTANCE_SQUARED)
             return;
-        if(!player.mayInteract(level, entity.blockPosition()))
+        if(!C2SPacket.mayEdit(player, entity.blockPosition()))
             return;
         cord.cordDetach(player, secondEndpoint);
     }

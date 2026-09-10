@@ -99,6 +99,10 @@ public class BlockWireCutC2SPacket implements C2SPacket {
             PowerGrid.LOGGER.debug("Received wire cut packet for an entity out of reach from {}", player.getName().getString());
             return;
         }
+        if(!C2SPacket.mayEdit(player, wire.blockPosition())) {
+            PowerGrid.LOGGER.debug("Received wire cut packet from a player who may not edit there {}", player.getName().getString());
+            return;
+        }
         if(index1 < 0 || index1 >= wire.segments.size() || index2 < 0 || index2 >= wire.segments.size()) {
             PowerGrid.LOGGER.debug("Received wire segment index out of bounds from {}", player.getName().getString());
             return;

@@ -1,5 +1,6 @@
 package org.patryk3211.powergrid.network.packets;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import org.patryk3211.powergrid.electricity.wire.powercord.CordEntity;
@@ -33,7 +34,13 @@ public class CordDetachC2SPacket implements C2SPacket {
             return;
         if(entity.getBoundingBox().distanceToSqr(player.position()) > C2SPacket.MAX_INTERACTION_DISTANCE_SQUARED)
             return;
-        if(!C2SPacket.mayEdit(player, entity.blockPosition()))
+        var endpoint1 = cord.getEndpoint1();
+        var endpoint2 = cord.getEndpoint2();
+        if(endpoint1 == null || endpoint2 == null)
+            return;
+        if(!C2SPacket.mayEdit(player, BlockPos.containing(endpoint1.getExactPosition(level))))
+            return;
+        if(!C2SPacket.mayEdit(player, BlockPos.containing(endpoint2.getExactPosition(level))))
             return;
         cord.cordDetach(player, secondEndpoint);
     }

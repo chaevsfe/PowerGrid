@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.network.packets;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -99,7 +100,7 @@ public class BlockWireCutC2SPacket implements C2SPacket {
             PowerGrid.LOGGER.debug("Received wire cut packet for an entity out of reach from {}", player.getName().getString());
             return;
         }
-        if(!C2SPacket.mayEdit(player, wire.blockPosition())) {
+        if(!C2SPacket.mayEdit(player, wire.blockPosition()) || !C2SPacket.mayEdit(player, BlockPos.containing(wire.endPosition()))) {
             PowerGrid.LOGGER.debug("Received wire cut packet from a player who may not edit there {}", player.getName().getString());
             return;
         }

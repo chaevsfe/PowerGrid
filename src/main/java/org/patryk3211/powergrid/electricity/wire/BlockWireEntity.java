@@ -179,6 +179,13 @@ public class BlockWireEntity extends WireEntity implements IComplexRaycast {
         return totalLength;
     }
 
+    public Vec3 endPosition() {
+        var pos = position();
+        for(var segment : segments)
+            pos = pos.add(segment.vector());
+        return pos;
+    }
+
     @Override
     protected boolean isConnectedTo(LivingEntity entity) {
         if(!super.isConnectedTo(entity))

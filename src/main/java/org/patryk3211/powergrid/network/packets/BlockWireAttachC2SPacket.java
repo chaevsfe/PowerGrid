@@ -17,6 +17,7 @@
 package org.patryk3211.powergrid.network.packets;
 
 import org.patryk3211.powergrid.compat.sable.SableCompanion;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -60,7 +61,7 @@ public class BlockWireAttachC2SPacket implements C2SPacket {
             PowerGrid.LOGGER.debug("Received wire attach packet for an entity out of reach from {}", player.getName().getString());
             return;
         }
-        if(!C2SPacket.mayEdit(player, wire.blockPosition())) {
+        if(!C2SPacket.mayEdit(player, wire.blockPosition()) || !C2SPacket.mayEdit(player, BlockPos.containing(wire.endPosition()))) {
             PowerGrid.LOGGER.debug("Received wire attach packet from a player who may not edit there {}", player.getName().getString());
             return;
         }
@@ -78,6 +79,10 @@ public class BlockWireAttachC2SPacket implements C2SPacket {
         var gridLength = segment.gridLength;
         if(gridPoint < 0 || gridPoint > gridLength) {
             PowerGrid.LOGGER.debug("Received wire segment length out of bounds from {}", player.getName().getString());
+            return;
+        }
+        if(!C2SPacket.mayEdit(player, BlockPos.containing(segment.start.relative(segment.direction, gridPoint / 16f)))) {
+            PowerGrid.LOGGER.debug("Received wire attach packet from a player who may not edit at the attachment point {}", player.getName().getString());
             return;
         }
 

@@ -18,6 +18,7 @@ package org.patryk3211.electricity;
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.patryk3211.powergrid.electricity.sim.ElectricalNetwork;
 import org.patryk3211.powergrid.electricity.sim.calculation.Precalculated;
 import org.patryk3211.powergrid.electricity.sim.node.CurrentSourceWire;
 import org.patryk3211.powergrid.electricity.sim.node.FloatingNode;
@@ -190,34 +191,51 @@ public class SolverTests extends TestHelper {
         V2.setField(100);
         Net.network.addNodes(V1, V2);
 
-//        Net.W(10f, N1, N2);
-        Net.W(.1f, N1, N3);
-        Net.W(.1f, N2, N4);
-//        Net.W(10f, N1, N2);
+        var W1 = Net.W(.1f, N1, N3);
+        var W2 = Net.W(.1f, N2, N4);
+
+        final float field = 100;
+        final double dt = 0.05;
+        final double backEmf = field * field * dt / rotor1.getInertia();
+        final double loopResistanceMax = 2 * (1 + backEmf) + 0.2;
+        final double loopResistanceMin = 2 * 1 + 0.2;
 
         for(int i = 0; i < 40; ++i) {
             rotor1.tick(10);
             rotor2.tick(0);
 
-            var E1 = rotor1.energy();
+            var speed1 = rotor1.getAngularVelocity();
+            var speed2 = rotor2.getAngularVelocity();
             var E2 = rotor2.energy();
+
             Net.calculate();
 
-//            V1.tick(60);
-//            V2.tick(60);
-            var deltaE1 = rotor1.energy() - E1;
-            var deltaE2 = rotor2.energy() - E2;
+            var emf1 = field * speed1 * Math.PI / 30;
+            var emf2 = field * speed2 * Math.PI / 30;
+            Assertions.assertEquals(emf1, V1.getVoltage(), 1e-2, "Generator 1 voltage does not follow field times angular velocity");
+            Assertions.assertEquals(emf2, V2.getVoltage(), 1e-2, "Generator 2 voltage does not follow field times angular velocity");
 
-            var Pe1 = V1.getVoltage() * -V1.getCurrent();
-            var Pe2 = V2.getVoltage() * -V2.getCurrent();
+            var current = V1.getCurrent();
+            Assertions.assertTrue(Double.isFinite(current), "Generator 1 current is not finite");
+            Assertions.assertTrue(Double.isFinite(V2.getCurrent()), "Generator 2 current is not finite");
+            Assertions.assertTrue(Double.isFinite(N1.getVoltage()) && Double.isFinite(N2.getVoltage()), "Generator 1 node voltages are not finite");
+            Assertions.assertTrue(Double.isFinite(N3.getVoltage()) && Double.isFinite(N4.getVoltage()), "Generator 2 node voltages are not finite");
+            var leakage = ElectricalNetwork.G_MIN * Math.max(Math.abs(N1.getVoltage()), Math.abs(N3.getVoltage())) + 1e-9;
+            Assertions.assertEquals(-current, V2.getCurrent(), leakage, "Generators do not carry the same series current");
+            Assertions.assertEquals(-current, W1.current(), leakage, "First wire does not carry the loop current");
+            Assertions.assertEquals(current, W2.current(), leakage, "Second wire does not carry the loop current");
 
-            System.out.printf("i = %d:\n", i);
-            System.out.printf("  ω1 = %g\n    I_gen1 = %g\n    ΔE_gen1 = %g\n    P_gen1 = %g, E = %g\n",
-                    rotor1.getAngularVelocity(), V1.getCurrent(), deltaE1, Pe1, Pe1 * 0.05f);
-            System.out.printf("  ω2 = %g\n    I_gen2 = %g\n    ΔE_gen2 = %g\n    P_gen2 = %g, E = %g\n",
-                    rotor2.getAngularVelocity(), V2.getCurrent(), deltaE2, Pe2, Pe2 * 0.05f);
-            System.out.printf("  E_system = %g\n", rotor1.energy() + rotor2.energy());
+            Assertions.assertTrue(speed1 > speed2, "Driving rotor is no longer the faster one");
+            Assertions.assertTrue(current < 0, "Faster generator does not source current into the loop");
+
+            var drive = emf1 - emf2;
+            Assertions.assertTrue(-current >= drive / loopResistanceMax * (1 - 1e-4), "Loop current is below what the coupling model allows");
+            Assertions.assertTrue(-current <= drive / loopResistanceMin * (1 + 1e-4), "Loop current is above what the coupling model allows");
+            Assertions.assertTrue(rotor2.energy() > E2, "Driven rotor did not gain energy from the loop current");
         }
+
+        Assertions.assertTrue(rotor2.getAngularVelocity() > 250f, "Driven rotor was never accelerated");
+        Assertions.assertTrue(rotor1.getAngularVelocity() - rotor2.getAngularVelocity() < 6f, "Coupled rotors did not converge");
     }
 
     @Test

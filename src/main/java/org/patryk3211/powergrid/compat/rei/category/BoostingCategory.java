@@ -25,8 +25,11 @@ import dev.chaevsfe.createreiviewer.client.widget.Panel;
 import dev.chaevsfe.createreiviewer.display.CreateReiDisplay;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import org.patryk3211.powergrid.collections.ModdedItems;
 import org.patryk3211.powergrid.compat.rei.PowerGridReiCategories;
+
+import java.util.List;
 
 public class BoostingCategory extends CreateReiCategory<CreateReiDisplay> {
     public BoostingCategory() {
@@ -55,11 +58,16 @@ public class BoostingCategory extends CreateReiCategory<CreateReiDisplay> {
 
     @Override
     protected void build(CreateReiDisplay display, Panel panel) {
+        List<EntryIngredient> outputs = display.outputs();
         panel.texture(AllGuiTextures.JEI_SHADOW, 62, 57);
-        panel.texture(AllGuiTextures.JEI_DOWN_ARROW, 126, display.outputs().size() > 2 ? 10 : 29);
+        panel.texture(AllGuiTextures.JEI_DOWN_ARROW, 126, outputs.size() > 2 ? 10 : 29);
         panel.pip(75, -10, DeployerRenderState::new);
         panel.slot(51, 5, CreateReiLayout.heldItem(display));
         panel.slot(27, 51, display.inputs().get(1));
+        if (outputs.size() == 1) {
+            panel.output(132, 51, outputs.get(0), display.chance(0));
+            return;
+        }
         CreateReiLayout.outputGrid(panel, display, 142, 51);
     }
 }

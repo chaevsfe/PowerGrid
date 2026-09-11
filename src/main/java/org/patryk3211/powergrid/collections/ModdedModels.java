@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.collections;
 
+import com.zurrtum.create.client.AllFluidConfigs;
 import com.zurrtum.create.client.AllModels;
 import com.zurrtum.create.client.content.decoration.encasing.EncasedCTBehaviour;
 import com.zurrtum.create.client.foundation.block.connected.ConnectedTextureBehaviour;
@@ -39,6 +40,7 @@ public class ModdedModels {
         connectedTextures(ModdedBlocks.SOLAR_PANEL.get(), new SolarPanelCTBehaviour());
         connectedTextures(ModdedBlocks.CEILING_TILE_SOLAR.get(), new CeilingTileSolarBlockCTBehaviour());
         AllModels.register(ModdedBlocks.CIRCUIT_BOARD.get(), CircuitBoardModel.of());
+        AllFluidConfigs.model(ModdedFluids.ACID);
     }
 
     private static void connectedTextures(Block block, ConnectedTextureBehaviour behaviour) {

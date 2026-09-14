@@ -24,14 +24,11 @@ import com.zurrtum.create.client.infrastructure.model.CTModel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockColorRegistry;
-import net.minecraft.client.color.block.BlockTintSources;
 import net.minecraft.world.level.block.Block;
 import org.patryk3211.powergrid.circuits.circuitboard.CircuitBoardModel;
 import org.patryk3211.powergrid.electricity.battery.BatteryCTBehaviour;
 import org.patryk3211.powergrid.electricity.solarpanel.SolarPanelCTBehaviour;
 import org.patryk3211.powergrid.general.ceilingtile.solar.CeilingTileSolarBlockCTBehaviour;
-
-import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class ModdedModels {
@@ -44,7 +41,7 @@ public class ModdedModels {
         connectedTextures(ModdedBlocks.SOLAR_PANEL.get(), new SolarPanelCTBehaviour());
         connectedTextures(ModdedBlocks.CEILING_TILE_SOLAR.get(), new CeilingTileSolarBlockCTBehaviour());
         AllModels.register(ModdedBlocks.CIRCUIT_BOARD.get(), CircuitBoardModel.of());
-        BlockColorRegistry.register(List.of(BlockTintSources.constant(CircuitBoardModel.DESTROYED_COLOR)), ModdedBlocks.CIRCUIT_BOARD.get());
+        BlockColorRegistry.register(CircuitBoardModel.tintSources(), ModdedBlocks.CIRCUIT_BOARD.get());
         AllFluidConfigs.model(ModdedFluids.ACID);
     }
 

@@ -22,6 +22,8 @@ import com.zurrtum.create.catnip.math.VecHelper;
 import com.zurrtum.create.client.infrastructure.model.WrapperBlockStateModel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.color.block.BlockTintSources;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
@@ -69,8 +71,14 @@ public class CircuitBoardModel extends WrapperBlockStateModel {
 
     private static final float TRACE_HEIGHT = 2.05f;
 
-    public static final int DESTROYED_TINT = 0;
+    private static final int NEUTRAL_COLOR = -1;
+
+    public static final int DESTROYED_TINT = 1;
     public static final int DESTROYED_COLOR = 0xFF404040;
+
+    public static List<BlockTintSource> tintSources() {
+        return List.of(BlockTintSources.constant(NEUTRAL_COLOR), BlockTintSources.constant(DESTROYED_COLOR));
+    }
 
     private final Map<Identifier, BlockStateModelPart> componentParts = new HashMap<>();
 

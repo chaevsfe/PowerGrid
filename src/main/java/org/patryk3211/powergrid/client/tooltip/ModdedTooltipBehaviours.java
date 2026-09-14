@@ -36,7 +36,8 @@ public class ModdedTooltipBehaviours {
 
         @Override
         public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-            return blockEntity.addToGoggleTooltip(tooltip, isPlayerSneaking);
+            int before = tooltip.size();
+            return blockEntity.addToGoggleTooltip(tooltip, isPlayerSneaking) && tooltip.size() > before;
         }
     }
 
@@ -47,8 +48,10 @@ public class ModdedTooltipBehaviours {
 
         @Override
         public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+            int before = tooltip.size();
             boolean added = super.addToGoggleTooltip(tooltip, isPlayerSneaking);
-            return blockEntity.addToGoggleTooltip(tooltip, isPlayerSneaking) || added;
+            added |= blockEntity.addToGoggleTooltip(tooltip, isPlayerSneaking);
+            return added && tooltip.size() > before;
         }
     }
 }

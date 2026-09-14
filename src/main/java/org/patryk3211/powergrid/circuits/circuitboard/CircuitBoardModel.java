@@ -69,6 +69,9 @@ public class CircuitBoardModel extends WrapperBlockStateModel {
 
     private static final float TRACE_HEIGHT = 2.05f;
 
+    public static final int DESTROYED_TINT = 0;
+    public static final int DESTROYED_COLOR = 0xFF404040;
+
     private final Map<Identifier, BlockStateModelPart> componentParts = new HashMap<>();
 
     private ModelBaker.Interner interner;
@@ -182,17 +185,17 @@ public class CircuitBoardModel extends WrapperBlockStateModel {
 
         var builder = new QuadCollection.Builder();
         for(var quad : part.getQuads(null))
-            builder.addUnculledFace(placeQuad(quad, rotation, correction, offset));
+            builder.addUnculledFace(placeQuad(quad, rotation, correction, offset, placed.destroyed));
         for(var direction : Direction.values()) {
             for(var quad : part.getQuads(direction))
-                builder.addUnculledFace(placeQuad(quad, rotation, correction, offset));
+                builder.addUnculledFace(placeQuad(quad, rotation, correction, offset, placed.destroyed));
         }
         var quads = builder.build();
         if(!quads.getAll().isEmpty())
             out.add(new SimpleModelWrapper(quads, part.useAmbientOcclusion(), part.particleMaterial()));
     }
 
-    private static BakedQuad placeQuad(BakedQuad quad, Quaternionf rotation, Vector3f correction, Vector3f offset) {
+    private static BakedQuad placeQuad(BakedQuad quad, Quaternionf rotation, Vector3f correction, Vector3f offset, boolean destroyed) {
         Direction direction = quad.direction();
         if(rotation != null) {
             var normal = new Vector3f(direction.getUnitVec3i().getX(), direction.getUnitVec3i().getY(), direction.getUnitVec3i().getZ());
@@ -205,8 +208,12 @@ public class CircuitBoardModel extends WrapperBlockStateModel {
                 placeVertex(quad.position2(), rotation, correction, offset),
                 placeVertex(quad.position3(), rotation, correction, offset),
                 quad.packedUV0(), quad.packedUV1(), quad.packedUV2(), quad.packedUV3(),
-                direction, quad.materialInfo()
+                direction, destroyed ? destroyedInfo(quad.materialInfo()) : quad.materialInfo()
         );
+    }
+
+    private static BakedQuad.MaterialInfo destroyedInfo(BakedQuad.MaterialInfo info) {
+        return new BakedQuad.MaterialInfo(info.sprite(), info.layer(), info.itemRenderType(), DESTROYED_TINT, info.shade(), info.lightEmission());
     }
 
     private static Vector3fc placeVertex(Vector3fc position, Quaternionf rotation, Vector3f correction, Vector3f offset) {

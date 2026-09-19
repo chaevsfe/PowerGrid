@@ -35,6 +35,6 @@ public final class SharedProperties {
     }
 
     public static Block copperMetal() {
-        return Blocks.COPPER_BLOCK.weathering().unaffected();
+        return Blocks.COPPER_BLOCK;
     }
 }

@@ -242,7 +242,7 @@ public class DeviceScenes {
         scene.idle(90);
 
         scene.overlay().showControls(util.vector().of(2.5, 2.5, 2.5), Pointing.DOWN, 40)
-                .withItem(new ItemStack(Items.DYE.red()))
+                .withItem(new ItemStack(Items.RED_DYE))
                 .rightClick();
         scene.idle(20);
         scene.world().modifyBlockEntity(light, LightFixtureBlockEntity.class, be -> be.setColor(DyeColor.RED));
@@ -934,7 +934,7 @@ public class DeviceScenes {
                 .placeNearTarget();
         scene.idle(90);
         scene.overlay().showControls(util.vector().of(3.5, 1.9, 2.5), Pointing.UP, 30)
-                .withItem(new ItemStack(Items.DYE.red()))
+                .withItem(new ItemStack(Items.RED_DYE))
                 .rightClick();
         scene.idle(20);
         scene.world().modifyBlockEntity(plotter, PlotterBlockEntity.class, be -> be.setColor(DyeColor.RED));
@@ -1750,7 +1750,7 @@ public class DeviceScenes {
                 .attachKeyFrame();
 
         scene.overlay().showControls(util.vector().of(2.25, 1.75, 2), Pointing.DOWN, 20)
-                .withItem(Items.DYE.red().getDefaultInstance()).rightClick();
+                .withItem(Items.RED_DYE.getDefaultInstance()).rightClick();
         scene.idle(20);
 
         scene.world().modifyBlockEntity(block, ModularDisplayBlockEntity.class, be -> {

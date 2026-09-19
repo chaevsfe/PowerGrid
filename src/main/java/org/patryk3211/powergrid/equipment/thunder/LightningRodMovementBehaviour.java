@@ -39,7 +39,6 @@ import org.patryk3211.powergrid.network.packets.LightningSyncS2CPacket;
 import java.util.ArrayList;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.FACING;
-import net.minecraft.world.entity.EntityTypes;
 
 public class LightningRodMovementBehaviour extends MovementBehaviour {
     @Override
@@ -49,7 +48,7 @@ public class LightningRodMovementBehaviour extends MovementBehaviour {
 
     protected void fire(MovementContext context) {
         spawnLightning((ServerLevel) context.world, context.position);
-        var lightningEntity = EntityTypes.LIGHTNING_BOLT.create(context.world, EntitySpawnReason.TRIGGERED);
+        var lightningEntity = EntityType.LIGHTNING_BOLT.create(context.world, EntitySpawnReason.TRIGGERED);
         if(lightningEntity != null) {
             lightningEntity.snapTo(Vec3.atBottomCenterOf(BlockPos.containing(context.position)));
             lightningEntity.setVisualOnly(false);
@@ -89,7 +88,7 @@ public class LightningRodMovementBehaviour extends MovementBehaviour {
         var blockPos = ((LightningAccessor) world).invokeGetLightningPos(BlockPos.containing(pos));
         // This is equivalent to the natural lightning spawning code in ServerWorld
         if(world.isRainingAt(blockPos)) {
-            var lightningEntity = EntityTypes.LIGHTNING_BOLT.create(world, EntitySpawnReason.TRIGGERED);
+            var lightningEntity = EntityType.LIGHTNING_BOLT.create(world, EntitySpawnReason.TRIGGERED);
             if(lightningEntity != null) {
                 lightningEntity.snapTo(Vec3.atBottomCenterOf(blockPos));
                 lightningEntity.setVisualOnly(false);

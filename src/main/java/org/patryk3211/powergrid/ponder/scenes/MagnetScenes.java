@@ -28,7 +28,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.phys.Vec3;
 import org.patryk3211.powergrid.collections.ModdedItems;
-import net.minecraft.world.entity.EntityTypes;
 
 public class MagnetScenes {
     public static void magnet(SceneBuilder scene, SceneBuildingUtil util) {
@@ -54,7 +53,7 @@ public class MagnetScenes {
         scene.idle(30);
 
         scene.world().createEntity(world -> {
-            var entity = EntityTypes.LIGHTNING_BOLT.create(world, EntitySpawnReason.EVENT);
+            var entity = EntityType.LIGHTNING_BOLT.create(world, EntitySpawnReason.EVENT);
             if(entity != null) {
                 entity.snapTo(util.vector().of(2.5, 1.0, 2.5));
                 entity.setVisualOnly(false);

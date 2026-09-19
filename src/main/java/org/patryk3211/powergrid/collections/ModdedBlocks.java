@@ -30,7 +30,7 @@ import com.zurrtum.create.content.processing.AssemblyOperatorBlockItem;
 import com.zurrtum.create.content.processing.burner.BlazeBurnerBlock;
 import org.patryk3211.powergrid.foundation.SharedProperties;
 import org.patryk3211.powergrid.registrate.entry.BlockEntry;
-import net.minecraft.advancements.predicates.StatePropertiesPredicate;
+import net.minecraft.advancements.criterion.StatePropertiesPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -779,7 +779,7 @@ public class ModdedBlocks {
             .register();
 
     public static final BlockEntry<GroundingRodBlock> GROUNDING_ROD = REGISTRATE.block("grounding_rod", GroundingRodBlock::new)
-            .initialProperties(() -> Blocks.LIGHTNING_ROD.weathering().unaffected())
+            .initialProperties(() -> Blocks.LIGHTNING_ROD)
             .blockstate(simple("block/grounding_rod"))
             .transform(pickaxeOnly())
             .simpleItem()

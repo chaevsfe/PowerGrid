@@ -1,6 +1,6 @@
 package org.patryk3211.powergrid.advancements;
 
-import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
+import net.minecraft.advancements.criterion.SimpleCriterionTrigger;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;

@@ -45,7 +45,6 @@ import org.patryk3211.powergrid.network.packets.ZapProjectileS2CPacket;
 import java.util.ArrayList;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.entity.EntityTypes;
 
 public class ZapProjectileEntity extends AbstractHurtingProjectile {
     private float power;
@@ -166,7 +165,7 @@ public class ZapProjectileEntity extends AbstractHurtingProjectile {
             ModdedPackets.sendToClientsAround(new ZapProjectileS2CPacket(target, damagedEntities), (ServerLevel) level(), position(), 50);
         }
 
-        if(target.getType() == EntityTypes.ENDERMAN)
+        if(target.getType() == EntityType.ENDERMAN)
             return;
 
         if(!(target instanceof LivingEntity livingTarget)) {

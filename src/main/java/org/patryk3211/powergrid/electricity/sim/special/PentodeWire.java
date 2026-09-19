@@ -177,7 +177,7 @@ public class PentodeWire extends CompoundWire implements ISolverHook {
         var e1 = vs / kp * sp;
         var sigmoid = sigmoid(driveTerm);
         var dE1_dGrid = sigmoid;
-        var dE1_dScreen = sp / kp - sigmoid * vGrid / (vs * vs);
+        var dE1_dScreen = vScreen > SCREEN_FLOOR ? sp / kp - sigmoid * vGrid / vs : 0;
         return new E1State(e1, dE1_dGrid, dE1_dScreen);
     }
 

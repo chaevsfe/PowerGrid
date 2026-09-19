@@ -166,4 +166,34 @@ public class PentodeTest extends TestHelper {
         Assertions.assertTrue(0.1f >= V1.getCurrent(), "Anode current should not exceed saturation");
         Assertions.assertTrue(49.0f <= Anode.getVoltage(), "Anode voltage should stay high under saturation");
     }
+
+    @Test
+    void testScreenDerivativeMatchesFiniteDifference() throws Exception {
+        var tube = new PentodeWire(8, 6_000f, 4_500f, 48, 12, 1.35f, 10f, null, null, null, null);
+        var method = PentodeWire.class.getDeclaredMethod("evaluatePlate", double.class, double.class, double.class);
+        method.setAccessible(true);
+
+        final double vAnode = 100;
+        final double vScreen = 100;
+        final double h = 1e-4;
+
+        for (double vGrid : new double[]{0, -2, -10, 5}) {
+            var state = method.invoke(tube, vAnode, vGrid, vScreen);
+            var dScreen = state.getClass().getDeclaredMethod("dCurrent_dScreen");
+            var current = state.getClass().getDeclaredMethod("current");
+            dScreen.setAccessible(true);
+            current.setAccessible(true);
+            var analytic = (double) dScreen.invoke(state);
+
+            var up = method.invoke(tube, vAnode, vGrid, vScreen + h);
+            var down = method.invoke(tube, vAnode, vGrid, vScreen - h);
+            var iUp = (double) current.invoke(up);
+            var iDown = (double) current.invoke(down);
+            var numeric = (iUp - iDown) / (2 * h);
+
+            var scale = Math.max(1e-9, Math.abs(numeric));
+            Assertions.assertTrue(Math.abs(analytic - numeric) / scale < 1e-3,
+                    "screen derivative at vGrid=" + vGrid + ": analytic " + analytic + " vs numeric " + numeric);
+        }
+    }
 }

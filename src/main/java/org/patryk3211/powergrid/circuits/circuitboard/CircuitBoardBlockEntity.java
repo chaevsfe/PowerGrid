@@ -256,7 +256,15 @@ public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IEle
         be.edgeViadWires.computeIfAbsent(this, $ -> new ArrayList<>()).add(wire);
     }
 
+    private static int[] mapAcrossBoard(int x, int y, Direction facing, Direction neighborFacing) {
+        if (facing.getAxis().isVertical() || neighborFacing.getAxis().isVertical())
+            return null;
+        return ViaMapping.across(x, y, neighborFacing.get2DDataValue() - facing.get2DDataValue());
+    }
+
     private void processHeader(@NotNull CircuitBoardBlockEntity be, PlacedComponent placed, int[] positions) {
+        if (positions == null)
+            return;
         var headerNode = be.getHeaderAt(positions);
         var thisHeaderNode = baked.getNode(new CircuitSchematic.Node(placed, 0));
         if(headerNode == null)
@@ -275,24 +283,8 @@ public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IEle
                 continue;
             var neighborFacing = be.getBlockState().getValue(HORIZONTAL_FACING);
             var facing = this.getBlockState().getValue(HORIZONTAL_FACING);
-            if (dir == Direction.UP) {
-                if(neighborFacing == facing)
-                    processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), placed.y});
-                if(neighborFacing == facing.getOpposite())
-                    processHeader(be, placed, new int[]{placed.x, Mth.abs(placed.y - 15)});
-                if(neighborFacing == facing.getClockWise())
-                    processHeader(be, placed, new int[]{placed.x, placed.y});
-                if(neighborFacing == facing.getCounterClockWise())
-                    processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), Mth.abs(placed.y - 15)});
-            } else if(dir == Direction.DOWN) {
-                if(neighborFacing == facing)
-                    processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), placed.y});
-                if(neighborFacing == facing.getOpposite())
-                    processHeader(be, placed, new int[]{placed.x, Mth.abs(placed.y - 15)});
-                if(neighborFacing == facing.getClockWise())
-                    processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), Mth.abs(placed.y - 15)});
-                if(neighborFacing == facing.getCounterClockWise())
-                    processHeader(be, placed, new int[]{placed.x, placed.y});
+            if (dir == Direction.UP || dir == Direction.DOWN) {
+                processHeader(be, placed, mapAcrossBoard(placed.x, placed.y, facing, neighborFacing));
             } else if (this.getBlockState().getValue(ROTATION) == 1 && be.getBlockState().getValue(ROTATION) == 1) {
                 if(neighborFacing == facing.getOpposite())
                     processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), placed.y});

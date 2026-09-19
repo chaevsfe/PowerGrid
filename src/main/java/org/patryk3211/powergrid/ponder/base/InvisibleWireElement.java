@@ -18,6 +18,8 @@ package org.patryk3211.powergrid.ponder.base;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.zurrtum.create.client.ponder.api.level.PonderLevel;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.item.ItemModelResolver;
@@ -37,7 +39,7 @@ public class InvisibleWireElement extends WireElement {
     }
 
     @Override
-    protected void renderLast(EntityRenderDispatcher dispatcher, ItemModelResolver itemModelResolver, PonderLevel world, SubmitNodeCollector collector, CameraRenderState cameraState, PoseStack ms, float fade, float pt) {
+    protected void renderLast(EntityRenderDispatcher dispatcher, ItemModelResolver itemModelResolver, PonderLevel world, MultiBufferSource buffer, SubmitNodeCollector collector, Camera camera, CameraRenderState cameraState, PoseStack ms, float fade, float pt) {
         if(wire == null && isVisible()) {
             wire = wireFactory.apply(world);
         }

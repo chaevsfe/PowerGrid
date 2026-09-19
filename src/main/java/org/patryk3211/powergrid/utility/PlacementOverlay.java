@@ -82,7 +82,7 @@ public class PlacementOverlay {
         var mc = Minecraft.getInstance();
         if(mc.player == null || mc.gameMode == null)
             return;
-        if(mc.gui.hud.isHidden() || mc.gameMode.getPlayerMode() == GameType.SPECTATOR)
+        if(mc.options.hideGui || mc.gameMode.getPlayerMode() == GameType.SPECTATOR)
             return;
 
         var player = mc.player;

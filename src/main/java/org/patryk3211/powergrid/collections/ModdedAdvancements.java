@@ -95,7 +95,7 @@ public class ModdedAdvancements implements DataProvider {
             .special(NOISY)
             .after(ELECTRICAL_AGE)),
     LIGHTNING = create("lightning", b -> b
-            .icon(Items.LIGHTNING_ROD.weathering().unaffected())
+            .icon(Items.LIGHTNING_ROD)
             .title("Poking grey clouds")
             .description("Trigger a thunder strike with a thunder attractor")
             .after(ROOT)),

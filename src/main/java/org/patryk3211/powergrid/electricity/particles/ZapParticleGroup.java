@@ -27,7 +27,7 @@ import net.minecraft.client.renderer.state.level.ParticleGroupRenderState;
 
 @Environment(EnvType.CLIENT)
 public class ZapParticleGroup extends ParticleGroup<ZapParticle> {
-    public static final ParticleRenderType ZAP = new ParticleRenderType("powergrid:zap", "PZ");
+    public static final ParticleRenderType ZAP = new ParticleRenderType("powergrid:zap");
 
     private final ZapParticleRenderState renderState = new ZapParticleRenderState();
 

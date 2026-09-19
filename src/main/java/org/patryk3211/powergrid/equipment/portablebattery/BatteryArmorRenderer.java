@@ -59,6 +59,7 @@ public class BatteryArmorRenderer implements ArmorRenderer {
 
         battery.disableDiffuse()
                 .light(light)
+                .extractRenderState()
                 .submit(Sheets.cutoutBlockItemSheet(), matrices, submitter);
 
         matrices.popPose();

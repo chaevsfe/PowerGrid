@@ -20,6 +20,7 @@ import com.zurrtum.create.AllFluidItemInventory;
 import com.zurrtum.create.infrastructure.fluids.BucketFluidInventory;
 import com.zurrtum.create.infrastructure.fluids.FlowableFluid;
 import com.zurrtum.create.infrastructure.fluids.FluidBlock;
+import com.zurrtum.create.infrastructure.fluids.FluidEntry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -36,19 +37,24 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.FluidState;
 import org.patryk3211.powergrid.PowerGrid;
 
 public class ModdedFluids {
-    public static final FlowableFluid ACID_FLOWING = new Flowing();
-    public static final FlowableFluid ACID = new Still();
+    private static final FluidEntry ACID_ENTRY = createEntry();
+    public static final FlowableFluid ACID_FLOWING = ACID_ENTRY.flowing;
+    public static final FlowableFluid ACID = ACID_ENTRY.still;
     public static FluidBlock ACID_BLOCK;
     public static BucketItem ACID_BUCKET;
+
+    private static FluidEntry createEntry() {
+        FluidEntry entry = new FluidEntry();
+        entry.still = new Still(entry);
+        entry.flowing = new Flowing(entry);
+        return entry;
+    }
 
     public static Fluid acid() {
         return ACID;
@@ -67,12 +73,14 @@ public class ModdedFluids {
         ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, PowerGrid.asResource("acid"));
         ACID_BLOCK = Registry.register(BuiltInRegistries.BLOCK, key,
                 new AcidBlock(ACID, BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).setId(key)));
+        ACID_ENTRY.block = ACID_BLOCK;
     }
 
     public static void registerItems() {
         ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, PowerGrid.asResource("acid_bucket"));
         ACID_BUCKET = Registry.register(BuiltInRegistries.ITEM, key,
                 new BucketItem(ACID, new Item.Properties().setId(key).craftRemainder(Items.BUCKET).stacksTo(1)));
+        ACID_ENTRY.bucket = ACID_BUCKET;
         AllFluidItemInventory.ALL.put(ACID_BUCKET, new AllFluidItemInventory.Entry(BucketFluidInventory::new));
     }
 
@@ -91,22 +99,9 @@ public class ModdedFluids {
         }
     }
 
-    private static abstract class Acid extends FlowableFluid {
-        @Override
-        public Item getBucket() {
-            return ACID_BUCKET != null ? ACID_BUCKET : Items.AIR;
-        }
-
-        @Override
-        public BlockState createLegacyBlock(FluidState state) {
-            if (ACID_BLOCK == null)
-                return Blocks.AIR.defaultBlockState();
-            return ACID_BLOCK.defaultBlockState().setValue(LiquidBlock.LEVEL, getLegacyLevel(state));
-        }
-
-        @Override
-        public boolean isSame(Fluid fluid) {
-            return fluid == ACID || fluid == ACID_FLOWING;
+    private static class Flowing extends FlowableFluid.Flowing {
+        public Flowing(FluidEntry entry) {
+            super(entry);
         }
 
         @Override
@@ -125,53 +120,24 @@ public class ModdedFluids {
         }
     }
 
-    private static class Flowing extends Acid {
-        @Override
-        public Fluid getFlowing() {
-            return this;
+    private static class Still extends FlowableFluid.Still {
+        public Still(FluidEntry entry) {
+            super(entry);
         }
 
         @Override
-        public Fluid getSource() {
-            return ACID;
+        public int getTickDelay(LevelReader level) {
+            return 5;
         }
 
         @Override
-        protected void createFluidStateDefinition(StateDefinition.Builder<Fluid, FluidState> builder) {
-            super.createFluidStateDefinition(builder);
-            builder.add(LEVEL);
+        public int getSlopeFindDistance(LevelReader level) {
+            return 4;
         }
 
         @Override
-        public int getAmount(FluidState state) {
-            return state.getValue(LEVEL);
-        }
-
-        @Override
-        public boolean isSource(FluidState state) {
-            return false;
-        }
-    }
-
-    private static class Still extends Acid {
-        @Override
-        public Fluid getFlowing() {
-            return ACID_FLOWING;
-        }
-
-        @Override
-        public Fluid getSource() {
-            return this;
-        }
-
-        @Override
-        public int getAmount(FluidState state) {
-            return 8;
-        }
-
-        @Override
-        public boolean isSource(FluidState state) {
-            return true;
+        protected float getExplosionResistance() {
+            return 100f;
         }
     }
 }

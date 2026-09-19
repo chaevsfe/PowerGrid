@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.collections;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
@@ -44,7 +45,7 @@ public class ModdedRenderLayers {
             .withLocation(PowerGrid.asResource("pipeline/additive_crt"))
             .withColorTargetState(new ColorTargetState(BlendFunction.ADDITIVE))
             .withDepthStencilState(PonderRenderPipelines.DEFAULT_TEST_NOT_WRITE)
-            .withPrimitiveTopology(VertexFormat.Mode.TRIANGLES)
+            .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
             .withCull(false)
             .build());
 

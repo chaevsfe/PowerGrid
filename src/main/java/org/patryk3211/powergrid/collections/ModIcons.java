@@ -22,8 +22,8 @@ import com.zurrtum.create.client.foundation.gui.AllIcons;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 import org.patryk3211.powergrid.PowerGrid;
@@ -82,23 +82,17 @@ public class ModIcons extends AllIcons {
     }
 
     @Override
-    public void submit(PoseStack ms, SubmitNodeCollector collector, int color) {
-        collector.submitCustomGeometry(ms, RenderTypes.text(ICON_ATLAS), new IconRenderState(iconX, iconY, color));
-    }
-
-    private record IconRenderState(int iconX, int iconY, int color) implements SubmitNodeCollector.CustomGeometryRenderer {
-        @Override
-        public void render(PoseStack.Pose pose, VertexConsumer consumer) {
-            var matrix = pose.pose();
-            int light = 15728880;
-            float u1 = (float) iconX / ATLAS_SIZE;
-            float u2 = (float) (iconX + 16) / ATLAS_SIZE;
-            float v1 = (float) iconY / ATLAS_SIZE;
-            float v2 = (float) (iconY + 16) / ATLAS_SIZE;
-            consumer.addVertex(matrix, 0, 0, 0).setColor(color).setUv(u1, v1).setLight(light);
-            consumer.addVertex(matrix, 0, 1, 0).setColor(color).setUv(u1, v2).setLight(light);
-            consumer.addVertex(matrix, 1, 1, 0).setColor(color).setUv(u2, v2).setLight(light);
-            consumer.addVertex(matrix, 1, 0, 0).setColor(color).setUv(u2, v1).setLight(light);
-        }
+    public void render(PoseStack ms, MultiBufferSource buffer, int color) {
+        VertexConsumer consumer = buffer.getBuffer(RenderTypes.text(ICON_ATLAS));
+        var matrix = ms.last().pose();
+        int light = 15728880;
+        float u1 = (float) iconX / ATLAS_SIZE;
+        float u2 = (float) (iconX + 16) / ATLAS_SIZE;
+        float v1 = (float) iconY / ATLAS_SIZE;
+        float v2 = (float) (iconY + 16) / ATLAS_SIZE;
+        consumer.addVertex(matrix, 0, 0, 0).setColor(color).setUv(u1, v1).setLight(light);
+        consumer.addVertex(matrix, 0, 1, 0).setColor(color).setUv(u1, v2).setLight(light);
+        consumer.addVertex(matrix, 1, 1, 0).setColor(color).setUv(u2, v2).setLight(light);
+        consumer.addVertex(matrix, 1, 0, 0).setColor(color).setUv(u2, v1).setLight(light);
     }
 }

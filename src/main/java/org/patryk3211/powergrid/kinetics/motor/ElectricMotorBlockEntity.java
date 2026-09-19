@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.kinetics.motor;
 
+import net.minecraft.util.Mth;
 import com.zurrtum.create.api.stress.BlockStressValues;
 import com.zurrtum.create.content.kinetics.base.GeneratingKineticBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
@@ -74,10 +75,11 @@ public class ElectricMotorBlockEntity extends GeneratingKineticBlockEntity imple
     public void updateFromNetwork(float maxStress, float currentStress, int networkSize) {
         super.updateFromNetwork(maxStress, currentStress, networkSize);
         if(ModdedConfigs.server().electricity.motorDynamicResistance.get()) {
+            final float minLoad = ModdedConfigs.server().electricity.motorMinimumLoad.getF();
             if (maxStress != 0) {
-                load = Math.max(currentStress / maxStress, 0.05f);
+                load = Mth.clamp(currentStress / maxStress, minLoad, 1.0f);
             } else {
-                load = 0.05f;
+                load = minLoad;
             }
             coil.setResistance(resistance() / load);
         }

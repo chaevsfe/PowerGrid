@@ -22,8 +22,15 @@ import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
 public class BooleanProperty extends ComponentProperty<Boolean> {
+    Boolean defaultValue = false;
+
     public BooleanProperty(String namespace, String name) {
         super(namespace, name);
+    }
+
+    public BooleanProperty(String namespace, String name, Boolean defaultValue) {
+        super(namespace, name);
+        this.defaultValue = defaultValue;
     }
 
     @Override
@@ -52,6 +59,6 @@ public class BooleanProperty extends ComponentProperty<Boolean> {
 
     @Override
     public Boolean defaultValue() {
-        return false;
+        return defaultValue;
     }
 }

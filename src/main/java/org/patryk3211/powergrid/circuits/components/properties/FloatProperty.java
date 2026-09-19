@@ -86,7 +86,7 @@ public class FloatProperty extends ComponentProperty<Float> {
             value *= 1e-6f;
             suffix = "M";
         }
-        return value + suffix;
+        return String.format("%.2f%s", value, suffix);
     }
 
     @Override

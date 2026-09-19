@@ -69,7 +69,10 @@ public class SawItem extends AxeItem {
                 stack.hurtAndBreak(1, miningEntity, EquipmentSlot.MAINHAND);
             }
             if(player.isShiftKeyDown() && power >= 0.3f && !level.isClientSide()) {
-                TreeCutter.findTree(level, pos, state).destroyBlocks(level, null, (pos1, stack1) -> dropTreeItem(level, pos1, stack1));
+                if (TreeCutter.isLog(state) || TreeCutter.isRoot(state) || TreeCutter.isVerticalPlant(state) ||
+                        TreeCutter.isChorus(state)) {
+                    TreeCutter.findTree(level, pos, state).destroyBlocks(level, null, (pos1, stack1) -> dropTreeItem(level, pos1, stack1));
+                }
             }
             return true;
         }

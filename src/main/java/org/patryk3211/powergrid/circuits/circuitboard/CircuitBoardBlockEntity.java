@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.circuits.circuitboard;
 
+import net.minecraft.util.Mth;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.content.kinetics.fan.AirCurrent;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
@@ -70,12 +71,15 @@ import java.util.*;
 
 import static org.patryk3211.powergrid.circuits.circuitboard.CircuitBoardBlock.HORIZONTAL_FACING;
 import static org.patryk3211.powergrid.circuits.circuitboard.CircuitBoardBlock.ROTATION;
+import static org.patryk3211.powergrid.circuits.components.ViaComponent.VERTICAL_PASSTHROUGH;
+import static org.patryk3211.powergrid.circuits.components.ViaComponent.EDGE_CONNECTIONS;
 
 public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IElectric, IHaveGoggleInformation, ISchematicHolder, ElectricBehaviour.SyncAppender {
     private CircuitSchematic schematic = new CircuitSchematic();
     private BakedCircuit baked;
     private final Map<Class<?>, Collection<PlacedComponent>> componentCache = new HashMap<>();
     private final Map<CircuitBoardBlockEntity, List<ElectricWire>> edgeViadWires = new HashMap<>();
+    private final Map<CircuitBoardBlockEntity, List<ElectricWire>> backViadWires = new HashMap<>();
 
     private final Map<AirCurrent, Float> coolingAir = new HashMap<>();
     public float totalCoolingFactorMultiplier = 1.0f;
@@ -171,12 +175,28 @@ public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IEle
             edgePosition = 15 - edgePosition;
         }
         for(var placed : getComponents(ViaComponent.class)) {
+            if (!placed.get(EDGE_CONNECTIONS))
+                continue;
             var match = switch(orientation) {
                 case UP -> placed.x == edgePosition && placed.y == 0;
                 case DOWN -> placed.x == edgePosition && placed.y == 15;
                 case LEFT -> placed.x == 0 && placed.y == edgePosition;
                 case RIGHT -> placed.x == 15 && placed.y == edgePosition;
             };
+            if(match)
+                return baked.getNode(new CircuitSchematic.Node(placed, 0));
+        }
+        return null;
+    }
+
+    private FloatingNode getHeaderAt(int[] position) {
+        if (baked == null)
+            return null;
+
+        for(var placed : getComponents(ViaComponent.class)) {
+            if(!placed.get(VERTICAL_PASSTHROUGH))
+                continue;
+            boolean match = placed.x == position[0] && placed.y == position[1];
             if(match)
                 return baked.getNode(new CircuitSchematic.Node(placed, 0));
         }
@@ -236,8 +256,54 @@ public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IEle
         be.edgeViadWires.computeIfAbsent(this, $ -> new ArrayList<>()).add(wire);
     }
 
+    private void processHeader(@NotNull CircuitBoardBlockEntity be, PlacedComponent placed, int[] positions) {
+        var headerNode = be.getHeaderAt(positions);
+        var thisHeaderNode = baked.getNode(new CircuitSchematic.Node(placed, 0));
+        if(headerNode == null)
+            return;
+        if(thisHeaderNode == null)
+            return;
+
+        var wire = makeWire(be.electricBehaviour, headerNode, thisHeaderNode);
+        backViadWires.computeIfAbsent(be, $ -> new ArrayList<>()).add(wire);
+        be.backViadWires.computeIfAbsent(this, $ -> new ArrayList<>()).add(wire);
+    }
+
+    private void processBehind(@NotNull CircuitBoardBlockEntity be, Direction dir) {
+        for (var placed : getComponents(ViaComponent.class)) {
+            if(!placed.get(VERTICAL_PASSTHROUGH))
+                continue;
+            var neighborFacing = be.getBlockState().getValue(HORIZONTAL_FACING);
+            var facing = this.getBlockState().getValue(HORIZONTAL_FACING);
+            if (dir == Direction.UP) {
+                if(neighborFacing == facing)
+                    processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), placed.y});
+                if(neighborFacing == facing.getOpposite())
+                    processHeader(be, placed, new int[]{placed.x, Mth.abs(placed.y - 15)});
+                if(neighborFacing == facing.getClockWise())
+                    processHeader(be, placed, new int[]{placed.x, placed.y});
+                if(neighborFacing == facing.getCounterClockWise())
+                    processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), Mth.abs(placed.y - 15)});
+            } else if(dir == Direction.DOWN) {
+                if(neighborFacing == facing)
+                    processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), placed.y});
+                if(neighborFacing == facing.getOpposite())
+                    processHeader(be, placed, new int[]{placed.x, Mth.abs(placed.y - 15)});
+                if(neighborFacing == facing.getClockWise())
+                    processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), Mth.abs(placed.y - 15)});
+                if(neighborFacing == facing.getCounterClockWise())
+                    processHeader(be, placed, new int[]{placed.x, placed.y});
+            } else if (this.getBlockState().getValue(ROTATION) == 1 && be.getBlockState().getValue(ROTATION) == 1) {
+                if(neighborFacing == facing.getOpposite())
+                    processHeader(be, placed, new int[]{Mth.abs(placed.x - 15), placed.y});
+            }
+        }
+    }
+
     private void processNeighbor(@NotNull CircuitBoardBlockEntity be, Orientation expectedOrientation) {
         for(var placed : getComponents(ViaComponent.class)) {
+            if (!placed.get(EDGE_CONNECTIONS))
+                continue;
             // This must also take corners into account (a via on two edges)
             if(placed.x == 0) {
                 processViaOrientation(be, expectedOrientation, placed, Orientation.LEFT, placed.y);
@@ -260,6 +326,11 @@ public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IEle
             entry.getValue().forEach(ElectricWire::remove);
         }
         edgeViadWires.clear();
+        for(var entry : backViadWires.entrySet()) {
+            entry.getKey().backViadWires.remove(this);
+            entry.getValue().forEach(ElectricWire::remove);
+        }
+        backViadWires.clear();
     }
 
     private void bakeCircuit() {
@@ -300,6 +371,21 @@ public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IEle
             } else if(state.getValue(ROTATION).equals(neighborState.getValue(ROTATION))) {
                 processNeighbor(be, orientation);
             }
+        }
+        if (state.getValue(ROTATION) == 1) {
+            var dir = state.getValue(HORIZONTAL_FACING);
+            var opt = level.getBlockEntity(worldPosition.relative(dir), ModdedBlockEntities.CIRCUIT_BOARD.get());
+            if(opt.isPresent()) {
+                var be = opt.get();
+                var neighborState = be.getBlockState();
+                if(neighborState.getValue(ROTATION) == 1 && neighborState.getValue(HORIZONTAL_FACING) == dir.getOpposite()) {
+                    processBehind(be, dir);
+                }
+            }
+        } else if (state.getValue(ROTATION) == 0 || state.getValue(ROTATION) == 2) {
+            var dir = state.getValue(ROTATION) == 0 ? Direction.DOWN : Direction.UP;
+            var opt = level.getBlockEntity(worldPosition.relative(dir), ModdedBlockEntities.CIRCUIT_BOARD.get());
+            opt.ifPresent(be -> processBehind(be, dir));
         }
     }
 

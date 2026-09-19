@@ -1,5 +1,7 @@
 package org.patryk3211.powergrid.electricity.solarpanel;
 
+import org.patryk3211.powergrid.electricity.solarpanel.registry.SolarBiomeRegistry;
+import org.patryk3211.powergrid.electricity.solarpanel.registry.SolarBiomeEntry;
 import org.patryk3211.powergrid.compat.sable.SableCompanion;
 import org.patryk3211.powergrid.compat.sable.math.JOMLConversion;
 import net.minecraft.core.*;
@@ -41,6 +43,8 @@ public class SolarPanelBlockEntity extends ElectricBlockEntity implements Transf
     private int rayCastDelay = 0;
     private float sunVisibility = 0;
     private boolean skyVisible = false;
+    private float solarConstant = 1361;
+    private SolarBiomeEntry solarBiomeEntry;
     private Vector3d panelNormal;
     private double irradiance;
 
@@ -112,7 +116,14 @@ public class SolarPanelBlockEntity extends ElectricBlockEntity implements Transf
         var subLevel = SableCompanion.INSTANCE.getContaining(this);
 
         if (firstTick || subLevel != null) {
-            ambientTemp = ThermalBehaviour.getAmbientTemperature(world, blockPos);
+            solarBiomeEntry = SolarBiomeRegistry.forBiome(world, blockPos);
+            if (solarBiomeEntry != null && solarBiomeEntry.overrideTemp()) {
+                ambientTemp = solarBiomeEntry.biomeTemp();
+            } else {
+                ambientTemp = ThermalBehaviour.getAmbientTemperature(world, blockPos);
+            }
+            if (solarBiomeEntry != null && solarBiomeEntry.overrideSolarConstant())
+                solarConstant = solarBiomeEntry.solarConstant();
             if (ambientTemp <= ThermalBehaviour.ABSOLUTE_ZERO)
                 ambientTemp = 22f;
             firstTick = false;
@@ -149,15 +160,27 @@ public class SolarPanelBlockEntity extends ElectricBlockEntity implements Transf
     }
 
     public double getIrradiance(double AM, double cloudCover, int YPos, Level world) {
-        if (AM == Double.POSITIVE_INFINITY) return 0;
-        var transmittance = 1 - cloudCover;
-        var irradiance = SOLAR_CONSTANT * Math.pow(0.7,Math.pow(AM, 0.678));
-        irradiance = irradiance * ((((YPos - 70) / 250f) * 0.04f) + 1); //70 is around average world height, but it could also be put to sea level
-        if (irradiance > SOLAR_CONSTANT) irradiance = SOLAR_CONSTANT;
+        double transmittance = 1, irradiance;
+        if (AM == Double.POSITIVE_INFINITY) {
+            if (solarBiomeEntry == null || !solarBiomeEntry.disableAtmosphere())
+                return 0;
+            AM = 0;
+        }
+
+        if (solarBiomeEntry == null || !solarBiomeEntry.disableWeather())
+            transmittance = 1 - cloudCover;
+        if (solarBiomeEntry == null || !solarBiomeEntry.disableAtmosphere()) {
+            irradiance = solarConstant * Math.pow(0.7, Math.pow(AM, 0.678));
+            irradiance = irradiance * ((((YPos - 70) / 250f) * 0.04f) + 1); //70 is around average world height, but it could also be put to sea level
+        } else {
+            irradiance = solarConstant;
+        }
+        if (irradiance > solarConstant) irradiance = solarConstant;
 
         double sunAngle = getSunAngle(world, worldPosition);
         Vector3d sunDir = new Vector3d(-Math.sin(sunAngle), Math.cos(sunAngle), 0);
-        if (sunDir.y <= 0) return 0;
+        if (sunDir.y <= 0 && (solarBiomeEntry == null || !solarBiomeEntry.enableFullRotation()))
+            return 0;
 
         if (rayCastDelay-- == 0){
             if (connectedPanels.isEmpty()){

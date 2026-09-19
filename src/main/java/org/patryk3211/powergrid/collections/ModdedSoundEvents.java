@@ -101,6 +101,8 @@ public class ModdedSoundEvents {
     public static final SoundEntry RELAY_CLICK = register("relay_click", SoundSource.BLOCKS, 1.0f, 1.0f);
     public static final SoundEntry COMPONENT_EXPLODE = register("component_explode", SoundSource.BLOCKS, 0.25f, 2.0f);
     public static final SoundEntry FUSE_POPS = register("fuse_pops", SoundSource.BLOCKS, 0.5f, 1.6f);
+    public static final SoundEntry THYRATRON_FIRE = register("thyratron_fire", SoundSource.BLOCKS, 0.35f, 1.85f);
+    public static final SoundEntry THYRATRON_HUM = register("thyratron_hum", SoundSource.BLOCKS, 1.0f, 1.0f);
     public static final SoundEntry MICROSWITCH_ON = register("uswitch_on", SoundSource.BLOCKS, 1.0f, 2.0f);
     public static final SoundEntry MICROSWITCH_OFF = register("uswitch_off", SoundSource.BLOCKS, 1.0f, 2.0f);
     public static final SoundEntry MICROBUTTON_ON = register("ubutton_on", SoundSource.BLOCKS, 0.75f, 2.0f);

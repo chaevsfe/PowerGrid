@@ -37,6 +37,8 @@ import org.patryk3211.powergrid.PowerGrid;
 import org.patryk3211.powergrid.circuits.circuitboard.CircuitBoardBlockEntity;
 import org.patryk3211.powergrid.circuits.components.BarretterTubeComponent;
 import org.patryk3211.powergrid.circuits.components.ElectronTubeComponent;
+import org.patryk3211.powergrid.circuits.components.ThyratronComponent;
+import org.patryk3211.powergrid.circuits.components.PentodeComponent;
 import org.patryk3211.powergrid.circuits.components.GaugeComponent;
 import org.patryk3211.powergrid.circuits.components.LabelComponent;
 import org.patryk3211.powergrid.circuits.components.LightBulbComponent;
@@ -61,6 +63,8 @@ public class ComponentRenderers {
     static {
         RENDERERS.put(BarretterTubeComponent.class, ComponentRenderers::barretterTube);
         RENDERERS.put(ElectronTubeComponent.class, ComponentRenderers::electronTube);
+        RENDERERS.put(PentodeComponent.class, ComponentRenderers::pentode);
+        RENDERERS.put(ThyratronComponent.class, ComponentRenderers::thyratron);
         RENDERERS.put(RegulatorTubeComponent.class, ComponentRenderers::regulatorTube);
         RENDERERS.put(GaugeComponent.class, ComponentRenderers::gauge);
         RENDERERS.put(PotentiometerComponent.class, ComponentRenderers::potentiometer);
@@ -78,6 +82,10 @@ public class ComponentRenderers {
         }
         return null;
     }
+
+    private static final float GLOW_CENTER_X = 1.5f / 16f;
+    private static final float GLOW_CENTER_Y = 6.5f / 16f;
+    private static final float GLOW_CENTER_Z = 1.5f / 16f;
 
     private static void glow(List<ComponentDrawCall> out, SuperByteBufferRenderState state) {
         out.add((ms, queue) -> state.submit(ModdedRenderLayers.getAdditive(), ms, queue.order(1)));
@@ -100,7 +108,7 @@ public class ComponentRenderers {
     private static void electronTube(CircuitBoardBlockEntity be, PlacedComponent placed, float partialTicks, int light, int overlay, List<ComponentDrawCall> out) {
         int a = 0;
         if(placed.customData instanceof ElectronTubeComponent.RenderData data) {
-            a = (int) (Mth.lerp(partialTicks, data.prev, data.current) * 64);
+            a = (int) (Mth.lerp(partialTicks, data.prev, data.current) * 160);
         }
         if(a == 0)
             return;
@@ -109,6 +117,62 @@ public class ComponentRenderers {
                 .color(a, a, a, 255)
                 .light(LightCoordsUtil.FULL_BRIGHT)
                 .extractRenderState());
+    }
+
+    private static void pentode(CircuitBoardBlockEntity be, PlacedComponent placed, float partialTicks, int light, int overlay, List<ComponentDrawCall> out) {
+        int a = 0;
+        if(placed.customData instanceof ElectronTubeComponent.RenderData data) {
+            a = (int) (Mth.lerp(partialTicks, data.prev, data.current) * 170);
+        }
+        if(a == 0)
+            return;
+        glow(out, CachedBuffers.partial(ModdedPartialModels.PENTODE_GLOW, be.getBlockState())
+                .disableDiffuse()
+                .color(a, a, a, 255)
+                .light(LightCoordsUtil.FULL_BRIGHT)
+                .extractRenderState());
+    }
+
+    private static void thyratron(CircuitBoardBlockEntity be, PlacedComponent placed, float partialTicks, int light, int overlay, List<ComponentDrawCall> out) {
+        float heater = 0;
+        float plasma = 0;
+        float strike = 0;
+        if(placed.customData instanceof ThyratronComponent.RenderData data) {
+            heater = Mth.lerp(partialTicks, data.heaterPrev, data.heater);
+            plasma = data.plasma.getValue(partialTicks);
+            strike = data.strike.getValue(partialTicks);
+        }
+
+        int heaterAlpha = (int) (heater * 82);
+        if(heaterAlpha > 0) {
+            glow(out, CachedBuffers.partial(ModdedPartialModels.THYRATRON_GLOW, be.getBlockState())
+                    .disableDiffuse()
+                    .color(heaterAlpha, heaterAlpha, heaterAlpha, 255)
+                    .light(LightCoordsUtil.FULL_BRIGHT)
+                    .extractRenderState());
+        }
+
+        int plasmaAlpha = (int) (plasma * 200);
+        if(plasmaAlpha > 0) {
+            glow(out, CachedBuffers.partial(ModdedPartialModels.THYRATRON_GLOW, be.getBlockState())
+                    .disableDiffuse()
+                    .color(plasmaAlpha * 2 / 3, plasmaAlpha, plasmaAlpha * 5 / 6, 255)
+                    .light(LightCoordsUtil.FULL_BRIGHT)
+                    .extractRenderState());
+        }
+
+        int flash = (int) (strike * 255);
+        if(flash > 0) {
+            float scale = 1f + strike * 0.07f;
+            glow(out, CachedBuffers.partial(ModdedPartialModels.THYRATRON_GLOW, be.getBlockState())
+                    .translate(GLOW_CENTER_X, GLOW_CENTER_Y, GLOW_CENTER_Z)
+                    .scale(scale)
+                    .translate(-GLOW_CENTER_X, -GLOW_CENTER_Y, -GLOW_CENTER_Z)
+                    .disableDiffuse()
+                    .color(flash, flash, flash, 255)
+                    .light(LightCoordsUtil.FULL_BRIGHT)
+                    .extractRenderState());
+        }
     }
 
     private static void regulatorTube(CircuitBoardBlockEntity be, PlacedComponent placed, float partialTicks, int light, int overlay, List<ComponentDrawCall> out) {

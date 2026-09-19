@@ -77,10 +77,10 @@ public class ComponentRegistry {
                 .lookupOrThrow(ComponentRegistry.ITEM_REGISTRY_KEY);
         for(var entry : registry.entrySet()) {
             if(stack.is(entry.getValue().item()))
-                return entry.getKey().identifier();
+                return remapId(entry.getKey().identifier());
             var tag = entry.getValue().tag();
             if(tag.isPresent() && stack.is(tag.get()))
-                return entry.getKey().identifier();
+                return remapId(entry.getKey().identifier());
         }
         return null;
     }
@@ -100,15 +100,21 @@ public class ComponentRegistry {
                 .lookupOrThrow(ComponentRegistry.ITEM_REGISTRY_KEY);
         for(var entry : registry.entrySet()) {
             if(entry.getValue().item() == item)
-                return get(entry.getKey().identifier());
+                return get(remapId(entry.getKey().identifier()));
             var tag = entry.getValue().tag();
             if(tag.isPresent() && item.builtInRegistryHolder().is(tag.get()))
-                return get(entry.getKey().identifier());
+                return get(remapId(entry.getKey().identifier()));
         }
         return null;
     }
 
     @NotNull
+    private static Identifier remapId(Identifier id) {
+        if ("powergrid:electron_tube".equals(id.toString()))
+            return PowerGrid.asResource("triode");
+        return id;
+    }
+
     public static Identifier getId(@NotNull Component component) {
         return Objects.requireNonNull(REGISTRY.getKey(component), "This component is not registered");
     }

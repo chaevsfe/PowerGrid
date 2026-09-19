@@ -26,6 +26,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.patryk3211.powergrid.advancements.PowerGridTriggers;
 import org.patryk3211.powergrid.circuits.components.ComponentRegistry;
+import org.patryk3211.powergrid.electricity.solarpanel.registry.SolarBiomeEntry;
+import org.patryk3211.powergrid.electricity.solarpanel.registry.SolarBiomeRegistry;
 import org.patryk3211.powergrid.circuits.components.Components;
 import org.patryk3211.powergrid.collections.*;
 import org.patryk3211.powergrid.commands.PerformanceCommand;
@@ -74,6 +76,7 @@ public class PowerGrid {
 
 	private static void setup() {
 		DynamicRegistries.registerSynced(ComponentRegistry.ITEM_REGISTRY_KEY, ComponentRegistry.ITEM_CODEC, ComponentRegistry.ITEM_CODEC);
+		DynamicRegistries.register(SolarBiomeRegistry.KEY, SolarBiomeEntry.CODEC);
 		DynamicRegistries.registerSynced(WireRegistry.KEY, WireItemEntry.CODEC, WireItemEntry.CODEC);
 		RedstoneConverterRegistry.init();
 		ModdedAdvancements.register();

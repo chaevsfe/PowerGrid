@@ -295,5 +295,25 @@
       }
     ],
     "subtitle": "powergrid.subtitle.wire_cut"
+  },
+  "thyratron_hum": {
+    "sounds": [
+      {
+        "type": "file",
+        "name": "powergrid:thyratron_hum"
+      }
+    ],
+    "subtitle": "powergrid.subtitle.thyratron_hum"
+  },
+  "thyratron_fire": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "minecraft:entity.firework_rocket.blast",
+        "volume": 0.35,
+        "pitch": 1.85
+      }
+    ],
+    "subtitle": "powergrid.subtitle.thyratron_fire"
   }
 }

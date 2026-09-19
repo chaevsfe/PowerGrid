@@ -21,6 +21,7 @@ import com.zurrtum.create.content.processing.sequenced.SequencedAssemblyItem;
 import org.patryk3211.powergrid.registrate.builders.ItemBuilder;
 import org.patryk3211.powergrid.registrate.entry.ItemEntry;
 import org.patryk3211.powergrid.registrate.fn.NonNullUnaryOperator;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import org.patryk3211.powergrid.circuits.circuitboard.IncompleteCircuitItem;
@@ -162,6 +163,15 @@ public class ModdedItems {
             .register();
     public static final ItemEntry<Item> CAPACITOR = ingredient("capacitor");
     public static final ItemEntry<Item> POTENTIOMETER = ingredient("potentiometer");
+    public static final ItemEntry<Item> TRIODE = REGISTRATE.item("triode", Item::new)
+            .lang("Triode")
+            .register();
+    public static final ItemEntry<Item> PENTODE = REGISTRATE.item("pentode", Item::new)
+            .lang("Pentode")
+            .register();
+    public static final ItemEntry<Item> THYRATRON = REGISTRATE.item("thyratron", Item::new)
+            .lang("Thyratron")
+            .register();
     public static final ItemEntry<Item> REGULATOR_TUBE = ingredient("regulator_tube");
     public static final ItemEntry<Item> NEON_BULB = ingredient("neon_bulb");
     public static final ItemEntry<Item> BARRETTER_TUBE = ingredient("barretter_tube");
@@ -185,19 +195,23 @@ public class ModdedItems {
     public static final ItemEntry<ElectroZapperItem> ELECTROZAPPER = REGISTRATE.item("electrozapper", ElectroZapperItem::new)
             .model(itemWithParent("item/electrozapper/item"))
             .lang("Electro-Zapper")
+            .tag(ItemTags.DURABILITY_ENCHANTABLE)
             .register();
 
     public static final ItemEntry<ElectroBatonItem> ELECTROBATON = REGISTRATE.item("electrobaton", ElectroBatonItem::new)
             .model(itemWithParent("item/electrobaton/item"))
             .lang("Electro-Baton")
+            .tag(ItemTags.SWORDS)
             .register();
 
     public static final ItemEntry<DrillItem> PORTABLE_DRILL = REGISTRATE.item("portable_drill", DrillItem::new)
             .model(itemWithParent("item/drill/item"))
+            .tag(ItemTags.PICKAXES)
             .register();
 
     public static final ItemEntry<SawItem> PORTABLE_SAW = REGISTRATE.item("portable_saw", SawItem::new)
             .model(itemWithParent("item/saw/item"))
+            .tag(ItemTags.AXES)
             .register();
 
     public static final ItemEntry<PortableBatteryPlaceableItem> PORTABLE_BATTERY_PLACEABLE = REGISTRATE.item("portable_battery_placeable",

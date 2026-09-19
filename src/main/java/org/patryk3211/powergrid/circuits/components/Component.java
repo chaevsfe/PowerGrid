@@ -103,6 +103,10 @@ public abstract class Component {
         return false;
     }
 
+    public boolean isExternalNode(int nodeIndex) {
+        return emitExternalTerminals();
+    }
+
     public List<TerminalBoundingBox> terminals(@NotNull PlacedComponent placed) {
         return List.of();
     }

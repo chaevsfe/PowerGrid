@@ -141,10 +141,12 @@ public class PowerGridPonderTags {
                 .add(ModdedBlocks.BATTERY);
 
         helper.addToTag(CIRCUIT_COMPONENTS)
-                .add(BuiltInRegistries.ITEM.getKey(Items.COPPER_NUGGET))
-                .add(BuiltInRegistries.ITEM.getKey(AllItems.ELECTRON_TUBE));
+                .add(BuiltInRegistries.ITEM.getKey(Items.COPPER_NUGGET));
 
         HELPER.addToTag(CIRCUIT_COMPONENTS)
+                .add(ModdedItems.TRIODE)
+                .add(ModdedItems.PENTODE)
+                .add(ModdedItems.THYRATRON)
                 .add(ModdedBlocks.WIRE_CONNECTOR)
                 .add(ModdedItems.RESISTOR)
                 .add(ModdedItems.DIODE)

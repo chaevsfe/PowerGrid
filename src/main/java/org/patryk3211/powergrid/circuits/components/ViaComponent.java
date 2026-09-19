@@ -16,6 +16,10 @@
  */
 package org.patryk3211.powergrid.circuits.components;
 
+import org.patryk3211.powergrid.circuits.components.properties.ComponentProperty;
+import org.patryk3211.powergrid.circuits.components.properties.BooleanProperty;
+import org.patryk3211.powergrid.PowerGrid;
+import com.google.common.collect.ImmutableCollection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.patryk3211.powergrid.circuits.circuitboard.ComponentCircuitBuilder;
@@ -24,6 +28,9 @@ import org.patryk3211.powergrid.circuits.schematic.PlacedComponent;
 import org.patryk3211.powergrid.circuits.thermal.ThermalBuilder;
 
 public class ViaComponent extends Component {
+    public static final BooleanProperty EDGE_CONNECTIONS = new BooleanProperty(PowerGrid.MOD_ID, "edge_connections", true);
+    public static final BooleanProperty VERTICAL_PASSTHROUGH = new BooleanProperty(PowerGrid.MOD_ID, "vertical_passthrough");
+
     private static final ComponentFootprint NODED_FOOTPRINT = new ComponentFootprint.Builder(1, 1)
             .addPad(0, 0, 0).build();
 
@@ -34,10 +41,19 @@ public class ViaComponent extends Component {
     @Override
     public ComponentFootprint footprint(@Nullable PlacedComponent placed) {
         if(placed != null) {
-            if(placed.x == 0 || placed.y == 0 || placed.x == 15 || placed.y == 15)
+            if(placed.x == 0 || placed.y == 0 || placed.x == 15 || placed.y == 15 && placed.get(EDGE_CONNECTIONS) == true)
+                return NODED_FOOTPRINT;
+
+            if (placed.get(VERTICAL_PASSTHROUGH) == true)
                 return NODED_FOOTPRINT;
         }
         return super.footprint(placed);
+    }
+
+    @Override
+    protected void addProperties(ImmutableCollection.Builder<ComponentProperty<?>> properties) {
+        super.addProperties(properties);
+        properties.add(EDGE_CONNECTIONS, VERTICAL_PASSTHROUGH);
     }
 
     @Override

@@ -239,6 +239,10 @@ public class ComponentFootprint {
                     keyShort == null ? null : Component.translatable(sharedKeyBase + "." + keyShort));
         }
 
+        public Builder addPadSharedText(int x, int y, int nodeIndex, @NotNull String key) {
+            return addPadSharedText(x, y, nodeIndex, key, key + ".short");
+        }
+
         public Builder withOutline() {
             outline = true;
             return this;
@@ -268,8 +272,6 @@ public class ComponentFootprint {
             if(!padIndices.isEmpty()) {
                 if (padIndices.first() != 0)
                     throw new IllegalStateException("Footprint pad indices must start from 0");
-                if (padIndices.last() != padIndices.size() - 1)
-                    throw new IllegalStateException("Footprint pad indices must not contain any gaps");
             }
             return new ComponentFootprint(width, height, width, height, pads, outline, withItem, arrow);
         }

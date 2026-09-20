@@ -3,7 +3,7 @@
   "id": "powergrid",
   "version": "${version}",
   "name": "Create Fly: Power Grid",
-  "description": "Create: Power Grid port for Create Fly 26.2. Physics-based electricity simulation for Create.",
+  "description": "Create: Power Grid port for Create Fly 26.1.2. Physics-based electricity simulation for Create.",
   "authors": [
     "patryk3211",
     "Da-Negy",

@@ -42,7 +42,7 @@ public class ItemInHandRendererMixin {
     @Final
     private EntityRenderDispatcher entityRenderDispatcher;
 
-    @Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderArmWithItem", at = @At("HEAD"), cancellable = true)
     private void powerGrid$submitZapperArm(AbstractClientPlayer player, float partialTick, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equipProgress, PoseStack poseStack, SubmitNodeCollector collector, int light, CallbackInfo ci) {
         if(PowerGridClient.ELECTRO_ZAPPER_RENDER_HANDLER.onRenderPlayerHand(stack, minecraft, entityRenderDispatcher,
                 (ItemInHandRenderer) (Object) this, poseStack, collector, light, partialTick, hand, equipProgress, swingProgress))

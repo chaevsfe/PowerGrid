@@ -2,7 +2,8 @@
 	"format_version": "1.21.6",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"1": "powergrid:block/component/thyratron"
+		"1": "powergrid:block/component/thyratron",
+		"particle": "#1"
 	},
 	"elements": [
 		{

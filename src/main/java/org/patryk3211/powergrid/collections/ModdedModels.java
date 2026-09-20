@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.collections;
 
+import com.zurrtum.create.client.AllCasings;
 import com.zurrtum.create.client.AllFluidConfigs;
 import com.zurrtum.create.client.AllModels;
 import com.zurrtum.create.client.content.decoration.encasing.EncasedCTBehaviour;
@@ -34,6 +35,8 @@ import org.patryk3211.powergrid.general.ceilingtile.solar.CeilingTileSolarBlockC
 public class ModdedModels {
     public static void register() {
         connectedTextures(ModdedBlocks.BATTERY.get(), new BatteryCTBehaviour());
+        AllCasings.make(ModdedBlocks.CONDUCTIVE_CASING.get(), ModdedPartialModels.CONDUCTIVE_CASING);
+        AllCasings.make(ModdedBlocks.COPPER_PLATING.get(), ModdedPartialModels.COPPER_PLATING);
         connectedTextures(ModdedBlocks.CONDUCTIVE_CASING.get(), new EncasedCTBehaviour(ModdedPartialModels.CONDUCTIVE_CASING));
         connectedTextures(ModdedBlocks.COPPER_PLATING.get(), new EncasedCTBehaviour(ModdedPartialModels.COPPER_PLATING));
         connectedTextures(ModdedBlocks.COPPER_PLATING_STAIRS.get(), new EncasedCTBehaviour(ModdedPartialModels.COPPER_PLATING));

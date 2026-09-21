@@ -216,7 +216,7 @@ public class CircuitDesignTableLoadScreen extends AbstractSimiContainerScreen<Ci
         int bgX = getLeftOfCentered(WIDTH);
 
         ctx.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, bgX, topPos, 0, 0, WIDTH, HEIGHT, TEXTURE_SIZE, TEXTURE_SIZE);
-        ctx.text(font, FILE_DIALOG, leftPos + 5, topPos + 4, 0x404040, false);
+        ctx.text(font, FILE_DIALOG, leftPos + 5, topPos + 4, 0xFF404040, false);
 
         if(popupTimeout > 0) {
             int color = 0xFF6060;

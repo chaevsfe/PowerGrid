@@ -124,7 +124,7 @@ public class CircuitDesignTableScreen extends AbstractSimiContainerScreen<Circui
         CircuitSchematicRender.renderLayer(schematic.back(), ctx, x, y, SCALE, COLOR_TRACE_BACK);
         CircuitSchematicRender.renderComponents(schematic, ctx, leftPos + 44 - 11, topPos + 20, SCALE);
 
-        ctx.centeredText(font, title, leftPos + (WIDTH - 8) / 2, topPos + 3, 0xFFFFFF);
+        ctx.centeredText(font, title, leftPos + (WIDTH - 8) / 2, topPos + 3, 0xFFFFFFFF);
     }
 
     @Override

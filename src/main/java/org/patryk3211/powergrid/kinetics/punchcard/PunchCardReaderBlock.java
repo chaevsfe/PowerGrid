@@ -17,16 +17,19 @@
 package org.patryk3211.powergrid.kinetics.punchcard;
 
 import com.zurrtum.create.foundation.block.IBE;
+import com.zurrtum.create.infrastructure.items.ItemInventoryProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -52,7 +55,7 @@ import org.patryk3211.powergrid.utility.Lang;
 
 import java.util.List;
 
-public class PunchCardReaderBlock extends ElectricKineticBlock implements IBE<PunchCardReaderBlockEntity>, IHaveElectricProperties {
+public class PunchCardReaderBlock extends ElectricKineticBlock implements IBE<PunchCardReaderBlockEntity>, ItemInventoryProvider<PunchCardReaderBlockEntity>, IHaveElectricProperties {
     public static final EnumProperty<Direction> HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     private static Component bit(int i) {
@@ -111,6 +114,11 @@ public class PunchCardReaderBlock extends ElectricKineticBlock implements IBE<Pu
     @Override
     public Class<PunchCardReaderBlockEntity> getBlockEntityClass() {
         return PunchCardReaderBlockEntity.class;
+    }
+
+    @Override
+    public Container getInventory(LevelAccessor level, BlockPos pos, BlockState state, PunchCardReaderBlockEntity blockEntity, Direction side) {
+        return blockEntity.getCardInventory(side);
     }
 
     @Override

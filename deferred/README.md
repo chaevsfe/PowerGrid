@@ -13,9 +13,8 @@ Code kept out of the compiled source set on purpose. Nothing under this director
   `{"model": {"type": "powergrid:model/<name>"}}`. **`SawItemRenderer` was dropped, not ported**: its `render`
   only re-rendered the unmodified base model, so a custom `ItemModel` for `portable_saw` would be a no-op that
   additionally forces `setAnimated()` and loses vanilla tint support; the item stays on `minecraft:model`.
-  `DrillItemRenderer.renderPlayerHand` and `SawItemRenderer.renderPlayerHand` were dropped with it — both were
-  called ONLY from `forge/.../ForgeClientEvents.renderPlayerHand`, so upstream's own Fabric module never ran them.
-  Upstream's copies are one `git show fcf4c4d4:...` away if first-person tool arms are ever wanted.
+  The first-person pose of `DrillItemRenderer.renderPlayerHand` and `SawItemRenderer.renderPlayerHand` (fired from
+  NeoForge's `RenderHandEvent`) lives in `mixin/client/ItemInHandRendererMixin`, at the head of `submitArmWithItem`.
   `ThermometerItemRenderer` and `MultimeterItemRenderer` are back in the compiled source set with their `render`
   bodies removed: they now hold only the per-frame client state the models read (`needleAngle`, `getDialState`),
   their `clientTick`s, their two overlay text providers and the multimeter's world-space probe line.

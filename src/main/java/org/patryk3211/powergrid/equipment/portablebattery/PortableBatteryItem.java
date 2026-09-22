@@ -16,10 +16,13 @@
  */
 package org.patryk3211.powergrid.equipment.portablebattery;
 
+import com.zurrtum.create.AllEnchantments;
+import net.fabricmc.fabric.api.item.v1.EnchantingContext;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import team.reborn.energy.api.EnergyStorage;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -30,7 +33,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
@@ -50,8 +55,20 @@ public class PortableBatteryItem extends Item implements IHaveElectricProperties
     private Supplier<PortableBatteryPlaceableItem> blockItem;
 
     public PortableBatteryItem(ArmorMaterial material, Properties settings, Supplier<PortableBatteryPlaceableItem> placeable) {
-        super(settings.humanoidArmor(material, ArmorType.CHESTPLATE));
+        super(settings.stacksTo(1)
+                .attributes(material.createAttributes(ArmorType.CHESTPLATE))
+                .enchantable(material.enchantmentValue())
+                .repairable(material.repairIngredient())
+                .component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.CHEST)
+                        .setEquipSound(material.equipSound())
+                        .setAsset(material.assetId())
+                        .build()));
         this.blockItem = placeable;
+    }
+
+    @Override
+    public boolean canBeEnchantedWith(ItemStack stack, Holder<Enchantment> enchantment, EnchantingContext context) {
+        return enchantment.is(AllEnchantments.CAPACITY);
     }
 
     public static PortableBatteryItem getWornBy(Entity entity) {

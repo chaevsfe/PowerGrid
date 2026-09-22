@@ -18,6 +18,7 @@ package org.patryk3211.powergrid.kinetics.punchcard;
 
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import com.zurrtum.create.infrastructure.items.ItemStackHandler;
+import com.zurrtum.create.infrastructure.items.SidedItemInventory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -26,6 +27,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -42,7 +44,13 @@ import net.minecraft.world.level.storage.ValueOutput;
 import com.mojang.serialization.Codec;
 
 public class PunchCardReaderBlockEntity extends ElectricKineticBlockEntity {
+    private static final int[] SLOTS = {0};
+    private static final int[] NO_SLOTS = {};
+
     private final ItemStackHandler inventory = new ItemStackHandler(1);
+    private final CardInventory anySideInventory = new CardInventory(Access.ANY);
+    private final CardInventory topInventory = new CardInventory(Access.TOP);
+    private final CardInventory frontInventory = new CardInventory(Access.FRONT);
     private SwitchedWire[] wires;
 
     protected float prevAngle;
@@ -182,6 +190,16 @@ public class PunchCardReaderBlockEntity extends ElectricKineticBlockEntity {
         return extracted;
     }
 
+    public @Nullable Container getCardInventory(@Nullable Direction side) {
+        if(side == null)
+            return anySideInventory;
+        if(side == Direction.UP)
+            return topInventory;
+        if(side == getBlockState().getValue(HvSwitchBlock.HORIZONTAL_FACING))
+            return frontInventory;
+        return null;
+    }
+
     public void dropItems() {
         if(level != null)
             Containers.dropContents(level, worldPosition, inventory);
@@ -191,5 +209,84 @@ public class PunchCardReaderBlockEntity extends ElectricKineticBlockEntity {
     public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         super.preRemoveSideEffects(pos, state);
         dropItems();
+    }
+
+    private enum Access {
+        ANY,
+        TOP,
+        FRONT
+    }
+
+    private class CardInventory implements SidedItemInventory {
+        private final Access access;
+        private boolean insertFromTop;
+
+        private CardInventory(Access access) {
+            this.access = access;
+            this.insertFromTop = access != Access.FRONT;
+        }
+
+        private @Nullable Access accessThrough(@Nullable Direction face) {
+            if(access != Access.ANY)
+                return access;
+            if(face == null || face == Direction.UP)
+                return Access.TOP;
+            if(face == getBlockState().getValue(HvSwitchBlock.HORIZONTAL_FACING))
+                return Access.FRONT;
+            return null;
+        }
+
+        @Override
+        public int[] getSlotsForFace(Direction face) {
+            return accessThrough(face) == null ? NO_SLOTS : SLOTS;
+        }
+
+        @Override
+        public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction face) {
+            var through = accessThrough(face);
+            if(through == null || !canPlaceItem(slot, stack))
+                return false;
+            insertFromTop = through == Access.TOP;
+            return true;
+        }
+
+        @Override
+        public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction face) {
+            var through = accessThrough(face);
+            if(through == Access.TOP)
+                return angle <= 0;
+            if(through == Access.FRONT)
+                return angle >= 16;
+            return false;
+        }
+
+        @Override
+        public boolean canPlaceItem(int slot, ItemStack stack) {
+            return slot == 0 && stack.getItem() instanceof PunchCardItem && currentItem().isEmpty();
+        }
+
+        @Override
+        public int getContainerSize() {
+            return 1;
+        }
+
+        @Override
+        public int getMaxStackSize() {
+            return 1;
+        }
+
+        @Override
+        public ItemStack getItem(int slot) {
+            return inventory.getItem(slot);
+        }
+
+        @Override
+        public void setItem(int slot, ItemStack stack) {
+            boolean inserted = !stack.isEmpty() && currentItem().isEmpty();
+            inventory.setItem(slot, stack);
+            if(inserted)
+                prevAngle = angle = insertFromTop ? 0 : 16;
+            notifyUpdate();
+        }
     }
 }

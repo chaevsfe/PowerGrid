@@ -20,6 +20,10 @@ public final class ViaMapping {
     private ViaMapping() {
     }
 
+    public static int[] behind(int x, int y, int facing, int neighborFacing, boolean fromFloorBoard) {
+        return across(x, y, fromFloorBoard ? neighborFacing - facing : facing - neighborFacing);
+    }
+
     public static int[] across(int x, int y, int quarterTurns) {
         return switch (((quarterTurns % 4) + 4) % 4) {
             case 0 -> new int[]{15 - x, y};

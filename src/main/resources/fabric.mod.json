@@ -35,11 +35,11 @@
     "create_plugin": [
       "org.patryk3211.powergrid.fabric.PowerGridCreatePlugin"
     ],
-    "rei_common": [
-      "org.patryk3211.powergrid.compat.rei.PowerGridReiCommonPlugin"
+    "createreiviewer": [
+      "org.patryk3211.powergrid.compat.viewer.PowerGridViewerPlugin"
     ],
-    "rei_client": [
-      "org.patryk3211.powergrid.compat.rei.PowerGridReiClientPlugin"
+    "createreiviewer_client": [
+      "org.patryk3211.powergrid.compat.viewer.PowerGridViewerClientPlugin"
     ]
   },
   "accessWidener": "powergrid.accesswidener",
@@ -60,7 +60,8 @@
   "suggests": {
     "createaddition": "*",
     "createreiviewer": "*",
-    "roughlyenoughitems": "*"
+    "roughlyenoughitems": "*",
+    "jei": "*"
   },
   "breaks": {
     "sable": "*",

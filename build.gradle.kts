@@ -22,12 +22,6 @@ repositories {
     maven("https://maven.modmuss50.me/") {
         content { includeGroup("teamreborn") }
     }
-    maven("https://maven.shedaniel.me/") {
-        content {
-            includeGroup("me.shedaniel.cloth")
-            includeGroup("me.shedaniel.cloth.api")
-        }
-    }
 }
 
 // The recipe viewer is nested into this jar and compiled against: CI downloads its release
@@ -67,9 +61,6 @@ dependencies {
     include(implementation("org.ejml:ejml-ddense:$ejml")!!)
     include(implementation("org.ejml:ejml-dsparse:$ejml")!!)
 
-    compileOnly("maven.modrinth:rei:${property("rei_version")}")
-    compileOnly("maven.modrinth:architectury-api:${property("architectury_version")}")
-    compileOnly("me.shedaniel.cloth:basic-math:${property("basic_math_version")}")
     compileOnly(recipeViewer)
     include(recipeViewer)
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")

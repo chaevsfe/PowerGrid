@@ -369,7 +369,8 @@ public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IEle
         } else if (state.getValue(ROTATION) == 0 || state.getValue(ROTATION) == 2) {
             var dir = state.getValue(ROTATION) == 0 ? Direction.DOWN : Direction.UP;
             var opt = level.getBlockEntity(worldPosition.relative(dir), ModdedBlockEntities.CIRCUIT_BOARD.get());
-            opt.ifPresent(be -> processBehind(be, dir));
+            if(opt.isPresent() && opt.get().getBlockState().getValue(ROTATION) == 2 - state.getValue(ROTATION))
+                processBehind(opt.get(), dir);
         }
     }
 

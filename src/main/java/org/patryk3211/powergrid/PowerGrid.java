@@ -22,6 +22,7 @@ import com.zurrtum.create.infrastructure.config.AllConfigs;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.patryk3211.powergrid.advancements.PowerGridTriggers;
@@ -50,6 +51,8 @@ import org.patryk3211.powergrid.network.PlayerSelectionImpl;
 import org.patryk3211.powergrid.utility.proxy.SubstituteBlockEntityProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 public class PowerGrid {
 	public static final String MOD_ID = "powergrid";
@@ -120,7 +123,10 @@ public class PowerGrid {
 		EnergyStorage.SIDED.registerForBlockEntity(
 				(be, side) -> be.getEnergyStorage(side), ModdedBlockEntities.FE_INVERTER.get());
 
-		MovementBehaviour.REGISTRY.register(Blocks.LIGHTNING_ROD, new LightningRodMovementBehaviour());
+		LightningRodMovementBehaviour lightningRodBehaviour = new LightningRodMovementBehaviour();
+		for (Block rod : List.of(Blocks.LIGHTNING_ROD, Blocks.EXPOSED_LIGHTNING_ROD, Blocks.WEATHERED_LIGHTNING_ROD, Blocks.OXIDIZED_LIGHTNING_ROD,
+				Blocks.WAXED_LIGHTNING_ROD, Blocks.WAXED_EXPOSED_LIGHTNING_ROD, Blocks.WAXED_WEATHERED_LIGHTNING_ROD, Blocks.WAXED_OXIDIZED_LIGHTNING_ROD))
+			MovementBehaviour.REGISTRY.register(rod, lightningRodBehaviour);
 		registerBlockMovementChecks();
 
 		REGISTRATE.register();

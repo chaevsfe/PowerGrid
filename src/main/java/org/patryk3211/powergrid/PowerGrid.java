@@ -120,7 +120,8 @@ public class PowerGrid {
 		EnergyStorage.SIDED.registerForBlockEntity(
 				(be, side) -> be.getEnergyStorage(side), ModdedBlockEntities.FE_INVERTER.get());
 
-		MovementBehaviour.REGISTRY.register(Blocks.LIGHTNING_ROD.weathering().unaffected(), new LightningRodMovementBehaviour());
+		LightningRodMovementBehaviour lightningRodBehaviour = new LightningRodMovementBehaviour();
+		Blocks.LIGHTNING_ROD.forEach(rod -> MovementBehaviour.REGISTRY.register(rod, lightningRodBehaviour));
 		registerBlockMovementChecks();
 
 		REGISTRATE.register();

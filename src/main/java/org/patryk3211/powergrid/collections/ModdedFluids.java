@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import org.patryk3211.powergrid.PowerGrid;
+import org.patryk3211.powergrid.registrate.entry.ItemEntry;
 
 public class ModdedFluids {
     private static final FluidEntry ACID_ENTRY = createEntry();
@@ -82,6 +83,7 @@ public class ModdedFluids {
                 new BucketItem(ACID, new Item.Properties().setId(key).craftRemainder(Items.BUCKET).stacksTo(1)));
         ACID_ENTRY.bucket = ACID_BUCKET;
         AllFluidItemInventory.ALL.put(ACID_BUCKET, new AllFluidItemInventory.Entry(BucketFluidInventory::new));
+        PowerGrid.REGISTRATE.track(Registries.ITEM, new ItemEntry<>(key.identifier(), ACID_BUCKET));
     }
 
     private static class AcidBlock extends FluidBlock {

@@ -32,6 +32,7 @@ import org.patryk3211.powergrid.electricity.solarpanel.registry.SolarBiomeRegist
 import org.patryk3211.powergrid.circuits.components.Components;
 import org.patryk3211.powergrid.collections.*;
 import org.patryk3211.powergrid.commands.PerformanceCommand;
+import org.patryk3211.powergrid.compat.CompatMod;
 import org.patryk3211.powergrid.compat.sable.SableUtils;
 import org.patryk3211.powergrid.electricity.deviceconnector.DeviceConnectorBlockEntity;
 import org.patryk3211.powergrid.electricity.fan.ElectricFanBlockEntity;
@@ -68,6 +69,7 @@ public class PowerGrid {
 		SableUtils.makeDummyProxy();
 
 		register();
+		CompatMod.register();
 
 		ModdedConfigs.register();
 		setup();

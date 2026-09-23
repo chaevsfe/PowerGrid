@@ -40,6 +40,9 @@
     ],
     "createreiviewer_client": [
       "org.patryk3211.powergrid.compat.viewer.PowerGridViewerClientPlugin"
+    ],
+    "rei_client": [
+      "org.patryk3211.powergrid.compat.rei.PowerGridReiClientPlugin"
     ]
   },
   "accessWidener": "powergrid.accesswidener",

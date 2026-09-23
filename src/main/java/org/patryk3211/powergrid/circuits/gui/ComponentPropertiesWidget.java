@@ -24,6 +24,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -45,6 +46,7 @@ import java.util.List;
 public class ComponentPropertiesWidget extends AbstractSimiWidget {
     public static final Identifier PROPERTIES = PowerGrid.texture("gui/circuit_design_table_properties");
     private static final int TEXTURE_SIZE = 256;
+    private static final int DEFAULT_SIZE = 150;
 
     private final Font textRenderer;
     private final int right;
@@ -55,7 +57,7 @@ public class ComponentPropertiesWidget extends AbstractSimiWidget {
     private int propertyCount = 0;
 
     public ComponentPropertiesWidget(Font textRenderer, int right, int y) {
-        super(right - 150, y, 150, 150);
+        super(right - DEFAULT_SIZE, y, DEFAULT_SIZE, DEFAULT_SIZE);
         this.right = right;
         this.textRenderer = textRenderer;
     }
@@ -123,6 +125,11 @@ public class ComponentPropertiesWidget extends AbstractSimiWidget {
             setX(right - 120);
             propertyCount = 0;
         }
+    }
+
+    public Rect2i getArea() {
+        int left = Math.min(getX(), right - DEFAULT_SIZE);
+        return new Rect2i(left, getY(), right - left, Math.max(DEFAULT_SIZE, 78 + propertyCount * 20));
     }
 
     // Port of ctx.blitRepeating method

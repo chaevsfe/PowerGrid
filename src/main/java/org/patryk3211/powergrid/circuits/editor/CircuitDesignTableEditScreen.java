@@ -51,6 +51,7 @@ import org.patryk3211.powergrid.network.packets.ChangeScreenC2SPacket;
 import org.patryk3211.powergrid.network.packets.SaveSchematicC2SPacket;
 import org.patryk3211.powergrid.utility.Lang;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -233,6 +234,19 @@ public class CircuitDesignTableEditScreen<T extends CircuitEditMenu<?>> extends 
 
     public Rect2i ghostTarget() {
         return new Rect2i(editWidget.getX(), editWidget.getY(), editWidget.getWidth(), editWidget.getHeight());
+    }
+
+    public Rect2i getWindowArea() {
+        return new Rect2i(leftPos, topPos, imageWidth, imageHeight);
+    }
+
+    @Override
+    public List<Rect2i> getExtraAreas() {
+        List<Rect2i> areas = new ArrayList<>();
+        areas.add(new Rect2i(leftPos - windowXOffset, topPos, windowXOffset, imageHeight));
+        if(propertiesWidget != null)
+            areas.add(propertiesWidget.getArea());
+        return areas;
     }
 
     @Override

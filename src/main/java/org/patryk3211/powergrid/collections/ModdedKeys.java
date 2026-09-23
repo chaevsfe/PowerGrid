@@ -16,13 +16,13 @@
  */
 package org.patryk3211.powergrid.collections;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import org.lwjgl.glfw.GLFW;
 import org.patryk3211.powergrid.PowerGrid;
 
 /**
@@ -31,15 +31,15 @@ import org.patryk3211.powergrid.PowerGrid;
 public enum ModdedKeys {
     CATEGORY_POWER_GRID("main"),
 
-    ALTERNATE_WIRE_PLACEMENT("alternate_wire_placement", GLFW.GLFW_KEY_LEFT_CONTROL),
+    ALTERNATE_WIRE_PLACEMENT("alternate_wire_placement", InputConstants.KEY_LCONTROL),
 
     CATEGORY_CIRCUIT_EDITOR("circuit_editor"),
 
-    ROTATE_COMPONENT("rotate_component", GLFW.GLFW_KEY_R),
-    PLACE_TRACE("place_trace", GLFW.GLFW_KEY_T),
-    DELETE_AREA("delete_area", GLFW.GLFW_KEY_D),
-    PICK_COMPONENT("pick_component", GLFW.GLFW_KEY_S),
-    SWITCH_LAYER("switch_layer", GLFW.GLFW_KEY_X),
+    ROTATE_COMPONENT("rotate_component", InputConstants.KEY_R),
+    PLACE_TRACE("place_trace", InputConstants.KEY_T),
+    DELETE_AREA("delete_area", InputConstants.KEY_D),
+    PICK_COMPONENT("pick_component", InputConstants.KEY_S),
+    SWITCH_LAYER("switch_layer", InputConstants.KEY_X),
 
     ;
 

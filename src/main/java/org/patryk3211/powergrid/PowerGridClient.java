@@ -70,7 +70,7 @@ public class PowerGridClient {
 		PlacementOverlay.init();
 		PowerGridClientEvents.register();
 		PonderIndex.addPlugin(new PowerGridPonderPlugin());
-		PictureInPictureRendererRegistry.register(context -> new TallBlockRenderer());
+		PictureInPictureRendererRegistry.register(context -> new TallBlockRenderer(context.bufferSource()));
 	}
 
 	public static void clientTick(Minecraft client) {

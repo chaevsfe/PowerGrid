@@ -16,6 +16,8 @@
  */
 package org.patryk3211.powergrid;
 
+import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
+import org.patryk3211.powergrid.compat.viewer.TallBlockRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import com.zurrtum.create.client.ponder.api.level.PonderLevel;
@@ -68,6 +70,7 @@ public class PowerGridClient {
 		PlacementOverlay.init();
 		PowerGridClientEvents.register();
 		PonderIndex.addPlugin(new PowerGridPonderPlugin());
+		PictureInPictureRendererRegistry.register(context -> new TallBlockRenderer());
 	}
 
 	public static void clientTick(Minecraft client) {

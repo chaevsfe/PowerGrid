@@ -54,7 +54,7 @@ public final class PowerGridViewerClientPlugin implements CreateViewerClientPlug
     private static void magnetizing(ViewerRecipe recipe, ViewerCanvas canvas) {
         canvas.texture(AllGuiTextures.JEI_SHADOW, 61, 41);
         canvas.texture(AllGuiTextures.JEI_LONG_ARROW, 52, 54);
-        canvas.blockPip(71, 22, ModdedBlocks.ELECTROMAGNET.getDefaultState());
+        canvas.pip(71, 22, (pose, x, y) -> new TallBlockRenderState(pose, ModdedBlocks.ELECTROMAGNET.getDefaultState(), x, y, 6));
         canvas.slot(27, 51, recipe.input(0));
         List<ViewerIngredient> outputs = recipe.outputs();
         for (int i = 0; i < outputs.size(); i++) {

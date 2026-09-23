@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.electricity.wire;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import org.patryk3211.powergrid.compat.sable.SableCompanion;
 import com.zurrtum.create.catnip.math.VecHelper;
 import net.fabricmc.api.EnvType;
@@ -31,7 +32,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.glfw.GLFW;
 import org.patryk3211.powergrid.collections.ModdedItems;
 import org.patryk3211.powergrid.collections.ModdedDataComponents;
 import org.patryk3211.powergrid.collections.ModdedPackets;
@@ -203,8 +203,8 @@ public class ClientWireInteractions {
             return;
         }
         // Update alternate placement status
-        if(action == GLFW.GLFW_PRESS || action == GLFW.GLFW_RELEASE) {
-            alternatePlacementStatus = action == GLFW.GLFW_PRESS;
+        if(action == InputConstants.PRESS || action == InputConstants.RELEASE) {
+            alternatePlacementStatus = action == InputConstants.PRESS;
             ModdedPackets.sendToServer(new AlternatePlacementStatusC2SPacket(alternatePlacementStatus));
         }
     }

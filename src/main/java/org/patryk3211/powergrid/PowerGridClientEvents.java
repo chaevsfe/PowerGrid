@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
@@ -31,7 +32,6 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
-import org.lwjgl.glfw.GLFW;
 import org.patryk3211.powergrid.collections.ModPackets;
 import org.patryk3211.powergrid.collections.ModdedConfigs;
 import org.patryk3211.powergrid.collections.ModdedKeys;
@@ -114,7 +114,7 @@ public class PowerGridClientEvents {
         boolean down = ModdedKeys.ALTERNATE_WIRE_PLACEMENT.isPressed();
         if (down != alternatePlacementDown) {
             alternatePlacementDown = down;
-            ClientWireInteractions.alternatePlacementCheck(client, down ? GLFW.GLFW_PRESS : GLFW.GLFW_RELEASE);
+            ClientWireInteractions.alternatePlacementCheck(client, down ? InputConstants.PRESS : InputConstants.RELEASE);
         }
     }
 

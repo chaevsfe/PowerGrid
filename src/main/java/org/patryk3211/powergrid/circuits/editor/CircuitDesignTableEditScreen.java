@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.circuits.editor;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.zurrtum.create.client.foundation.gui.AllIcons;
 import com.zurrtum.create.client.foundation.gui.menu.AbstractSimiContainerScreen;
 import com.zurrtum.create.client.foundation.gui.widget.IconButton;
@@ -37,7 +38,6 @@ import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
 import org.jetbrains.annotations.NotNull;
 import org.patryk3211.powergrid.PowerGrid;
 import org.patryk3211.powergrid.circuits.components.ComponentRegistry;
@@ -453,7 +453,7 @@ public class CircuitDesignTableEditScreen<T extends CircuitEditMenu<?>> extends 
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if(event.key() == GLFW.GLFW_KEY_ESCAPE) {
+        if(event.key() == InputConstants.KEY_ESCAPE) {
             if(!changed || saving) {
                 this.onClose();
             } else {

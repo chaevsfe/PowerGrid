@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.circuits.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.ComponentPath;
@@ -30,7 +31,6 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
 import org.patryk3211.powergrid.circuits.components.properties.PropertyEntry;
 
 import static org.patryk3211.powergrid.circuits.gui.ComponentPropertiesWidget.PROPERTIES;
@@ -89,7 +89,7 @@ public class TextFieldPropertyWidget<T, P extends PropertyEntry<T>> extends Prop
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == GLFW.GLFW_KEY_ENTER) {
+        if (event.key() == InputConstants.KEY_RETURN) {
             acceptInput();
             return true;
         }

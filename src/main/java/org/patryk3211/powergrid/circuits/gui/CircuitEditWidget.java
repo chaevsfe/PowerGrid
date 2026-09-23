@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.circuits.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.zurrtum.create.client.catnip.gui.widget.AbstractSimiWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -223,13 +224,13 @@ public class CircuitEditWidget extends AbstractSimiWidget {
             var footprint = placedComponent.footprint();
             int offsetX = footprint.getWidth() / 2;
             int offsetY = footprint.getHeight() / 2;
-            if(button == 0) {
+            if(button == InputConstants.MOUSE_BUTTON_LEFT) {
                 placementCallback.accept(gridX - offsetX, gridY - offsetY);
             }
             return true;
         }
 
-        if(button == 0 && selectMode != SelectMode.NONE) {
+        if(button == InputConstants.MOUSE_BUTTON_LEFT && selectMode != SelectMode.NONE) {
             if(selectMode == SelectMode.POINT) {
                 startX = gridX;
                 startY = gridY;
@@ -244,7 +245,7 @@ public class CircuitEditWidget extends AbstractSimiWidget {
                     handleCallback(gridX, gridY);
                 }
             }
-        } else if (button == 1) {
+        } else if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
             cancelSelection();
         }
         return true;

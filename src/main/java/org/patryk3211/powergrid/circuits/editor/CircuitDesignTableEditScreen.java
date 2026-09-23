@@ -536,7 +536,7 @@ public class CircuitDesignTableEditScreen<T extends CircuitEditMenu<?>> extends 
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubled) {
-        if(event.button() == 1) {
+        if(event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
             if(currentComponent == null && currentTool == Tool.SELECT) {
                 int gridX = (int) ((event.x() - editWidget.getX()) / CIRCUIT_SCALE);
                 int gridY = (int) ((event.y() - editWidget.getY()) / CIRCUIT_SCALE);

@@ -1,0 +1,13 @@
+{
+  "values": [
+    "powergrid:incomplete_electrical_gizmo",
+    "powergrid:incomplete_unetched_circuit",
+    "powergrid:incomplete_transformer_core",
+    "powergrid:incomplete_punch_card",
+    "powergrid:incomplete_battery",
+    "powergrid:incomplete_bjt_npn",
+    "powergrid:incomplete_bjt_pnp",
+    "powergrid:incomplete_solar_panel",
+    "powergrid:portable_battery_placeable"
+  ]
+}

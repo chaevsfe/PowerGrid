@@ -1,0 +1,16 @@
+{
+  "values": [
+    "powergrid:generator_clutch",
+    "powergrid:generator_induction_rotor",
+    "powergrid:generator_large_induction_rotor",
+    "powergrid:generator_commutator",
+    "powergrid:generator_vertical_commutator",
+    "powergrid:winding",
+    "powergrid:transformer_medium",
+    "powergrid:hv_switch",
+    "powergrid:device_connector",
+    "powergrid:battery",
+    "powergrid:carbon_pile",
+    "powergrid:carbon_pile_coil"
+  ]
+}

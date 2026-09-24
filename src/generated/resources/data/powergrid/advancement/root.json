@@ -6,7 +6,7 @@
   },
   "display": {
     "announce_to_chat": false,
-    "background": "powergrid:textures/gui/advancements.png",
+    "background": "powergrid:gui/advancements",
     "description": {
       "color": "#DBA213",
       "translate": "advancement.powergrid.root.desc"

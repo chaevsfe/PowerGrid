@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class PowerGridAdvancement {
-    public static final Identifier BACKGROUND = PowerGrid.texture("gui/advancements");
+    public static final Identifier BACKGROUND = PowerGrid.asResource("gui/advancements");
     public static final String LANG = "advancement.powergrid.";
     public static final String SECRET_SUFFIX = "\n§7(Hidden Advancement)";
 

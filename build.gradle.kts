@@ -31,7 +31,7 @@ repositories {
         dirs("libs", "../../create-rei/CreateReiViewer-Fly/build/libs")
     }
 }
-val recipeViewer = ":CreateReiViewer:${property("createreiviewer_version")}+fabric-mc${property("minecraft_version")}"
+val recipeViewer = ":CreateReiViewer:${property("createreiviewer_version")}"
 
 loom {
     accessWidenerPath = file("src/main/resources/powergrid.accesswidener")

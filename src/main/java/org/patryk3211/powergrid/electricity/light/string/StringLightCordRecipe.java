@@ -31,10 +31,11 @@ import java.util.ArrayList;
 import net.minecraft.core.component.DataComponents;
 
 public class StringLightCordRecipe extends CustomRecipe {
+    public static final StringLightCordRecipe INSTANCE = new StringLightCordRecipe();
     public static final RecipeSerializer<StringLightCordRecipe> SERIALIZER =
-            new RecipeSerializer<>(MapCodec.unit(new StringLightCordRecipe()), StreamCodec.unit(new StringLightCordRecipe()));
+            new RecipeSerializer<>(MapCodec.unit(INSTANCE), StreamCodec.unit(INSTANCE));
 
-    public StringLightCordRecipe() {
+    private StringLightCordRecipe() {
     }
 
 

@@ -206,7 +206,7 @@ public class SolarPanelBlockEntity extends ElectricBlockEntity implements Transf
                 * (1 + cloudCover) * ((1 + panelNormal.y()) / 2);
         double reflected = ALBEDO_FRAC * (Math.max(0, sunDir.y) * irradiance * transmittance) * ((1 - panelNormal.y()) / 2.0);
 
-        if (!skyVisible) {
+        if (!skyVisible || solarBiomeEntry != null && solarBiomeEntry.disableAtmosphere()) {
             diffuseLight = 0;
             reflected = 0;
         }

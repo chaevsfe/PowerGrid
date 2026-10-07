@@ -55,7 +55,7 @@ public class SolarHelper {
     }
 
     public static float getSunAngle(Level world, BlockPos pos) {
-        return world.environmentAttributes().getValue(EnvironmentAttributes.SUN_ANGLE, pos);
+        return world.environmentAttributes().getValue(EnvironmentAttributes.SUN_ANGLE, pos) * Mth.DEG_TO_RAD;
     }
 
     public static double getAM(Level world, BlockPos pos){

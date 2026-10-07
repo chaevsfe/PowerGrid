@@ -67,6 +67,7 @@ dependencies {
     compileOnly(recipeViewer)
     include(recipeViewer)
     compileOnly("maven.modrinth:rei:${property("rei_version")}")
+    compileOnly("maven.modrinth:farmers-delight-refabricated:${property("farmers_delight_version")}")
     compileOnly("me.shedaniel.cloth:basic-math:${property("basic_math_version")}")
     compileOnly("com.google.code.findbugs:jsr305:3.0.2")
 

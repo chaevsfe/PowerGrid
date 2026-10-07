@@ -48,6 +48,7 @@
   "accessWidener": "powergrid.accesswidener",
   "mixins": [
     "powergrid.mixins.json",
+    "powergrid.farmersdelight.mixins.json",
     {
       "config": "powergrid.client.mixins.json",
       "environment": "client"
@@ -63,6 +64,7 @@
   "suggests": {
     "createaddition": "*",
     "createreiviewer": "*",
+    "farmersdelight": "*",
     "roughlyenoughitems": "*",
     "jei": "*"
   },

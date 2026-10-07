@@ -68,6 +68,7 @@ import org.patryk3211.powergrid.utility.Env;
 import org.patryk3211.powergrid.utility.Lang;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.patryk3211.powergrid.circuits.circuitboard.CircuitBoardBlock.HORIZONTAL_FACING;
 import static org.patryk3211.powergrid.circuits.circuitboard.CircuitBoardBlock.ROTATION;
@@ -520,6 +521,34 @@ public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IEle
         }
         componentCache.put(ofClass, components);
         return components;
+    }
+
+    public Stream<PlacedComponent> getComponentsStream() {
+        return schematic.components().stream();
+    }
+
+    public <T> @Nullable PlacedComponent getComponent(Class<T> ofClass, int x, int y) {
+        Stream<PlacedComponent> searcher = componentCache.containsKey(ofClass) ?
+            componentCache.get(ofClass).stream() : schematic.components().stream();
+        for (var iter = searcher.iterator(); iter.hasNext();) {
+            PlacedComponent placed = iter.next();
+            if (placed.x != x || placed.y != y) continue;
+            if (!ofClass.isInstance(placed.component)) continue;
+            return placed;
+        }
+        return null;
+    }
+
+    public <T> @Nullable PlacedComponent getComponent(Class<T> ofClass, UUID uuid) {
+        Stream<PlacedComponent> searcher = componentCache.containsKey(ofClass) ?
+            componentCache.get(ofClass).stream() : schematic.components().stream();
+        for (var iter = searcher.iterator(); iter.hasNext();) {
+            PlacedComponent placed = iter.next();
+            if (!uuid.equals(placed.uuid)) continue;
+            if (!ofClass.isInstance(placed.component)) continue;
+            return placed;
+        }
+        return null;
     }
 
     @Override

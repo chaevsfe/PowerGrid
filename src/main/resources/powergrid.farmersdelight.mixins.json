@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "org.patryk3211.powergrid.mixin.compat.farmersdelight",
+  "plugin": "org.patryk3211.powergrid.compat.farmersdelight.FarmersDelightMixinPlugin",
+  "compatibilityLevel": "JAVA_25",
+  "minVersion": "0.8.3",
+  "mixins": [
+    "HeatableBlockEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

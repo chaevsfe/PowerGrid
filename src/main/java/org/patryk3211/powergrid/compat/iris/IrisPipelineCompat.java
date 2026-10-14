@@ -28,6 +28,7 @@ import org.patryk3211.powergrid.collections.ModdedRenderLayers;
 public final class IrisPipelineCompat {
     private static final int PIPELINE_API_REVISION = 3;
     private static final int SHADOW_PIPELINE_API_REVISION = 4;
+    private static final String SHADOW_PROGRAM = "SHADOW_LIGHTNING";
 
     private IrisPipelineCompat() {
     }
@@ -39,19 +40,30 @@ public final class IrisPipelineCompat {
             PowerGrid.LOGGER.warn("Iris API revision {} cannot take Power Grid's render pipelines", revision);
             return;
         }
-        assign(api, revision, ModdedRenderLayers.getAdditiveColorPipeline());
-        assign(api, revision, ModdedRenderLayers.getAdditiveCrtPipeline());
-        PowerGrid.LOGGER.info("Assigned Iris programs to Power Grid's render pipelines (Iris API revision {})", revision);
+        boolean shadows = revision >= SHADOW_PIPELINE_API_REVISION;
+        boolean assigned = assign(api, shadows, ModdedRenderLayers.getAdditiveColorPipeline());
+        assigned &= assign(api, shadows, ModdedRenderLayers.getAdditiveCrtPipeline());
+        if (assigned) {
+            PowerGrid.LOGGER.info("Assigned Iris programs to Power Grid's render pipelines (Iris API revision {})", revision);
+        }
     }
 
-    private static void assign(IrisApi api, int revision, RenderPipeline pipeline) {
+    private static boolean assign(IrisApi api, boolean shadows, RenderPipeline pipeline) {
         try {
             api.assignPipeline(pipeline, IrisProgram.BASIC);
-            if (revision >= SHADOW_PIPELINE_API_REVISION) {
-                api.assignPipelineShadow(pipeline, IrisShadowProgram.SHADOW_LIGHTNING);
-            }
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | LinkageError e) {
             PowerGrid.LOGGER.warn("Iris refused Power Grid render pipeline {}", pipeline.getLocation(), e);
+            return false;
+        }
+        if (!shadows) {
+            return true;
+        }
+        try {
+            api.assignPipelineShadow(pipeline, IrisShadowProgram.valueOf(SHADOW_PROGRAM));
+            return true;
+        } catch (RuntimeException | LinkageError e) {
+            PowerGrid.LOGGER.warn("Iris refused a shadow program for Power Grid render pipeline {}", pipeline.getLocation(), e);
+            return false;
         }
     }
 }

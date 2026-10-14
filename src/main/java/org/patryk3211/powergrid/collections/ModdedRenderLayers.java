@@ -72,6 +72,14 @@ public class ModdedRenderLayers {
         return CreateRenderTypes.additive();
     }
 
+    public static RenderPipeline getAdditiveColorPipeline() {
+        return ADDITIVE_COLOR_PIPELINE;
+    }
+
+    public static RenderPipeline getAdditiveCrtPipeline() {
+        return ADDITIVE_CRT_PIPELINE;
+    }
+
     @SuppressWarnings("EmptyMethod")
     public static void register() { /* Initialize static fields. */ }
 }

@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegis
 import org.patryk3211.powergrid.compat.viewer.TallBlockRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import com.zurrtum.create.client.ponder.api.level.PonderLevel;
 import com.zurrtum.create.client.ponder.foundation.PonderIndex;
 import net.minecraft.client.Minecraft;
@@ -31,6 +32,7 @@ import org.patryk3211.powergrid.collections.ModdedModels;
 import org.patryk3211.powergrid.collections.ModdedParticleProviders;
 import org.patryk3211.powergrid.collections.ModdedPartialModels;
 import org.patryk3211.powergrid.collections.ModdedRenderLayers;
+import org.patryk3211.powergrid.compat.iris.IrisPipelineCompat;
 import org.patryk3211.powergrid.electricity.transformer.TransformerWindingInteraction;
 import org.patryk3211.powergrid.electricity.transformer.TransformerWindingScreen;
 import org.patryk3211.powergrid.electricity.wire.ClientWireInteractions;
@@ -56,6 +58,8 @@ public class PowerGridClient {
 		LevelKind.PONDER = level -> level instanceof PonderLevel;
 		ModdedPartialModels.register();
 		ModdedRenderLayers.register();
+		if(FabricLoader.getInstance().isModLoaded("iris"))
+			IrisPipelineCompat.register();
 		ModdedModels.register();
 		ModdedItemModels.register();
 		ModdedEntityRenders.register();

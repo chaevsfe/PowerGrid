@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.patryk3211.powergrid.collections.ModdedPartialModels;
+import org.patryk3211.powergrid.collections.ModdedRenderLayers;
 
 public class PlotterRenderer extends KineticBlockEntityRenderer<PlotterBlockEntity, PlotterRenderer.PlotterRenderState> {
     private static final float TIME_SPAN = 9.5f / 16;
@@ -129,7 +130,7 @@ public class PlotterRenderer extends KineticBlockEntityRenderer<PlotterBlockEnti
         matrices.scale(VOLTAGE_SPAN * 0.5f, TIME_SPAN, 1);
         if (state.scrolling)
             matrices.translate(0, -1.0f / samples.length * state.tickProgress, 0);
-        queue.submitCustomGeometry(matrices, RenderTypes.debugQuads(), (pose, consumer) -> {
+        queue.submitCustomGeometry(matrices, ModdedRenderLayers.getColor(), (pose, consumer) -> {
             Matrix4f m4 = pose.pose();
             float yPrev = 0;
             for (int i = 0; i < samples.length; ++i) {

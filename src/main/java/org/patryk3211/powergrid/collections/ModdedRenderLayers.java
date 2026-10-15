@@ -27,11 +27,16 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import org.patryk3211.powergrid.PowerGrid;
 
 @Environment(EnvType.CLIENT)
 public class ModdedRenderLayers {
+    private static final RenderPipeline COLOR_PIPELINE = RenderPipelines.register(RenderPipeline
+            .builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+            .withLocation(PowerGrid.asResource("pipeline/color"))
+            .withCull(false)
+            .build());
+
     private static final RenderPipeline ADDITIVE_COLOR_PIPELINE = RenderPipelines.register(RenderPipeline
             .builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
             .withLocation(PowerGrid.asResource("pipeline/additive_color"))
@@ -48,6 +53,10 @@ public class ModdedRenderLayers {
             .withCull(false)
             .build());
 
+    private static final RenderType COLOR = RenderType.create(
+            "powergrid_color",
+            RenderSetup.builder(COLOR_PIPELINE).sortOnUpload().createRenderSetup());
+
     private static final RenderType ADDITIVE_COLOR = RenderType.create(
             "powergrid_additive_color",
             RenderSetup.builder(ADDITIVE_COLOR_PIPELINE).createRenderSetup());
@@ -57,7 +66,7 @@ public class ModdedRenderLayers {
             RenderSetup.builder(ADDITIVE_CRT_PIPELINE).createRenderSetup());
 
     public static RenderType getColor() {
-        return RenderTypes.debugQuads();
+        return COLOR;
     }
 
     public static RenderType getAdditiveCrt() {
@@ -70,6 +79,10 @@ public class ModdedRenderLayers {
 
     public static RenderType getAdditive() {
         return CreateRenderTypes.additive();
+    }
+
+    public static RenderPipeline getColorPipeline() {
+        return COLOR_PIPELINE;
     }
 
     public static RenderPipeline getAdditiveColorPipeline() {

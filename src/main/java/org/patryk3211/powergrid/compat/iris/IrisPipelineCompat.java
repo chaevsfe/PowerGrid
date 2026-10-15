@@ -41,7 +41,8 @@ public final class IrisPipelineCompat {
             return;
         }
         boolean shadows = revision >= SHADOW_PIPELINE_API_REVISION;
-        boolean assigned = assign(api, shadows, ModdedRenderLayers.getAdditiveColorPipeline());
+        boolean assigned = assign(api, shadows, ModdedRenderLayers.getColorPipeline());
+        assigned &= assign(api, shadows, ModdedRenderLayers.getAdditiveColorPipeline());
         assigned &= assign(api, shadows, ModdedRenderLayers.getAdditiveCrtPipeline());
         if (assigned) {
             PowerGrid.LOGGER.info("Assigned Iris programs to Power Grid's render pipelines (Iris API revision {})", revision);

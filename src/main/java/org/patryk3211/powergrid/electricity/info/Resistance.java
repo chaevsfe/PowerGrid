@@ -17,7 +17,7 @@
 package org.patryk3211.powergrid.electricity.info;
 
 import com.zurrtum.create.content.equipment.goggles.GogglesItem;
-import com.zurrtum.create.client.catnip.lang.LangBuilder;
+import org.patryk3211.powergrid.utility.LangBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;

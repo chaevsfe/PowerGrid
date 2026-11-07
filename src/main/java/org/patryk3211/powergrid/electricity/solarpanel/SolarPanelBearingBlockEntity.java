@@ -1,5 +1,7 @@
 package org.patryk3211.powergrid.electricity.solarpanel;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.EnvironmentInterface;
 import org.patryk3211.powergrid.electricity.solarpanel.registry.SolarBiomeRegistry;
 import org.patryk3211.powergrid.electricity.solarpanel.registry.SolarBiomeEntry;
 import com.zurrtum.create.AllSoundEvents;
@@ -43,6 +45,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import com.mojang.serialization.Codec;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IDisplayAssemblyExceptions.class)
 public class SolarPanelBearingBlockEntity extends ElectricKineticBlockEntity implements IBearingBlockEntity, IDisplayAssemblyExceptions {
     protected ControlledContraptionEntity movedContraption;
     protected float angle;

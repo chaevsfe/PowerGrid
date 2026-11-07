@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.electricity.gauge;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.Create;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
@@ -43,6 +46,7 @@ import java.util.List;
  * PowerGrid's electric equivalent of the kinetic gauge from Create.
  * @see com.zurrtum.create.content.kinetics.gauge.GaugeBlockEntity
  */
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public abstract class GaugeBlockEntity extends ElectricBlockEntity implements IHaveGoggleInformation, IVarSet {
     protected GaugeValueBehaviour gaugeValue;
     protected CustomDisplayBehaviour display;
@@ -108,6 +112,7 @@ public abstract class GaugeBlockEntity extends ElectricBlockEntity implements IH
         return x;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         // Use default Create header here.

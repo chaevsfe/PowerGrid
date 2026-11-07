@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.equipment.thermometer;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
@@ -36,6 +39,7 @@ import java.util.List;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class ThermometerBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation {
     public float maxState;
     public float maxTemperature;
@@ -120,6 +124,7 @@ public class ThermometerBlockEntity extends SmartBlockEntity implements IHaveGog
         return color;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         CreateLang.translate("gui.gauge.info_header").forGoggles(tooltip);

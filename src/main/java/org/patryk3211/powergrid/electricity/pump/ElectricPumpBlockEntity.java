@@ -1,12 +1,15 @@
 package org.patryk3211.powergrid.electricity.pump;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.content.fluids.FluidPropagator;
 import com.zurrtum.create.content.fluids.FluidTransportBehaviour;
 import com.zurrtum.create.content.fluids.PipeConnection;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
-import com.zurrtum.create.client.foundation.utility.CreateLang;
+import com.zurrtum.create.Create;
 import com.zurrtum.create.catnip.data.Couple;
 import com.zurrtum.create.catnip.data.Iterate;
 import com.zurrtum.create.catnip.data.Pair;
@@ -37,6 +40,7 @@ import static org.patryk3211.powergrid.electricity.pump.ElectricPumpBlock.isPump
 /**
  * @see com.zurrtum.create.content.fluids.pump.PumpBlockEntity
  */
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class ElectricPumpBlockEntity extends ElectricBlockEntity implements IHaveGoggleInformation {
     protected ElectricWire pumpElement;
     private int prevSpeed;
@@ -287,6 +291,7 @@ public class ElectricPumpBlockEntity extends ElectricBlockEntity implements IHav
         return !front;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         Lang.translate("gui.pump.info_header")
@@ -297,7 +302,7 @@ public class ElectricPumpBlockEntity extends ElectricBlockEntity implements IHav
         Lang.number(getSpeed())
                 .style(ChatFormatting.AQUA)
                 .add(Lang.text(" "))
-                .add(CreateLang.translate("generic.unit.rpm"))
+                .add(Lang.builder(Create.MOD_ID).translate("generic.unit.rpm"))
                 .forGoggles(tooltip, 1);
         return true;
     }

@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.electricity.deviceconnector;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import net.minecraft.ChatFormatting;
@@ -30,6 +33,7 @@ import org.patryk3211.powergrid.utility.Unit;
 
 import java.util.List;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class DeviceConnectorBlockEntity extends ElectricBlockEntity implements IHaveGoggleInformation {
     protected BridgeElectricBehaviour proxyBehaviour;
     protected ElectricWire converterWire;
@@ -55,6 +59,7 @@ public class DeviceConnectorBlockEntity extends ElectricBlockEntity implements I
         converterWire = builder.connect(100, builder.terminalNode(0), builder.terminalNode(1));
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         if(!proxyBehaviour.isFE())

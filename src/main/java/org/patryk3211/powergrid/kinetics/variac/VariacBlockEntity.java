@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.kinetics.variac;
 
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -35,6 +36,7 @@ import org.patryk3211.powergrid.utility.sound.SoundScapes;
 
 import java.util.List;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class VariacBlockEntity extends TunedBlockEntity implements IHaveGoggleInformation {
     public static final float PRIMARY_TURNS = 25;
     public static final float CORE_AL = 1.5f;
@@ -124,6 +126,7 @@ public class VariacBlockEntity extends TunedBlockEntity implements IHaveGoggleIn
         SoundScapes.play(SoundScapes.AmbienceGroup.HUM, worldPosition, 1, lastCurrent / 20);
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         if(!isPlayerSneaking)

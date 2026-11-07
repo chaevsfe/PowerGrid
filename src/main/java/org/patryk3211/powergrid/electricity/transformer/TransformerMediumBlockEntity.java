@@ -16,6 +16,8 @@
  */
 package org.patryk3211.powergrid.electricity.transformer;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -142,6 +144,7 @@ public class TransformerMediumBlockEntity extends TransformerBlockEntity {
         return pos.relative(axis, offset);
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         if(isMain())

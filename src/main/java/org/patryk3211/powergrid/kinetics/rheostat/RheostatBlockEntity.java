@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.kinetics.rheostat;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.CenteredSideValueBoxTransform;
@@ -36,6 +39,7 @@ import org.patryk3211.powergrid.utility.Lang;
 
 import java.util.List;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class RheostatBlockEntity extends TunedBlockEntity implements IHaveGoggleInformation {
     protected ResistorValueBehaviour value;
 
@@ -93,6 +97,7 @@ public class RheostatBlockEntity extends TunedBlockEntity implements IHaveGoggle
         applyPower(half2);
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         if(!isPlayerSneaking)

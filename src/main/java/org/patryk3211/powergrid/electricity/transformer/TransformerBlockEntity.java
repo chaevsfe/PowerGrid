@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.electricity.transformer;
 
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.content.schematics.requirement.ItemRequirement;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
@@ -55,6 +56,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import com.mojang.serialization.Codec;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public abstract class TransformerBlockEntity extends ElectricBlockEntity implements IHaveGoggleInformation, IHelperTerminal {
     protected TransformerCoilParameters primaryCoil;
     protected TransformerCoilParameters secondaryCoil;
@@ -388,6 +390,7 @@ public abstract class TransformerBlockEntity extends ElectricBlockEntity impleme
         return null;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         if(!isPlayerSneaking)

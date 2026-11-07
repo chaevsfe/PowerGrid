@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.electricity.heater;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -33,6 +36,7 @@ import org.patryk3211.powergrid.utility.Unit;
 
 import java.util.List;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class HeaterBlockEntity extends ElectricBlockEntity implements IHaveGoggleInformation {
     public enum State {
         COLD,
@@ -106,6 +110,7 @@ public class HeaterBlockEntity extends ElectricBlockEntity implements IHaveGoggl
             return ChatFormatting.RED;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         Lang.translate("gui.heater.info_header").forGoggles(tooltip);

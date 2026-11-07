@@ -16,7 +16,6 @@
  */
 package org.patryk3211.powergrid.utility;
 
-import com.zurrtum.create.client.catnip.lang.LangBuilder;
 import net.minecraft.network.chat.Component;
 
 public enum Unit {

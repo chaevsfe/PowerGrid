@@ -17,7 +17,7 @@
 package org.patryk3211.powergrid.electricity.deviceconnector;
 
 import com.zurrtum.create.foundation.block.IBE;
-import com.zurrtum.create.client.catnip.lang.LangBuilder;
+import org.patryk3211.powergrid.utility.LangBuilder;
 import com.zurrtum.create.catnip.math.VoxelShaper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;

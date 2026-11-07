@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.kinetics.plotter;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.CenteredSideValueBoxTransform;
 import org.patryk3211.powergrid.utility.Env;
@@ -54,6 +57,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import com.mojang.serialization.Codec;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class PlotterBlockEntity extends ElectricKineticBlockEntity implements IHaveGoggleInformation {
     private static final float[] MAX_VALUES = new float[] { 2, 20, 200, 2000 };
 
@@ -199,6 +203,7 @@ public class PlotterBlockEntity extends ElectricKineticBlockEntity implements IH
     private static final Object TIME_SLOT = new Object();
     private static final Object ZERO_SLOT = new Object();
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         IHaveGoggleInformation.super.addToGoggleTooltip(tooltip, isPlayerSneaking);

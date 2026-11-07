@@ -7,7 +7,7 @@
     "BlueprintOverlayMixin",
     "BlueprintOverlayRendererAccessor",
     "ComplexEntityRaycastMixin",
-    "ItemInHandRendererMixin",
+    "FirstPersonHandsAndItemsRendererMixin",
     "ValueSettingsScreenMixin"
   ],
   "injectors": {

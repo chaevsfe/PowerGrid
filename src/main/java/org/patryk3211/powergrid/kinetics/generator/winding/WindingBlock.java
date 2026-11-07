@@ -24,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -154,7 +155,7 @@ public class WindingBlock extends ElectricBlock implements IBE<WindingBlockEntit
     }
 
     @Override
-    public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
+    public void playerDestroy(ServerLevel world, ServerPlayer player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
         super.playerDestroy(world, player, pos, state, blockEntity, tool);
         if(state.getValue(PART) != 1) {
             popResource(world, pos, new ItemStack(AllBlocks.SHAFT));

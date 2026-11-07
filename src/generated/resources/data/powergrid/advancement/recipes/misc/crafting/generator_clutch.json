@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "powergrid:crafting//generator_clutch"
+        "recipes": "powergrid:crafting/generator_clutch"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//generator_clutch"
+      "powergrid:crafting/generator_clutch"
     ]
   }
 }

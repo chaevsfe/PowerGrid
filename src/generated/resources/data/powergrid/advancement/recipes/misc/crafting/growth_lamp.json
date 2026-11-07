@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "powergrid:crafting//growth_lamp"
+        "recipes": "powergrid:crafting/growth_lamp"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//growth_lamp"
+      "powergrid:crafting/growth_lamp"
     ]
   }
 }

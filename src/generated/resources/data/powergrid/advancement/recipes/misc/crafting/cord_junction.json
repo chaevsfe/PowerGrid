@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "powergrid:crafting//cord_junction"
+        "recipes": "powergrid:crafting/cord_junction"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//cord_junction"
+      "powergrid:crafting/cord_junction"
     ]
   }
 }

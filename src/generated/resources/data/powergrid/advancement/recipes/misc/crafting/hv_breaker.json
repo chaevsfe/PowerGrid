@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "powergrid:crafting//hv_breaker"
+        "recipes": "powergrid:crafting/hv_breaker"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//hv_breaker"
+      "powergrid:crafting/hv_breaker"
     ]
   }
 }

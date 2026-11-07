@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "powergrid:crafting//lv_button"
+        "recipes": "powergrid:crafting/lv_button"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//lv_button"
+      "powergrid:crafting/lv_button"
     ]
   }
 }

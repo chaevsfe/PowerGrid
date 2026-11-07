@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "powergrid:crafting//barretter_tube"
+        "recipes": "powergrid:crafting/barretter_tube"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//barretter_tube"
+      "powergrid:crafting/barretter_tube"
     ]
   }
 }

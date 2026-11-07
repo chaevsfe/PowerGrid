@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.collections;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.renderpearl.api.pipeline.BlendFunction;
 import com.mojang.renderpearl.api.pipeline.ColorTargetState;
 import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
@@ -24,7 +25,9 @@ import com.zurrtum.create.client.catnip.render.PonderRenderPipelines;
 import com.zurrtum.create.client.foundation.render.CreateRenderTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.BindGroupLayouts;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.oit.OitPipelineSet;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import org.patryk3211.powergrid.PowerGrid;
@@ -53,17 +56,32 @@ public class ModdedRenderLayers {
             .withCull(false)
             .build());
 
+    private static final OitPipelineSet OIT_ADDITIVE_COLOR = additiveOitPipelines("powergrid/additive_color", PrimitiveTopology.QUADS);
+
+    private static final OitPipelineSet OIT_ADDITIVE_CRT = additiveOitPipelines("powergrid/additive_crt", PrimitiveTopology.TRIANGLES);
+
     private static final RenderType COLOR = RenderType.create(
             "powergrid_color",
-            RenderSetup.builder(COLOR_PIPELINE).sortOnUpload().createRenderSetup());
+            RenderSetup.builder(COLOR_PIPELINE).setOitPipelines(RenderPipelines.OIT_DEBUG_QUADS).sortOnUpload().createRenderSetup());
 
     private static final RenderType ADDITIVE_COLOR = RenderType.create(
             "powergrid_additive_color",
-            RenderSetup.builder(ADDITIVE_COLOR_PIPELINE).createRenderSetup());
+            RenderSetup.builder(ADDITIVE_COLOR_PIPELINE).setOitPipelines(OIT_ADDITIVE_COLOR).createRenderSetup());
 
     private static final RenderType ADDITIVE_CRT = RenderType.create(
             "powergrid_additive_crt",
-            RenderSetup.builder(ADDITIVE_CRT_PIPELINE).createRenderSetup());
+            RenderSetup.builder(ADDITIVE_CRT_PIPELINE).setOitPipelines(OIT_ADDITIVE_CRT).createRenderSetup());
+
+    private static OitPipelineSet additiveOitPipelines(String name, PrimitiveTopology topology) {
+        return RenderPipelines.register(OitPipelineSet.builder(name, RenderPipeline.builder()
+                .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+                .withVertexShader("core/position_color")
+                .withFragmentShader("core/position_color")
+                .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
+                .withPrimitiveTopology(topology)
+                .withCull(false)
+                .withShaderDefine("OIT_ADDITIVE")).build());
+    }
 
     public static RenderType getColor() {
         return COLOR;

@@ -24,11 +24,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import com.zurrtum.create.catnip.data.Pair;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -161,7 +163,8 @@ public class ClientWireInteractions {
             return false;
         if(currentEntity != null) {
             client.player.sendOverlayMessage(Lang.translateDirect("message.cut_reset"));
-            client.player.swing(InteractionHand.MAIN_HAND);
+            client.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
+            client.player.connection.send(ServerboundPunchPacket.INSTANCE);
             currentEntity = null;
         }
         return true;

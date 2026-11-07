@@ -11,6 +11,7 @@
     "ChuteBlockEntityMixin",
     "ConfigBaseAccessor",
     "ConfigBaseAccessor$CValueAccessor",
+    "DataFixersMixin",
     "EntityMixin",
     "FanProcessingMixin",
     "FluidPropagatorMixin",

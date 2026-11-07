@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//light_fixture"
+        "recipes": "powergrid:crafting//light_fixture"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

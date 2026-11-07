@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//vfet"
+        "recipes": "powergrid:crafting//vfet"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

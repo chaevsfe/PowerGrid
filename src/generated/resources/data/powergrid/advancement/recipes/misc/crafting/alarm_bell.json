@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//alarm_bell"
+        "recipes": "powergrid:crafting//alarm_bell"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

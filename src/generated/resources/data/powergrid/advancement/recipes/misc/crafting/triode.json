@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//triode"
+        "recipes": "powergrid:crafting//triode"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//modular_display"
+        "recipes": "powergrid:crafting//modular_display"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

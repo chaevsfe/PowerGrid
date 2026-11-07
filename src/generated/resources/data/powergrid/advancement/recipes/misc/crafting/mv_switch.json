@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//mv_switch"
+        "recipes": "powergrid:crafting//mv_switch"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

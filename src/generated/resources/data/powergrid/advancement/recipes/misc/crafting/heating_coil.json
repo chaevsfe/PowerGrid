@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//heating_coil"
+        "recipes": "powergrid:crafting//heating_coil"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

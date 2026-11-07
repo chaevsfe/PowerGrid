@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//power_gauge"
+        "recipes": "powergrid:crafting//power_gauge"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

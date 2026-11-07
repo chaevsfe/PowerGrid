@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//electric_fan"
+        "recipes": "powergrid:crafting//electric_fan"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

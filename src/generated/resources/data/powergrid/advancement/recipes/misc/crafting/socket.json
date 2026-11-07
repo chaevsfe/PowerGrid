@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//socket"
+        "recipes": "powergrid:crafting//socket"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

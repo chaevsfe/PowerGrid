@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//vertical_generator_housing_from_conversion"
+        "recipes": "powergrid:crafting//vertical_generator_housing_from_conversion"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//diode"
+        "recipes": "powergrid:crafting//diode"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

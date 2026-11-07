@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//energy_meter"
+        "recipes": "powergrid:crafting//energy_meter"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

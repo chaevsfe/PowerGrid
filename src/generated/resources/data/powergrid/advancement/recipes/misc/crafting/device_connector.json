@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//device_connector"
+        "recipes": "powergrid:crafting//device_connector"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

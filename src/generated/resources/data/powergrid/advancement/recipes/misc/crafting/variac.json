@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//variac"
+        "recipes": "powergrid:crafting//variac"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

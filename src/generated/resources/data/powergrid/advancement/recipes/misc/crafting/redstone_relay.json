@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//redstone_relay"
+        "recipes": "powergrid:crafting//redstone_relay"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

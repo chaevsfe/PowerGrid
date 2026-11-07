@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//heavy_wire_connector"
+        "recipes": "powergrid:crafting//heavy_wire_connector"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

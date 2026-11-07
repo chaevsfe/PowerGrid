@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//resistive_coil"
+        "recipes": "powergrid:crafting//resistive_coil"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

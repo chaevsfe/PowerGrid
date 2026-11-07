@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//spark_gap"
+        "recipes": "powergrid:crafting//spark_gap"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

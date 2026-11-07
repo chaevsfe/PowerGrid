@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//lv_light_bulb"
+        "recipes": "powergrid:crafting//lv_light_bulb"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

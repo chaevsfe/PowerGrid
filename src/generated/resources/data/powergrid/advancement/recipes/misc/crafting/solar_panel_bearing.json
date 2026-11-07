@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//solar_panel_bearing"
+        "recipes": "powergrid:crafting//solar_panel_bearing"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//power_resistor"
+        "recipes": "powergrid:crafting//power_resistor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

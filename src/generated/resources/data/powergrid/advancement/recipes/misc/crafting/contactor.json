@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//contactor"
+        "recipes": "powergrid:crafting//contactor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

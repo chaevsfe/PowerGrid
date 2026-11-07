@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//pins"
+        "recipes": "powergrid:crafting//pins"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

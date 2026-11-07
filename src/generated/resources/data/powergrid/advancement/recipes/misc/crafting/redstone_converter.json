@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//redstone_converter"
+        "recipes": "powergrid:crafting//redstone_converter"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

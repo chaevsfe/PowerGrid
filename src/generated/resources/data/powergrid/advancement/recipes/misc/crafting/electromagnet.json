@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//electromagnet"
+        "recipes": "powergrid:crafting//electromagnet"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

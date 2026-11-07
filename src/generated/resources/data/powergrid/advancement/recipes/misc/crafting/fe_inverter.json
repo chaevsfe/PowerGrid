@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//fe_inverter"
+        "recipes": "powergrid:crafting//fe_inverter"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

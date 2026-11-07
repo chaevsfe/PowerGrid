@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//generator_housing"
+        "recipes": "powergrid:crafting//generator_housing"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

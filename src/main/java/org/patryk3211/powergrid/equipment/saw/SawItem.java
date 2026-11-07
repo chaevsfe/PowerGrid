@@ -8,7 +8,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TooltipFlag;
@@ -23,9 +23,9 @@ import java.util.Optional;
 import net.minecraft.world.item.component.TooltipDisplay;
 import java.util.function.Consumer;
 
-public class SawItem extends AxeItem {
+public class SawItem extends Item {
     public SawItem(Properties properties) {
-        super(ToolMaterial.IRON, -ToolMaterial.IRON.attackDamageBonus(), 0.0f, properties);
+        super(properties.axe(ToolMaterial.IRON, -ToolMaterial.IRON.attackDamageBonus(), 0.0f));
     }
 
     @Override

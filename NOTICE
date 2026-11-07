@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-This distribution is a modification by chaevsfe of Create: Power Grid, ported to Fabric / Create Fly for Minecraft 26.2; upstream: https://github.com/patryk3211/PowerGrid
+This distribution is a modification by chaevsfe of Create: Power Grid, ported to Fabric / Create Fly for Minecraft 26.3; upstream: https://github.com/patryk3211/PowerGrid
 
 Portions of org.patryk3211.powergrid.electricity.battery.CustomConnectivityHandler,
 org.patryk3211.powergrid.utility.sound.SoundScapes and

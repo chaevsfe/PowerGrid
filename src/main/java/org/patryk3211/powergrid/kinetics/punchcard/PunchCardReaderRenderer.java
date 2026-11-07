@@ -68,7 +68,9 @@ public class PunchCardReaderRenderer extends KineticBlockEntityRenderer<PunchCar
 
     @Override
     public void submit(PunchCardReaderRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        matrices.pushPose();
         super.submit(state, matrices, queue, cameraState);
+        matrices.popPose();
         if (state.card != null)
             state.card.submit(matrices, queue);
     }

@@ -61,7 +61,9 @@ public class HvSwitchRenderer extends KineticBlockEntityRenderer<HvSwitchBlockEn
 
     @Override
     public void submit(HvSwitchRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        matrices.pushPose();
         super.submit(state, matrices, queue, cameraState);
+        matrices.popPose();
         if (state.rod != null)
             state.rod.submit(matrices, queue);
     }

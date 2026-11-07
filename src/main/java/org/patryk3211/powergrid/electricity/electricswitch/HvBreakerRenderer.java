@@ -76,7 +76,9 @@ public class HvBreakerRenderer extends KineticBlockEntityRenderer<HvBreakerBlock
 
     @Override
     public void submit(HvBreakerRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        matrices.pushPose();
         super.submit(state, matrices, queue, cameraState);
+        matrices.popPose();
         if (state.signalOpen != null)
             state.signalOpen.submit(matrices, queue);
         if (state.signalCharge != null)

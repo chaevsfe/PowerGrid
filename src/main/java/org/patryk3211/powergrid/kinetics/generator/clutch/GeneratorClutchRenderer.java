@@ -62,7 +62,9 @@ public class GeneratorClutchRenderer extends KineticBlockEntityRenderer<Generato
 
     @Override
     public void submit(GeneratorClutchRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        matrices.pushPose();
         super.submit(state, matrices, queue, cameraState);
+        matrices.popPose();
         if (state.assembly != null)
             state.assembly.submit(matrices, queue);
     }

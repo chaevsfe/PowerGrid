@@ -63,7 +63,9 @@ public class SolarPanelBearingRenderer<T extends KineticBlockEntity & IBearingBl
 
     @Override
     public void submit(SolarPanelBearingRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        matrices.pushPose();
         super.submit(state, matrices, queue, cameraState);
+        matrices.popPose();
         if (state.rotor != null)
             state.rotor.submit(matrices, queue);
     }

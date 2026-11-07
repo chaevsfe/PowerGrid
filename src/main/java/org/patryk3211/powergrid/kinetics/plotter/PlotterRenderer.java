@@ -111,7 +111,9 @@ public class PlotterRenderer extends KineticBlockEntityRenderer<PlotterBlockEnti
 
     @Override
     public void submit(PlotterRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        matrices.pushPose();
         super.submit(state, matrices, queue, cameraState);
+        matrices.popPose();
         if (state.pointer != null)
             state.pointer.submit(matrices, queue);
         if (state.viewer != null)

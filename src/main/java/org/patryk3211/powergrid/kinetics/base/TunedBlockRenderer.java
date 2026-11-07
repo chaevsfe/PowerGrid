@@ -64,7 +64,9 @@ public class TunedBlockRenderer<T extends TunedBlockEntity> extends KineticBlock
 
     @Override
     public void submit(TunedRenderState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        matrices.pushPose();
         super.submit(state, matrices, queue, cameraState);
+        matrices.popPose();
         if (state.armature != null)
             state.armature.submit(matrices, queue);
     }

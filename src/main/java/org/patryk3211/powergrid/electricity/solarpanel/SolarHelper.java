@@ -238,7 +238,7 @@ public class SolarHelper {
         var subLevel = SableCompanion.INSTANCE.getContaining(world, new Vector3d(pos.getX(), pos.getY(), pos.getZ()));
         if (subLevel == null) {
             if (!world.canSeeSky(pos)) {
-                var topY = world.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
+                var topY = world.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ());
                 var list = DDA(world, Vec3.atCenterOf(pos), Vec3.atCenterOf(pos).add(0, topY - pos.getY(), 0));
                 boolean hit = false;
                 for (DDAHit result : list) {
@@ -272,8 +272,8 @@ public class SolarHelper {
             var worldPos = BlockPos.containing(JOMLConversion.toMojang(SableCompanion.INSTANCE.projectOutOfSubLevel(world,
                     new Vector3d(pos.getX(), pos.getY(), pos.getZ()))));
             if (world.canSeeSky(worldPos) && world.canSeeSky(pos)) return true;
-            var topYWorld = world.getHeight(Heightmap.Types.MOTION_BLOCKING, worldPos.getX(), worldPos.getZ());
-            var topYSubLevel = world.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
+            var topYWorld = world.getHeight(Heightmap.Types.WORLD_SURFACE, worldPos.getX(), worldPos.getZ());
+            var topYSubLevel = world.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ());
             boolean hit = false;
             if (topYSubLevel > pos.getY()) {
                 var list = DDA(world, Vec3.atCenterOf(pos), Vec3.atCenterOf(pos).add(0, topYSubLevel - pos.getY(), 0));

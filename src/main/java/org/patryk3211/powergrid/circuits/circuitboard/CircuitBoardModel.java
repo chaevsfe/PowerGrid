@@ -107,8 +107,8 @@ public class CircuitBoardModel extends WrapperBlockStateModel {
 
         interner = baker.interner();
         var materials = baker.materials();
-        traceInfo = BakedQuad.MaterialInfo.of(materials.get(TRACE_MATERIAL, DEBUG_NAME), Transparency.NONE, CuboidFace.NO_TINT, false, 0);
-        padInfo = BakedQuad.MaterialInfo.of(materials.get(PAD_MATERIAL, DEBUG_NAME), Transparency.NONE, CuboidFace.NO_TINT, false, 0);
+        traceInfo = BakedQuad.MaterialInfo.of(materials.get(TRACE_MATERIAL, DEBUG_NAME), Transparency.NONE, CuboidFace.NO_TINT, Direction.UP, 0);
+        padInfo = BakedQuad.MaterialInfo.of(materials.get(PAD_MATERIAL, DEBUG_NAME), Transparency.NONE, CuboidFace.NO_TINT, Direction.UP, 0);
 
         componentParts.clear();
         for(var id : ComponentModels.collectRawIds())
@@ -221,7 +221,7 @@ public class CircuitBoardModel extends WrapperBlockStateModel {
     }
 
     private static BakedQuad.MaterialInfo destroyedInfo(BakedQuad.MaterialInfo info) {
-        return new BakedQuad.MaterialInfo(info.sprite(), info.layer(), info.itemRenderType(), DESTROYED_TINT, info.shade(), info.lightEmission());
+        return new BakedQuad.MaterialInfo(info.sprite(), info.layer(), info.itemRenderType(), info.itemGlintRenderType(), info.itemGlintSpecialRenderType(), DESTROYED_TINT, info.shadeDirectionOverride(), info.lightEmission());
     }
 
     private static Vector3fc placeVertex(Vector3fc position, Quaternionf rotation, Vector3f correction, Vector3f offset) {

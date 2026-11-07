@@ -8,6 +8,7 @@ import com.zurrtum.create.content.contraptions.Contraption;
 import com.zurrtum.create.content.contraptions.ContraptionCollider;
 import org.patryk3211.powergrid.compat.sable.math.JOMLConversion;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
@@ -234,11 +235,21 @@ public class SolarHelper {
         return new double[] {Ieq, G};
     }
 
+    private static int roofHeight(Level world, int x, int z) {
+        var cursor = new BlockPos.MutableBlockPos(x, world.getHeight(Heightmap.Types.WORLD_SURFACE, x, z), z);
+        while (cursor.move(Direction.DOWN).getY() >= world.getMinY()) {
+            var state = world.getBlockState(cursor);
+            if (state.isSolid() && !state.is(Blocks.COBWEB) && !state.is(Blocks.BAMBOO_SAPLING) || !state.getFluidState().isEmpty())
+                return cursor.getY() + 1;
+        }
+        return world.getMinY();
+    }
+
     public static boolean skyCheck(Level world, BlockPos pos) {
         var subLevel = SableCompanion.INSTANCE.getContaining(world, new Vector3d(pos.getX(), pos.getY(), pos.getZ()));
         if (subLevel == null) {
             if (!world.canSeeSky(pos)) {
-                var topY = world.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ());
+                var topY = roofHeight(world, pos.getX(), pos.getZ());
                 var list = DDA(world, Vec3.atCenterOf(pos), Vec3.atCenterOf(pos).add(0, topY - pos.getY(), 0));
                 boolean hit = false;
                 for (DDAHit result : list) {
@@ -272,8 +283,8 @@ public class SolarHelper {
             var worldPos = BlockPos.containing(JOMLConversion.toMojang(SableCompanion.INSTANCE.projectOutOfSubLevel(world,
                     new Vector3d(pos.getX(), pos.getY(), pos.getZ()))));
             if (world.canSeeSky(worldPos) && world.canSeeSky(pos)) return true;
-            var topYWorld = world.getHeight(Heightmap.Types.WORLD_SURFACE, worldPos.getX(), worldPos.getZ());
-            var topYSubLevel = world.getHeight(Heightmap.Types.WORLD_SURFACE, pos.getX(), pos.getZ());
+            var topYWorld = roofHeight(world, worldPos.getX(), worldPos.getZ());
+            var topYSubLevel = roofHeight(world, pos.getX(), pos.getZ());
             boolean hit = false;
             if (topYSubLevel > pos.getY()) {
                 var list = DDA(world, Vec3.atCenterOf(pos), Vec3.atCenterOf(pos).add(0, topYSubLevel - pos.getY(), 0));

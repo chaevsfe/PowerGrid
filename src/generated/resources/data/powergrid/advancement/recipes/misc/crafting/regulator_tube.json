@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//regulator_tube"
+        "recipe": "powergrid:crafting/regulator_tube"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//regulator_tube"
+      "powergrid:crafting/regulator_tube"
     ]
   }
 }

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//potato_battery"
+        "recipe": "powergrid:crafting/potato_battery"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//potato_battery"
+      "powergrid:crafting/potato_battery"
     ]
   }
 }

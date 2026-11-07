@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//pentode"
+        "recipe": "powergrid:crafting/pentode"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//pentode"
+      "powergrid:crafting/pentode"
     ]
   }
 }

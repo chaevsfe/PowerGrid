@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//generator_vertical_commutator_from_conversion"
+        "recipe": "powergrid:crafting/generator_vertical_commutator_from_conversion"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//generator_vertical_commutator_from_conversion"
+      "powergrid:crafting/generator_vertical_commutator_from_conversion"
     ]
   }
 }

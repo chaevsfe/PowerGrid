@@ -24,6 +24,7 @@ import com.zurrtum.create.foundation.blockEntity.behaviour.ValueSettings;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -79,8 +80,8 @@ public class TransformerWindingScreen extends ValueSettingsScreen {
     }
 
     @Override
-    public ValueSettings getClosestCoordinate(int mouseX, int mouseY) {
-        var value = super.getClosestCoordinate(mouseX, mouseY);
+    public ValueSettings getClosestCoordinate(boolean milestonesOnly, int mouseX, int mouseY) {
+        var value = super.getClosestCoordinate(milestonesOnly, mouseX, mouseY);
         if(value.value() > cap)
             return new ValueSettings(value.row(), cap);
         return value;
@@ -129,8 +130,8 @@ public class TransformerWindingScreen extends ValueSettingsScreen {
     }
 
     @Override
-    protected void saveAndClose(double pMouseX, double pMouseY) {
-        ValueSettings closest = getClosestCoordinate((int) pMouseX, (int) pMouseY);
+    protected void saveAndClose(InputWithModifiers input, double pMouseX, double pMouseY) {
+        ValueSettings closest = getClosestCoordinate(input.hasShiftDown(), (int) pMouseX, (int) pMouseY);
         var value = Math.max(closest.value(), 1);
         ModdedPackets.sendToServer(new TransformerWindingC2SPacket(value, hand));
         onClose();

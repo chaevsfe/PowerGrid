@@ -24,6 +24,7 @@ import com.zurrtum.create.foundation.blockEntity.behaviour.ValueSettings;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -62,8 +63,8 @@ public class CustomValueSettingsScreen extends ValueSettingsScreen {
     }
 
     @Override
-    protected void saveAndClose(double pMouseX, double pMouseY) {
-        ValueSettings closest = getClosestCoordinate((int) pMouseX, (int) pMouseY);
+    protected void saveAndClose(InputWithModifiers input, double pMouseX, double pMouseY) {
+        ValueSettings closest = getClosestCoordinate(input.hasShiftDown(), (int) pMouseX, (int) pMouseY);
         saveCallback.accept(closest);
         onClose();
     }

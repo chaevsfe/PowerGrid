@@ -27,6 +27,7 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.item.ModelRenderProperties;
 import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -49,17 +50,17 @@ public class MultimeterModel implements ItemModel {
 
     private static final float NEEDLE_PIVOT = 0.5f + (5.75f - 8) / 16;
 
-    private final List<BakedQuad> itemQuads;
+    private final ItemQuads itemQuads;
     private final ModelRenderProperties settings;
     private final Supplier<Vector3fc[]> itemExtents;
-    private final List<BakedQuad> needleQuads;
+    private final ItemQuads needleQuads;
     private final Supplier<Vector3fc[]> needleExtents;
 
     public MultimeterModel(List<BakedQuad> itemQuads, ModelRenderProperties settings, List<BakedQuad> needleQuads) {
-        this.itemQuads = itemQuads;
+        this.itemQuads = ItemQuads.split(itemQuads);
         this.settings = settings;
         this.itemExtents = ItemModelParts.extents(itemQuads);
-        this.needleQuads = needleQuads;
+        this.needleQuads = ItemQuads.split(needleQuads);
         this.needleExtents = ItemModelParts.extents(needleQuads);
     }
 

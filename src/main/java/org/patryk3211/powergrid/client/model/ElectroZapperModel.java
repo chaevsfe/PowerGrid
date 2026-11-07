@@ -30,6 +30,7 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.item.ModelRenderProperties;
 import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
@@ -53,17 +54,17 @@ public class ElectroZapperModel implements ItemModel {
 
     private static final float COG_OFFSET = -2.5f / 16;
 
-    private final List<BakedQuad> itemQuads;
+    private final ItemQuads itemQuads;
     private final ModelRenderProperties settings;
     private final Supplier<Vector3fc[]> itemExtents;
-    private final List<BakedQuad> cogQuads;
+    private final ItemQuads cogQuads;
     private final Supplier<Vector3fc[]> cogExtents;
 
     public ElectroZapperModel(List<BakedQuad> itemQuads, ModelRenderProperties settings, List<BakedQuad> cogQuads) {
-        this.itemQuads = itemQuads;
+        this.itemQuads = ItemQuads.split(itemQuads);
         this.settings = settings;
         this.itemExtents = ItemModelParts.extents(itemQuads);
-        this.cogQuads = cogQuads;
+        this.cogQuads = ItemQuads.split(cogQuads);
         this.cogExtents = ItemModelParts.extents(cogQuads);
     }
 

@@ -29,6 +29,7 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.item.ModelRenderProperties;
 import net.minecraft.client.resources.model.ResolvableModel;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -46,12 +47,12 @@ public class BoostingChipModel implements ItemModel {
     public static final Identifier ID = PowerGrid.asResource("model/integrated_circuit");
     public static final Identifier ITEM_ID = PowerGrid.asResource("item/integrated_circuit");
 
-    private final List<BakedQuad> quads;
+    private final ItemQuads quads;
     private final ModelRenderProperties settings;
     private final Supplier<Vector3fc[]> extents;
 
     public BoostingChipModel(List<BakedQuad> quads, ModelRenderProperties settings) {
-        this.quads = quads;
+        this.quads = ItemQuads.split(quads);
         this.settings = settings;
         this.extents = ItemModelParts.extents(quads);
     }

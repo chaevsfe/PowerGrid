@@ -15,6 +15,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -171,7 +172,7 @@ public class ModularDisplayBlockEntity extends ElectricBlockEntity{
         if (held.isEmpty() && player.isCrouching()) {
             if (current == null) return;
             if (!player.getInventory().add(new ItemStack(ModdedItems.DISPLAY_MODULE.get()))) {
-                player.drop(new ItemStack(ModdedItems.DISPLAY_MODULE.get()), false);
+                player.drop(new ItemStack(ModdedItems.DISPLAY_MODULE.get()), false, Prediction.SERVER_ONLY);
             }
             modules[slotIndex] = null;
             slotThermals[slotIndex].resetTemperature();

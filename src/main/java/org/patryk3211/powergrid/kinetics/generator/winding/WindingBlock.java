@@ -25,6 +25,7 @@ import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -406,7 +407,7 @@ public class WindingBlock extends ElectricBlock implements IBE<WindingBlockEntit
 
         if(player != null && !player.isCreative()) {
             Block.getDrops(state.setValue(PART, 1), serverWorld, pos, world.getBlockEntity(pos), player, context.getItemInHand())
-                    .forEach(stack -> player.getInventory().placeItemBackInInventory(stack));
+                    .forEach(stack -> player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY));
         }
         state.setValue(PART, 1).spawnAfterBreak(serverWorld, pos, ItemStack.EMPTY, true);
         world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
@@ -434,9 +435,9 @@ public class WindingBlock extends ElectricBlock implements IBE<WindingBlockEntit
         walk(world, pos, (pos1, state1) -> {
             if (player != null && !player.isCreative()) {
                 Block.getDrops(state1, serverLevel, pos1, world.getBlockEntity(pos1), player, context.getItemInHand())
-                        .forEach(stack -> player.getInventory().placeItemBackInInventory(stack));
+                        .forEach(stack -> player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY));
                 if(pos.equals(pos1) && state1.getValue(PART) != 1) {
-                    player.getInventory().placeItemBackInInventory(new ItemStack(AllBlocks.SHAFT));
+                    player.getInventory().placeItemBackInInventory(new ItemStack(AllBlocks.SHAFT), Prediction.SERVER_ONLY);
                 }
             }
             state1.spawnAfterBreak(serverLevel, pos1, ItemStack.EMPTY, true);

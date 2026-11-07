@@ -24,6 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -241,7 +242,7 @@ public class HvSwitchBlock extends HorizontalKineticBlock implements IElectric, 
                 var player = context.getPlayer();
                 if(player != null && !player.isCreative()) {
                     Block.getDrops(state2, serverWorld, pos2, world.getBlockEntity(pos2), player, context.getItemInHand())
-                            .forEach(stack -> player.getInventory().placeItemBackInInventory(stack));
+                            .forEach(stack -> player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY));
                 }
                 state2.spawnAfterBreak(serverWorld, pos2, ItemStack.EMPTY, true);
                 world.destroyBlock(pos2, false);

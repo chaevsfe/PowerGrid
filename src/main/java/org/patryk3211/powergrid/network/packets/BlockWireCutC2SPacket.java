@@ -20,6 +20,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.patryk3211.powergrid.PowerGrid;
@@ -182,7 +183,7 @@ public class BlockWireCutC2SPacket implements C2SPacket {
             // Drop excess wires
             var cutter = player;
             for(; wireCount > 0; wireCount -= 64) {
-                cutter.getInventory().placeItemBackInInventory(new ItemStack(wire.getItem(), Math.min(wireCount, 64)));
+                cutter.getInventory().placeItemBackInInventory(new ItemStack(wire.getItem(), Math.min(wireCount, 64)), Prediction.SERVER_ONLY);
             }
         }
 

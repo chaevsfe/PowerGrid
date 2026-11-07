@@ -19,6 +19,7 @@ package org.patryk3211.powergrid.electricity.transformer;
 import com.zurrtum.create.content.equipment.wrench.IWrenchable;
 import com.zurrtum.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Prediction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.LevelReader;
@@ -199,7 +200,7 @@ public class TransformerMediumBlock extends TransformerBlock implements IBE<Tran
                 var offsetState = world.getBlockState(offsetPos);
                 if (player != null && !player.isCreative()) {
                     Block.getDrops(offsetState, serverLevel, offsetPos, world.getBlockEntity(offsetPos), player, context.getItemInHand())
-                            .forEach((itemStack) -> player.getInventory().placeItemBackInInventory(itemStack));
+                            .forEach((itemStack) -> player.getInventory().placeItemBackInInventory(itemStack, Prediction.SERVER_ONLY));
                 }
                 offsetState.spawnAfterBreak(serverLevel, offsetPos, ItemStack.EMPTY, true);
                 world.destroyBlock(offsetPos, false);

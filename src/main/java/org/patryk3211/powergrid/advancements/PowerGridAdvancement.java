@@ -7,7 +7,6 @@ import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.triggers.Criterion;
 import net.minecraft.advancements.triggers.InventoryChangeTrigger;
 import net.minecraft.advancements.predicates.ItemPredicate;
-import net.minecraft.advancements.triggers.ItemUsedOnLocationTrigger;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -18,7 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.Block;
 import org.patryk3211.powergrid.PowerGrid;
 import org.patryk3211.powergrid.collections.ModdedAdvancements;
 
@@ -91,13 +89,19 @@ public class PowerGridAdvancement {
         if (pgBuilder.func != null)
             pgBuilder.icon(pgBuilder.func.apply(registries));
 
-        builder.display(pgBuilder.icon.get().getItem(), Component.translatable(titleKey()),
-                Component.translatable(descriptionKey()).withStyle(s -> s.withColor(0xDBA213)),
-                id.equals("root") ? BACKGROUND : null, pgBuilder.type.type, pgBuilder.type.toast,
-                pgBuilder.type.announce, pgBuilder.type.hide);
+        Item iconItem = pgBuilder.icon.get().getItem();
+        Component titleText = Component.translatable(titleKey());
+        Component descriptionText = Component.translatable(descriptionKey()).withStyle(s -> s.withColor(0xDBA213));
+        if(id.equals("root")) {
+            builder.rootDisplay(iconItem, titleText, descriptionText, BACKGROUND, pgBuilder.type.type, pgBuilder.type.toast,
+                    pgBuilder.type.announce, pgBuilder.type.hide);
+        } else {
+            builder.display(iconItem, titleText, descriptionText, pgBuilder.type.type, pgBuilder.type.toast,
+                    pgBuilder.type.announce, pgBuilder.type.hide);
+        }
 
-        datagenResult = builder.save(t, PowerGrid.asResource(id)
-                .toString());
+        datagenResult = builder.build(PowerGrid.asResource(id));
+        t.accept(datagenResult);
     }
 
     public void provideLang(BiConsumer<String, String> consumer) {
@@ -174,10 +178,6 @@ public class PowerGridAdvancement {
         public Builder description(String description) {
             PowerGridAdvancement.this.description = description;
             return this;
-        }
-
-        public Builder whenBlockPlaced(Block block) {
-            return externalTrigger(ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(block));
         }
 
         public Builder whenIconCollected() {

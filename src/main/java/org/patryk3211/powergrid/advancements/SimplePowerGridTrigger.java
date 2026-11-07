@@ -2,9 +2,9 @@ package org.patryk3211.powergrid.advancements;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
-import net.minecraft.advancements.predicates.entity.EntityPredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,16 +33,16 @@ public class SimplePowerGridTrigger extends CriterionTriggerBase<SimplePowerGrid
 
     public static class Instance extends CriterionTriggerBase.Instance {
         private static final Codec<Instance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(Instance::player)
+                LootItemCondition.CODEC.optionalFieldOf("player").forGetter(Instance::player)
         ).apply(instance, player -> new Instance(player.orElse(null))));
 
-        private final ContextAwarePredicate player;
+        private final Holder<LootItemCondition> player;
 
         public Instance() {
             player = null;
         }
 
-        public Instance(ContextAwarePredicate player) {
+        public Instance(Holder<LootItemCondition> player) {
             this.player = player;
         }
 
@@ -52,7 +52,7 @@ public class SimplePowerGridTrigger extends CriterionTriggerBase<SimplePowerGrid
         }
 
         @Override
-        public Optional<ContextAwarePredicate> player() {
+        public Optional<Holder<LootItemCondition>> player() {
             return Optional.ofNullable(player);
         }
     }

@@ -37,7 +37,7 @@ public class BoostingChipItem extends Item {
         if(!ModdedAdvancements.BOOSTING_CHIP.isAlreadyAwardedTo(player)) {
             ModdedAdvancements.BOOSTING_CHIP.awardTo(player);
         }
-        entity.onEquippedItemBroken(stack.getItem(), player.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+        entity.onEquippedItemBroken(stack, player.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
         stack.shrink(1);
         return stack;
     }

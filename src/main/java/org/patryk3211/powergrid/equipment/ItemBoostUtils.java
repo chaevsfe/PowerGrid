@@ -53,7 +53,7 @@ public class ItemBoostUtils {
     public static boolean useBoost(ItemStack stack, LivingEntity entity) {
         if(!isBoosted(stack))
             return false;
-        ItemBoostUtils.damageBoost(stack, () -> entity.onEquippedItemBroken(stack.getItem(), EquipmentSlot.MAINHAND));
+        ItemBoostUtils.damageBoost(stack, () -> entity.onEquippedItemBroken(stack, EquipmentSlot.MAINHAND));
         return true;
     }
 

@@ -15,7 +15,7 @@
  */
 package org.patryk3211.powergrid.compat.iris;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.irisshaders.iris.api.v0.IrisApi;

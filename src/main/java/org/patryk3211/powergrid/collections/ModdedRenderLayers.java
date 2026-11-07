@@ -16,10 +16,10 @@
  */
 package org.patryk3211.powergrid.collections;
 
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.zurrtum.create.client.catnip.render.PonderRenderPipelines;
 import com.zurrtum.create.client.foundation.render.CreateRenderTypes;
 import net.fabricmc.api.EnvType;

@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.circuits.editor;
 
+import com.mojang.blaze3d.Blaze3D;
 import com.zurrtum.create.client.foundation.gui.AllIcons;
 import com.zurrtum.create.client.foundation.gui.menu.AbstractSimiContainerScreen;
 import com.zurrtum.create.client.foundation.gui.widget.IconButton;
@@ -35,7 +36,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.storage.TagValueInput;
 import org.jetbrains.annotations.NotNull;
@@ -185,7 +185,7 @@ public class CircuitDesignTableLoadScreen extends AbstractSimiContainerScreen<Ci
         loadBtn.setToolTip(FILE_LOAD);
 
         folderBtn = new IconButton(leftPos + 20, topPos + 23, AllIcons.I_OPEN_FOLDER);
-        folderBtn.withCallback(() -> Util.getPlatform().openFile(Paths.get("circuits/").toFile()));
+        folderBtn.withCallback(() -> Blaze3D.openPath(Paths.get("circuits/")));
 
         addRenderableWidget(cancelBtn);
         addRenderableWidget(saveBtn);

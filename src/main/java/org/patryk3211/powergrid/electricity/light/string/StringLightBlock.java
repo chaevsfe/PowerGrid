@@ -26,7 +26,7 @@ public class StringLightBlock extends AirBlock {
                 .noLootTable()
                 .noOcclusion()
                 .replaceable()
-                .pushReaction(PushReaction.DESTROY)
+                .pushReaction(PushReaction.POPPED)
                 .air());
     }
 }

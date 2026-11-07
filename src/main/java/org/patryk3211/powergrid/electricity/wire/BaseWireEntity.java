@@ -533,7 +533,7 @@ public abstract class BaseWireEntity extends Entity implements EntityDataS2CPack
 
     @Override
     public PushReaction getPistonPushReaction() {
-        return PushReaction.IGNORE;
+        return PushReaction.IGNORE_ENTITY;
     }
 
     public int getColor() {

@@ -26,7 +26,7 @@ public class FactoryLightLightBlock extends Block implements IBE<FactoryLightLig
                 .noOcclusion()
                 .replaceable()
                 .noTerrainParticles()
-                .pushReaction(PushReaction.DESTROY)
+                .pushReaction(PushReaction.POPPED)
                 .air());
     }
 

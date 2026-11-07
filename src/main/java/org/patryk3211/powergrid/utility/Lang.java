@@ -16,7 +16,6 @@
  */
 package org.patryk3211.powergrid.utility;
 
-import com.zurrtum.create.client.catnip.lang.LangBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.patryk3211.powergrid.PowerGrid;
@@ -24,13 +23,17 @@ import org.patryk3211.powergrid.PowerGrid;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Lang extends com.zurrtum.create.client.catnip.lang.Lang {
+public class Lang {
+    public static LangBuilder builder(String namespace) {
+        return new LangBuilder(namespace);
+    }
+
     public static MutableComponent translateDirect(String key, Object... args) {
         return builder().translate(key, args).component();
     }
 
     public static LangBuilder builder() {
-        return Lang.builder(PowerGrid.MOD_ID);
+        return builder(PowerGrid.MOD_ID);
     }
 
     public static LangBuilder translate(String langKey, Object... args) {

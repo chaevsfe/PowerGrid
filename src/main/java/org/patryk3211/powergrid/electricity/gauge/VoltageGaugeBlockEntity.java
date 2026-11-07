@@ -16,6 +16,8 @@
  */
 package org.patryk3211.powergrid.electricity.gauge;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -155,6 +157,7 @@ public class VoltageGaugeBlockEntity extends GaugeBlockEntity {
                 .forGoggles(tooltip, 1);
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         super.addToGoggleTooltip(tooltip, isPlayerSneaking);

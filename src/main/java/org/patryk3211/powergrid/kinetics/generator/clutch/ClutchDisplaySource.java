@@ -18,7 +18,7 @@ package org.patryk3211.powergrid.kinetics.generator.clutch;
 
 import com.zurrtum.create.content.redstone.displayLink.DisplayLinkContext;
 import com.zurrtum.create.content.redstone.displayLink.source.PercentOrProgressBarDisplaySource;
-import com.zurrtum.create.client.foundation.utility.CreateLang;
+import com.zurrtum.create.Create;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +45,7 @@ public class ClutchDisplaySource extends PercentOrProgressBarDisplaySource {
         return get(context).map(be ->
                 Lang.numberConstant(Math.abs(be.rotorBehaviour.getAngularVelocity()))
                         .add(Component.literal(" "))
-                        .add(CreateLang.translate("generic.unit.rpm"))
+                        .add(Lang.builder(Create.MOD_ID).translate("generic.unit.rpm"))
                         .component())
                 .orElseGet(() -> super.formatNumeric(context, currentLevel));
     }

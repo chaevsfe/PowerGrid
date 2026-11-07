@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.electricity.creative;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -32,6 +35,7 @@ import org.patryk3211.powergrid.utility.Unit;
 
 import java.util.List;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class CreativeResistorBlockEntity extends ResistorBlockEntity implements IHaveGoggleInformation {
     public CreativeResistorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -47,6 +51,7 @@ public class CreativeResistorBlockEntity extends ResistorBlockEntity implements 
         return null;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         Lang.translate("gui.creative_resistor.info_header").forGoggles(tooltip);

@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.electricity.carbonpile;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import net.minecraft.ChatFormatting;
@@ -44,6 +47,7 @@ import java.util.List;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class CarbonPileCoilBlockEntity extends ElectricBlockEntity implements IHaveGoggleInformation, ElectricBehaviour.SyncAppender {
     private ElectricWire coil;
     private SwitchedWire pile;
@@ -137,6 +141,7 @@ public class CarbonPileCoilBlockEntity extends ElectricBlockEntity implements IH
         }
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         if(!pile.getState())

@@ -16,6 +16,7 @@
  */
 package org.patryk3211.powergrid.circuits.circuitboard;
 
+import net.fabricmc.api.EnvironmentInterface;
 import net.minecraft.util.Mth;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.content.kinetics.fan.AirCurrent;
@@ -75,6 +76,7 @@ import static org.patryk3211.powergrid.circuits.circuitboard.CircuitBoardBlock.R
 import static org.patryk3211.powergrid.circuits.components.ViaComponent.VERTICAL_PASSTHROUGH;
 import static org.patryk3211.powergrid.circuits.components.ViaComponent.EDGE_CONNECTIONS;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IElectric, IHaveGoggleInformation, ISchematicHolder, ElectricBehaviour.SyncAppender {
     private CircuitSchematic schematic = new CircuitSchematic();
     private BakedCircuit baked;
@@ -566,6 +568,7 @@ public class CircuitBoardBlockEntity extends ElectricBlockEntity implements IEle
         super.remove();
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<net.minecraft.network.chat.Component> tooltip, boolean isPlayerSneaking) {
         if(baked == null)

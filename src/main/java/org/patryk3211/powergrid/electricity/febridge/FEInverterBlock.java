@@ -1,7 +1,7 @@
 package org.patryk3211.powergrid.electricity.febridge;
 
 import com.zurrtum.create.foundation.block.IBE;
-import com.zurrtum.create.client.catnip.lang.LangBuilder;
+import org.patryk3211.powergrid.utility.LangBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;

@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.electricity.creative;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.CenteredSideValueBoxTransform;
@@ -42,6 +45,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import com.mojang.serialization.Codec;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class CreativeSourceBlockEntity extends ElectricBlockEntity implements IHaveGoggleInformation {
     private CreativeSourceValueBehaviour value;
 
@@ -181,6 +185,7 @@ public class CreativeSourceBlockEntity extends ElectricBlockEntity implements IH
         }
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         Lang.translate("gui.creative_source.info_header").forGoggles(tooltip);

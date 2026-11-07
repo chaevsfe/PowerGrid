@@ -15,7 +15,8 @@ limitations under the License.
 This distribution is a modification by chaevsfe of Create: Power Grid, ported to Fabric / Create Fly for Minecraft 26.2; upstream: https://github.com/patryk3211/PowerGrid
 
 Portions of org.patryk3211.powergrid.electricity.battery.CustomConnectivityHandler,
-org.patryk3211.powergrid.utility.sound.SoundScapes and
+org.patryk3211.powergrid.utility.sound.SoundScapes,
+org.patryk3211.powergrid.utility.LangBuilder and
 org.patryk3211.powergrid.electricity.electromagnet.MagnetizingBehaviour are derived from
 Create (https://github.com/Creators-of-Create/Create) and Create Fly
 (https://github.com/ZurrTum/Create-Fly), used under the MIT licence; Copyright (c) The Create

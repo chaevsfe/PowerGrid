@@ -16,10 +16,13 @@
  */
 package org.patryk3211.powergrid.electricity.electricswitch;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.api.behaviour.BlockEntityBehaviour;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.CenteredSideValueBoxTransform;
 import com.zurrtum.create.catnip.animation.LerpedFloat;
-import com.zurrtum.create.client.catnip.lang.LangBuilder;
+import org.patryk3211.powergrid.utility.LangBuilder;
 import com.zurrtum.create.catnip.math.VecHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -45,6 +48,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class HvBreakerBlockEntity extends ElectricKineticBlockEntity implements IHaveGoggleInformation {
     @Nullable
     private SwitchedWire wire;
@@ -194,6 +198,7 @@ public class HvBreakerBlockEntity extends ElectricKineticBlockEntity implements 
         }
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         IHaveGoggleInformation.super.addToGoggleTooltip(tooltip, isPlayerSneaking);

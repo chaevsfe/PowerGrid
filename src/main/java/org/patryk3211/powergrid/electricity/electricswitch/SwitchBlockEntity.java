@@ -16,6 +16,9 @@
  */
 package org.patryk3211.powergrid.electricity.electricswitch;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.api.EnvironmentInterface;
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -37,6 +40,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
+@EnvironmentInterface(value = EnvType.CLIENT, itf = IHaveGoggleInformation.class)
 public class SwitchBlockEntity extends ElectricBlockEntity implements IHaveGoggleInformation {
     private SwitchedWire wire;
     private float maxVoltage;
@@ -159,6 +163,7 @@ public class SwitchBlockEntity extends ElectricBlockEntity implements IHaveGoggl
         }
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
         if(overvoltResistance == null)

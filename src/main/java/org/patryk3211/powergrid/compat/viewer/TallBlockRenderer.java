@@ -26,8 +26,8 @@ public final class TallBlockRenderer extends GuiBlockRenderer<TallBlockRenderSta
     protected void renderToTexture(TallBlockRenderState state, PoseStack matrices, SubmitNodeCollector collector) {
         matrices.translate(0.0f, -state.extraHeight() / state.scale(), 0.0f);
         matrices.scale(1.0f, 1.0f, -1.0f);
-        matrices.mulPose(Axis.XP.rotationDegrees(-15.5f));
-        matrices.mulPose(Axis.YP.rotationDegrees(22.5f));
+        matrices.rotate(Axis.XP.rotationDegrees(-15.5f));
+        matrices.rotate(Axis.YP.rotationDegrees(22.5f));
         matrices.translate(-0.5f, -0.2f, -0.5f);
         matrices.scale(1.0f, -1.0f, 1.0f);
         CachedBuffers.block(state.state()).submit(matrices, collector);

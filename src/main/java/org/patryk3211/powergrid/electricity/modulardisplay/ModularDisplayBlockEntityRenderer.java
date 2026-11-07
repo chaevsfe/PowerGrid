@@ -105,7 +105,7 @@ public class ModularDisplayBlockEntityRenderer extends SmartBlockEntityRenderer<
 
         matrices.pushPose();
         matrices.translate(0.5, 0.5, 0.5);
-        matrices.mulPose(Axis.YP.rotationDegrees(state.yRot));
+        matrices.rotate(Axis.YP.rotationDegrees(state.yRot));
         matrices.translate(-0.5, -0.5, -0.5);
         matrices.translate(0f, 0f, -Z_NUDGE);
 

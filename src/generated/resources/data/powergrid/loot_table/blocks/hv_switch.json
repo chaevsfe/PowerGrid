@@ -3,18 +3,21 @@
   "pools": [
     {
       "bonus_rolls": 0.0,
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        },
-        {
-          "block": "powergrid:hv_switch",
-          "condition": "minecraft:block_state_property",
-          "properties": {
-            "part": "0"
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "powergrid:hv_switch",
+            "state": {
+              "part": "0"
+            }
           }
-        }
-      ],
+        ]
+      },
       "entries": [
         {
           "type": "minecraft:item",

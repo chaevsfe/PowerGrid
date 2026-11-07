@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//factory_light"
+        "recipe": "powergrid:crafting/factory_light"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//factory_light"
+      "powergrid:crafting/factory_light"
     ]
   }
 }

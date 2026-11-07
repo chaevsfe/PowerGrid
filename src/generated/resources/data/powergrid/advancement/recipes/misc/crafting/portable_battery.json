@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//portable_battery"
+        "recipe": "powergrid:crafting/portable_battery"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//portable_battery"
+      "powergrid:crafting/portable_battery"
     ]
   }
 }

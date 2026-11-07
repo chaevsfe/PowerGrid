@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//constant_speed_motor"
+        "recipe": "powergrid:crafting/constant_speed_motor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//constant_speed_motor"
+      "powergrid:crafting/constant_speed_motor"
     ]
   }
 }

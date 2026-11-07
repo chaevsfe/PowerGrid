@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//copper_plating_slab"
+        "recipe": "powergrid:crafting/copper_plating_slab"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//copper_plating_slab"
+      "powergrid:crafting/copper_plating_slab"
     ]
   }
 }

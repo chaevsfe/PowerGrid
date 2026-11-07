@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//wire_cutter"
+        "recipe": "powergrid:crafting/wire_cutter"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//wire_cutter"
+      "powergrid:crafting/wire_cutter"
     ]
   }
 }

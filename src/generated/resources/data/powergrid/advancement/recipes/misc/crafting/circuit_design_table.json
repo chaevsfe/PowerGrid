@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "powergrid:crafting//circuit_design_table"
+        "recipe": "powergrid:crafting/circuit_design_table"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "powergrid:crafting//circuit_design_table"
+      "powergrid:crafting/circuit_design_table"
     ]
   }
 }

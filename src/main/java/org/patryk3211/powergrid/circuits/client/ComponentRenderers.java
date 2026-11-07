@@ -21,7 +21,6 @@ import com.zurrtum.create.catnip.animation.LerpedFloat;
 import com.zurrtum.create.client.catnip.render.CachedBuffers;
 import com.zurrtum.create.client.catnip.render.SuperByteBufferRenderState;
 import com.zurrtum.create.client.flywheel.lib.transform.TransformStack;
-import com.zurrtum.create.client.foundation.render.CreateRenderTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -295,7 +294,7 @@ public class ComponentRenderers {
         var bulb = CachedBuffers.partial(ModdedPartialModels.NEON_TUBE_BULB, be.getBlockState())
                 .light(light)
                 .extractRenderState();
-        out.add((ms, queue) -> bulb.submit(CreateRenderTypes.translucent(), ms, queue));
+        out.add((ms, queue) -> bulb.submit(RenderTypes.translucentMovingBlock(), ms, queue));
 
         boolean vertical = placed.get(NeonBulbComponent.VERTICAL);
         var glowPartial = vertical ? ModdedPartialModels.NEON_TUBE_VERTICAL_GLOW : ModdedPartialModels.NEON_TUBE_GLOW;

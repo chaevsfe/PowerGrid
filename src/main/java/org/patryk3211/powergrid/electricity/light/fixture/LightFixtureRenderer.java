@@ -21,7 +21,6 @@ import com.zurrtum.create.client.catnip.render.CachedBuffers;
 import com.zurrtum.create.client.catnip.render.SuperByteBuffer;
 import com.zurrtum.create.client.catnip.render.SuperByteBufferRenderState;
 import com.zurrtum.create.client.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
-import com.zurrtum.create.client.foundation.render.CreateRenderTypes;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
@@ -104,7 +103,7 @@ public class LightFixtureRenderer extends SmartBlockEntityRenderer<LightFixtureB
         if (state.bulb != null)
             state.bulb.submit(RenderTypes.cutoutMovingBlock(), matrices, queue);
         if (state.dyedBulb != null)
-            state.dyedBulb.submit(CreateRenderTypes.translucent(), matrices, queue);
+            state.dyedBulb.submit(RenderTypes.translucentMovingBlock(), matrices, queue);
         if (state.glow != null)
             state.glow.submit(ModdedRenderLayers.getAdditive(), matrices, queue.order(1));
     }

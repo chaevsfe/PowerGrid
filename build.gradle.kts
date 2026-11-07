@@ -31,7 +31,7 @@ repositories {
 // jar into libs/, a local checkout uses the sibling repo's build output.
 repositories {
     flatDir {
-        dirs("libs", "../../create-rei/CreateReiViewer-Fly/build/libs")
+        dirs("libs", "../../create-rei/wt-263/build/libs")
     }
 }
 val recipeViewer = ":CreateReiViewer:${property("createreiviewer_version")}"

@@ -1,58 +1,220 @@
 {
   "values": [
-    "powergrid:andesite_encased_crt",
-    "powergrid:basin_heater",
-    "powergrid:battery",
-    "powergrid:brass_encased_crt",
-    "powergrid:carbon_pile",
-    "powergrid:carbon_pile_coil",
-    "powergrid:ceiling_tile_connector",
-    "powergrid:ceiling_tile_junction",
-    "powergrid:ceiling_tile_lamp",
-    "powergrid:ceiling_tile_solar",
-    "powergrid:circuit_design_table",
-    "powergrid:conductive_casing",
-    "powergrid:constant_speed_motor",
-    "powergrid:contactor",
-    "powergrid:copper_plating",
-    "powergrid:copper_plating_slab",
-    "powergrid:copper_plating_stairs",
-    "powergrid:creative_current_source",
-    "powergrid:creative_voltage_source",
-    "powergrid:crt",
-    "powergrid:current_gauge",
-    "powergrid:electric_fan",
-    "powergrid:electric_motor",
-    "powergrid:electric_pump",
-    "powergrid:electromagnet",
-    "powergrid:energy_meter",
-    "powergrid:fe_inverter",
-    "powergrid:generator_clutch",
-    "powergrid:generator_commutator",
-    "powergrid:generator_housing",
-    "powergrid:generator_induction_rotor",
-    "powergrid:generator_large_induction_rotor",
-    "powergrid:generator_vertical_commutator",
-    "powergrid:grounding_rod",
-    "powergrid:heating_coil",
-    "powergrid:hv_breaker",
-    "powergrid:hv_switch",
-    "powergrid:modular_display",
-    "powergrid:nether_transformer",
-    "powergrid:plotter",
-    "powergrid:power_gauge",
-    "powergrid:punch_card_reader",
-    "powergrid:rheostat",
-    "powergrid:servo",
-    "powergrid:solar_panel",
-    "powergrid:solar_panel_bearing",
-    "powergrid:spark_gap",
-    "powergrid:transformer_core",
-    "powergrid:transformer_medium",
-    "powergrid:transformer_small",
-    "powergrid:variac",
-    "powergrid:vertical_generator_housing",
-    "powergrid:voltage_gauge",
-    "powergrid:winding"
+    {
+      "id": "powergrid:andesite_encased_crt",
+      "required": false
+    },
+    {
+      "id": "powergrid:basin_heater",
+      "required": false
+    },
+    {
+      "id": "powergrid:battery",
+      "required": false
+    },
+    {
+      "id": "powergrid:brass_encased_crt",
+      "required": false
+    },
+    {
+      "id": "powergrid:carbon_pile",
+      "required": false
+    },
+    {
+      "id": "powergrid:carbon_pile_coil",
+      "required": false
+    },
+    {
+      "id": "powergrid:ceiling_tile_connector",
+      "required": false
+    },
+    {
+      "id": "powergrid:ceiling_tile_junction",
+      "required": false
+    },
+    {
+      "id": "powergrid:ceiling_tile_lamp",
+      "required": false
+    },
+    {
+      "id": "powergrid:ceiling_tile_solar",
+      "required": false
+    },
+    {
+      "id": "powergrid:circuit_design_table",
+      "required": false
+    },
+    {
+      "id": "powergrid:conductive_casing",
+      "required": false
+    },
+    {
+      "id": "powergrid:constant_speed_motor",
+      "required": false
+    },
+    {
+      "id": "powergrid:contactor",
+      "required": false
+    },
+    {
+      "id": "powergrid:copper_plating",
+      "required": false
+    },
+    {
+      "id": "powergrid:copper_plating_slab",
+      "required": false
+    },
+    {
+      "id": "powergrid:copper_plating_stairs",
+      "required": false
+    },
+    {
+      "id": "powergrid:creative_current_source",
+      "required": false
+    },
+    {
+      "id": "powergrid:creative_voltage_source",
+      "required": false
+    },
+    {
+      "id": "powergrid:crt",
+      "required": false
+    },
+    {
+      "id": "powergrid:current_gauge",
+      "required": false
+    },
+    {
+      "id": "powergrid:electric_fan",
+      "required": false
+    },
+    {
+      "id": "powergrid:electric_motor",
+      "required": false
+    },
+    {
+      "id": "powergrid:electric_pump",
+      "required": false
+    },
+    {
+      "id": "powergrid:electromagnet",
+      "required": false
+    },
+    {
+      "id": "powergrid:energy_meter",
+      "required": false
+    },
+    {
+      "id": "powergrid:fe_inverter",
+      "required": false
+    },
+    {
+      "id": "powergrid:generator_clutch",
+      "required": false
+    },
+    {
+      "id": "powergrid:generator_commutator",
+      "required": false
+    },
+    {
+      "id": "powergrid:generator_housing",
+      "required": false
+    },
+    {
+      "id": "powergrid:generator_induction_rotor",
+      "required": false
+    },
+    {
+      "id": "powergrid:generator_large_induction_rotor",
+      "required": false
+    },
+    {
+      "id": "powergrid:generator_vertical_commutator",
+      "required": false
+    },
+    {
+      "id": "powergrid:grounding_rod",
+      "required": false
+    },
+    {
+      "id": "powergrid:heating_coil",
+      "required": false
+    },
+    {
+      "id": "powergrid:hv_breaker",
+      "required": false
+    },
+    {
+      "id": "powergrid:hv_switch",
+      "required": false
+    },
+    {
+      "id": "powergrid:modular_display",
+      "required": false
+    },
+    {
+      "id": "powergrid:nether_transformer",
+      "required": false
+    },
+    {
+      "id": "powergrid:plotter",
+      "required": false
+    },
+    {
+      "id": "powergrid:power_gauge",
+      "required": false
+    },
+    {
+      "id": "powergrid:punch_card_reader",
+      "required": false
+    },
+    {
+      "id": "powergrid:rheostat",
+      "required": false
+    },
+    {
+      "id": "powergrid:servo",
+      "required": false
+    },
+    {
+      "id": "powergrid:solar_panel",
+      "required": false
+    },
+    {
+      "id": "powergrid:solar_panel_bearing",
+      "required": false
+    },
+    {
+      "id": "powergrid:spark_gap",
+      "required": false
+    },
+    {
+      "id": "powergrid:transformer_core",
+      "required": false
+    },
+    {
+      "id": "powergrid:transformer_medium",
+      "required": false
+    },
+    {
+      "id": "powergrid:transformer_small",
+      "required": false
+    },
+    {
+      "id": "powergrid:variac",
+      "required": false
+    },
+    {
+      "id": "powergrid:vertical_generator_housing",
+      "required": false
+    },
+    {
+      "id": "powergrid:voltage_gauge",
+      "required": false
+    },
+    {
+      "id": "powergrid:winding",
+      "required": false
+    }
   ]
 }

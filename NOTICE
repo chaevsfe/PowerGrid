@@ -47,7 +47,7 @@ public registration entrypoints, so that upstream's registration code compiles u
 Create Fly. SharedProperties and CreateTags reproduce the block property values and tag ids that Create itself
 uses (MIT, see licenses/Create-LICENSE) so that Power Grid's blocks keep upstream's hardness and
 behaviour. Class and method names follow Registrate's API only where a call site requires it;
-Registrate itself is Copyright (c) tterrag1098 and licensed under the MIT licence.
+Registrate itself is Copyright (c) tterrag1098 and licensed under the Mozilla Public License 2.0.
 
 Nothing outside org/patryk3211/powergrid/ ships in either jar apart from resources and the
 nested libraries listed above; a build-time check enforces that.

@@ -1,0 +1,27 @@
+{
+  "values": [
+    "powergrid:acid",
+    "powergrid:alarm_bell",
+    "powergrid:ceiling_tile",
+    "powergrid:circuit_board",
+    "powergrid:cord_junction",
+    "powergrid:creative_resistor",
+    "powergrid:device_connector",
+    "powergrid:factory_light",
+    "powergrid:factory_light_light",
+    "powergrid:fuse_holder",
+    "powergrid:heavy_wire_connector",
+    "powergrid:light_fixture",
+    "powergrid:lv_button",
+    "powergrid:lv_switch",
+    "powergrid:mv_switch",
+    "powergrid:portable_battery",
+    "powergrid:potato_battery",
+    "powergrid:power_resistor",
+    "powergrid:redstone_converter",
+    "powergrid:socket",
+    "powergrid:string_light_block",
+    "powergrid:thermometer",
+    "powergrid:wire_connector"
+  ]
+}

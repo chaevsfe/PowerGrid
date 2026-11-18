@@ -409,7 +409,8 @@ public class ThermalBehaviour extends BlockEntityBehaviour implements ISynchroni
 
     @Override
     public boolean shouldSync() {
-        return !blockEntity.isRemoved() && blockEntity.getBehaviour(ElectricBehaviour.TYPE) instanceof ProxyElectricBehaviour;
+        var electric = blockEntity.getBehaviour(ElectricBehaviour.TYPE);
+        return !blockEntity.isRemoved() && (electric == null || electric instanceof ProxyElectricBehaviour);
     }
 
     @Override

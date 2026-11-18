@@ -302,6 +302,7 @@ public class WindingBlockEntity extends ElectricBlockEntity implements IMultipar
                         be.coilWire = null;
                     }
                 }
+                be.mainBE = this;
                 if(!level.isClientSide() || isVirtual()) {
                     // Check for parallel windings and housings
                     checkParallelPosition(pos1, Direction.get(Direction.AxisDirection.POSITIVE, parallelCheckAxis), false);

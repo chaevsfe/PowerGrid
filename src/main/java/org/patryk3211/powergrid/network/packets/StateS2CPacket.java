@@ -116,25 +116,33 @@ public class StateS2CPacket implements S2CPacket {
         }
         try {
             for(var key : keys) {
+                if(wrapper().readableBytes() < 4)
+                    break;
                 var entryLength = wrapper().readInt();
+                var start = wrapper().readerIndex();
+                if(entryLength < 0 || entryLength > wrapper().readableBytes()) {
+                    if(ModdedConfigs.logsEnabled())
+                        PowerGrid.LOGGER.warn("Invalid state entry length {} with {} bytes left", entryLength, wrapper().readableBytes());
+                    break;
+                }
                 var element = key.resolve(level);
                 if(element == null) {
                     // Skip entry
                     wrapper().skipBytes(entryLength);
                 } else {
-                    try {var start = wrapper().readerIndex();
-                    element.readFromSync(wrapper(), useDoubles);
-                    var end = wrapper().readerIndex();
-                    if(end - start > entryLength) {
-                        if(ModdedConfigs.logsEnabled())PowerGrid.LOGGER.warn("Buffer read overrun (Entry of {} bytes, read {} bytes) for {}", entryLength, end - start, element);
-                        wrapper().readerIndex(start + entryLength);
-                    } else if(end - start < entryLength) {
-                        if(ModdedConfigs.logsEnabled())PowerGrid.LOGGER.warn("Buffer read underrun (Entry of {} bytes, read {} bytes) for {}", entryLength, end - start, element);
-                        wrapper().readerIndex(start + entryLength);}
+                    try {
+                        element.readFromSync(wrapper(), useDoubles);
+                        var end = wrapper().readerIndex();
+                        if(end - start > entryLength) {
+                            if(ModdedConfigs.logsEnabled())PowerGrid.LOGGER.warn("Buffer read overrun (Entry of {} bytes, read {} bytes) for {}", entryLength, end - start, element);
+                        } else if(end - start < entryLength) {
+                            if(ModdedConfigs.logsEnabled())PowerGrid.LOGGER.warn("Buffer read underrun (Entry of {} bytes, read {} bytes) for {}", entryLength, end - start, element);
+                        }
                     } catch(IndexOutOfBoundsException e) {
                         if(ModdedConfigs.logsEnabled())
                             PowerGrid.LOGGER.warn("Buffer read overrun (Out of bounds exception thrown)");
                     }
+                    wrapper().readerIndex(start + entryLength);
                 }
             }
         } finally {

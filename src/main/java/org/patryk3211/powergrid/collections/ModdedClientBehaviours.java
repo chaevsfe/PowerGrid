@@ -79,7 +79,7 @@ public class ModdedClientBehaviours {
 
         AllBlockEntityBehaviours.add(ModdedBlockEntities.HV_SWITCH.get(), KineticTooltipBehaviour::new);
         AllBlockEntityBehaviours.add(ModdedBlockEntities.PUNCH_CARD_READER.get(), KineticTooltipBehaviour::new);
-        AllBlockEntityBehaviours.add(ModdedBlockEntities.SOLAR_PANEL_BEARING.get(), KineticTooltipBehaviour::new);
+        AllBlockEntityBehaviours.add(ModdedBlockEntities.SOLAR_PANEL_BEARING.get(), ModdedTooltipBehaviours.SolarBearing::new);
 
         AllBlockEntityBehaviours.add(ModdedBlockEntities.PLOTTER.get(), ModdedTooltipBehaviours.Kinetic::new);
         AllBlockEntityBehaviours.add(ModdedBlockEntities.RHEOSTAT.get(), ModdedTooltipBehaviours.Kinetic::new);

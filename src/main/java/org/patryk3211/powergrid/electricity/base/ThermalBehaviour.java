@@ -408,6 +408,11 @@ public class ThermalBehaviour extends BlockEntityBehaviour implements ISynchroni
     }
 
     @Override
+    public boolean shouldSync() {
+        return !blockEntity.isRemoved() && blockEntity.getBehaviour(ElectricBehaviour.TYPE) instanceof ProxyElectricBehaviour;
+    }
+
+    @Override
     public StateS2CPacket.Key getKey() {
         return new StateS2CPacket.PosKey(getPos());
     }

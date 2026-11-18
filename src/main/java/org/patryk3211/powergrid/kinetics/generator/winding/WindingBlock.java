@@ -390,14 +390,16 @@ public class WindingBlock extends ElectricBlock implements IBE<WindingBlockEntit
         var axis = state.getValue(AXIS);
         switch(part) {
             case 0 -> {
-                if(world.getBlockState(pos.relative(axis, 1)).getValue(PART) != 1)
+                var next = world.getBlockState(pos.relative(axis, 1));
+                if(!next.is(this) || next.getValue(PART) != 1)
                     return InteractionResult.FAIL;
             }
             case 1 -> {
                 return InteractionResult.FAIL;
             }
             case 2 -> {
-                if(world.getBlockState(pos.relative(axis, -1)).getValue(PART) != 1)
+                var previous = world.getBlockState(pos.relative(axis, -1));
+                if(!previous.is(this) || previous.getValue(PART) != 1)
                     return InteractionResult.FAIL;
             }
         }

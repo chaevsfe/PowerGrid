@@ -1237,6 +1237,8 @@ public class WorldNetworks extends SavedData implements NetworkGraph.IGraphModif
             return node;
         if(endpoint.isValid(world)) {
             node = endpoint.getNode(world);
+            if(node != null && !node.endpoint.equals(endpoint))
+                return node;
         } else {
             node = new OwnedFloatingNode(endpoint);
         }

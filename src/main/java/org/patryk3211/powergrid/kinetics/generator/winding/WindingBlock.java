@@ -389,7 +389,7 @@ public class WindingBlock extends ElectricBlock implements IBE<WindingBlockEntit
         switch(part) {
             case 0 -> {
                 var next = world.getBlockState(pos.relative(axis, 1));
-                if(!next.is(this) || next.getValue(PART) != 1)
+                if(!next.is(this) || next.getValue(PART) != 1 || !isAligned(state, next))
                     return InteractionResult.FAIL;
             }
             case 1 -> {
@@ -397,7 +397,7 @@ public class WindingBlock extends ElectricBlock implements IBE<WindingBlockEntit
             }
             case 2 -> {
                 var previous = world.getBlockState(pos.relative(axis, -1));
-                if(!previous.is(this) || previous.getValue(PART) != 1)
+                if(!previous.is(this) || previous.getValue(PART) != 1 || !isAligned(state, previous))
                     return InteractionResult.FAIL;
             }
         }
@@ -410,14 +410,19 @@ public class WindingBlock extends ElectricBlock implements IBE<WindingBlockEntit
                     .forEach(stack -> player.getInventory().placeItemBackInInventory(stack));
         }
         state.setValue(PART, 1).spawnAfterBreak(serverWorld, pos, ItemStack.EMPTY, true);
-        world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+        world.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
         var newPos = pos.relative(axis, 1 - part);
         world.setBlockAndUpdate(newPos, state);
         if(state.getValue(PART) == 0)
             withBlockEntityDo(world, newPos, WindingBlockEntity::makeMain);
+        serverWorld.updateNeighborsAt(pos, this);
 
         IWrenchable.playRemoveSound(world, pos);
         return InteractionResult.SUCCESS;
+    }
+
+    private static boolean isAligned(BlockState state, BlockState other) {
+        return other.getValue(AXIS) == state.getValue(AXIS) && other.getValue(ALONG_FIRST_AXIS) == state.getValue(ALONG_FIRST_AXIS);
     }
 
     @Override

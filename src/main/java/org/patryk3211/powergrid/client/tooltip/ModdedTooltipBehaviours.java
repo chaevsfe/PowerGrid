@@ -17,13 +17,16 @@
 package org.patryk3211.powergrid.client.tooltip;
 
 import com.zurrtum.create.client.api.goggles.IHaveGoggleInformation;
+import com.zurrtum.create.client.content.contraptions.IDisplayAssemblyExceptions;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.tooltip.KineticTooltipBehaviour;
 import com.zurrtum.create.client.foundation.blockEntity.behaviour.tooltip.TooltipBehaviour;
+import com.zurrtum.create.content.contraptions.AssemblyException;
 import com.zurrtum.create.content.kinetics.base.KineticBlockEntity;
 import com.zurrtum.create.foundation.blockEntity.SmartBlockEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
+import org.patryk3211.powergrid.electricity.solarpanel.SolarPanelBearingBlockEntity;
 
 import java.util.List;
 
@@ -52,6 +55,17 @@ public class ModdedTooltipBehaviours {
             boolean added = super.addToGoggleTooltip(tooltip, isPlayerSneaking);
             added |= blockEntity.addToGoggleTooltip(tooltip, isPlayerSneaking);
             return added && tooltip.size() > before;
+        }
+    }
+
+    public static class SolarBearing extends KineticTooltipBehaviour<SolarPanelBearingBlockEntity> implements IDisplayAssemblyExceptions {
+        public SolarBearing(SolarPanelBearingBlockEntity blockEntity) {
+            super(blockEntity);
+        }
+
+        @Override
+        public AssemblyException getLastAssemblyException() {
+            return blockEntity.getLastAssemblyException();
         }
     }
 }
